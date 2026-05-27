@@ -70,3 +70,5 @@ docker-data/
 
 tmp/
 temp/
+
+backend/src/ChatApp.Api/appsettings.Development.json
