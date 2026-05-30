@@ -1,4 +1,5 @@
 ﻿using ChatApp.Application.DTOs;
+using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Domain.Entities;
 using ChatApp.Infrastructure.Authentication;
@@ -34,7 +35,7 @@ public class AuthService : IAuthService
 
         if (existingUser is not null)
         {
-            throw new Exception("User with this email already exists");
+            throw new UserAlreadyExistsException();
         }
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -68,7 +69,7 @@ public class AuthService : IAuthService
 
         if (user is null)
         {
-            throw new Exception("Invalid credentials");
+            throw new InvalidCredentialsException();
         }
 
         var passwordValid = BCrypt.Net.BCrypt.Verify(
@@ -77,7 +78,7 @@ public class AuthService : IAuthService
 
         if (!passwordValid)
         {
-            throw new Exception("Invalid credentials");
+            throw new InvalidCredentialsException();
         }
 
         var token = GenerateJwtToken(user);
