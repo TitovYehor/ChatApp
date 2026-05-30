@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using ChatApp.Api.Models;
+using System.Text.Json;
 
 namespace ChatApp.Api.Middleware;
 
@@ -37,7 +38,7 @@ public class ExceptionHandlingMiddleware
         context.Response.StatusCode =
             StatusCodes.Status500InternalServerError;
 
-        var response = new
+        var response = new ErrorResponse
         {
             Message = exception.Message
         };
