@@ -1,4 +1,5 @@
 using ChatApp.Application.Interfaces;
+using ChatApp.Api.Middleware;
 using ChatApp.Infrastructure.Authentication;
 using ChatApp.Infrastructure.Persistence;
 using ChatApp.Infrastructure.Services;
@@ -62,6 +63,8 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/openapi/v1.json", "V1");
     });
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
