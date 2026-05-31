@@ -1,3 +1,6 @@
+using ChatApp.Application.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using ChatApp.Application.Interfaces;
 using ChatApp.Api.Middleware;
 using ChatApp.Infrastructure.Authentication;
@@ -20,6 +23,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddControllers();
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestDtoValidator>();
 
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
