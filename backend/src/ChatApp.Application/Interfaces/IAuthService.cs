@@ -1,4 +1,4 @@
-﻿using ChatApp.Application.DTOs;
+﻿using ChatApp.Application.DTOs.Auth;
 
 namespace ChatApp.Application.Interfaces;
 
