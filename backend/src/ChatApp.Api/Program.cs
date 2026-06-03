@@ -22,6 +22,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 
 builder.Services.AddControllers();
 
