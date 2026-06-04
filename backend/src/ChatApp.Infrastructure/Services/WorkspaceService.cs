@@ -1,9 +1,11 @@
 ﻿using ChatApp.Application.DTOs.Workspaces;
+using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
 using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
@@ -39,6 +41,32 @@ public class WorkspaceService : IWorkspaceService
         _dbContext.WorkspaceMembers.Add(membership);
 
         await _dbContext.SaveChangesAsync();
+
+        return workspace.ToDto();
+    }
+
+    public async Task<WorkspaceResponseDto> GetByIdAsync(
+        Guid workspaceId,
+        Guid userId)
+    {
+        var isMember = await _dbContext.WorkspaceMembers
+            .AnyAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == userId);
+
+        if (!isMember)
+        {
+            throw new ForbiddenException("Workspace is forbidden for non members");
+        }
+
+        var workspace = await _dbContext.Workspaces
+            .FirstOrDefaultAsync(x =>
+                x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
 
         return workspace.ToDto();
     }
