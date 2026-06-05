@@ -23,7 +23,7 @@ public class WorkspacesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<WorkspaceResponseDto>> CreateAsync(
+    public async Task<ActionResult<WorkspaceResponseDto>> Create(
         CreateWorkspaceRequestDto request)
     {
         var userId = _currentUserService.GetUserId();
@@ -33,13 +33,14 @@ public class WorkspacesController : ControllerBase
             request);
 
         return CreatedAtAction(
-            nameof(GetByIdAsync),
+            nameof(GetById),
             new { id = workspace.Id },
             workspace);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<WorkspaceResponseDto>> GetByIdAsync(Guid id)
+    public async Task<ActionResult<WorkspaceResponseDto>> GetById(
+        Guid id)
     {
         var userId = _currentUserService.GetUserId();
 
@@ -48,5 +49,16 @@ public class WorkspacesController : ControllerBase
             userId);
 
         return Ok(workspace);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyCollection<WorkspaceResponseDto>>> GetAll()
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var workspaces = await _workspaceService
+            .GetAllAsync(userId);
+
+        return Ok(workspaces);
     }
 }
