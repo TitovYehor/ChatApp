@@ -70,4 +70,18 @@ public class WorkspaceService : IWorkspaceService
 
         return workspace.ToDto();
     }
+
+    public async Task<IReadOnlyCollection<WorkspaceResponseDto>> GetAllAsync(
+        Guid userId)
+    {
+        var workspaces = await _dbContext.Workspaces
+            .AsNoTracking()
+            .Where(x =>
+                x.Members.Any(m => m.UserId == userId))
+            .ToListAsync();
+
+        return workspaces
+            .Select(x => x.ToDto())
+            .ToList();
+    }
 }
