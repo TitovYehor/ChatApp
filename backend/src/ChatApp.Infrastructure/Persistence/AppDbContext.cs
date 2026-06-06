@@ -19,6 +19,9 @@ public class AppDbContext : DbContext
     public DbSet<WorkspaceMember> WorkspaceMembers
         => Set<WorkspaceMember>();
 
+    public DbSet<Channel> Channels
+        => Set<Channel>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
