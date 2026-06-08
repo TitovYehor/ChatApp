@@ -8,4 +8,8 @@ public interface IChannelService
         Guid workspaceId,
         Guid userId,
         CreateChannelRequestDto request);
+
+    Task<ChannelResponseDto> GetByIdAsync(
+        Guid channelId,
+        Guid userId);
 }
