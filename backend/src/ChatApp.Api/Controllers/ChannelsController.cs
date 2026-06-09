@@ -51,4 +51,17 @@ public class ChannelsController : ControllerBase
 
         return Ok(channel);
     }
+
+    [HttpGet("/api/workspaces/{workspaceId:guid}/channels")]
+    public async Task<ActionResult<IReadOnlyCollection<ChannelResponseDto>>> GetByWorkspaceId(
+        Guid workspaceId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var channels = await _channelService.GetByWorkspaceIdAsync(
+            workspaceId,
+            userId);
+
+        return Ok(channels);
+    }
 }
