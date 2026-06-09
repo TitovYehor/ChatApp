@@ -84,4 +84,29 @@ public class ChannelService : IChannelService
 
         return channel.ToDto();
     }
+
+    public async Task<IReadOnlyCollection<ChannelResponseDto>> GetByWorkspaceIdAsync(
+        Guid workspaceId,
+        Guid userId)
+    {
+        var isMember = await _dbContext.WorkspaceMembers
+            .AnyAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == userId);
+
+        if (!isMember)
+        {
+            throw new ForbiddenException("User is not a member of this workspace");
+        }
+
+        var channels = await _dbContext.Channels
+            .AsNoTracking()
+            .Where(x => x.WorkspaceId == workspaceId)
+            .OrderBy(x => x.Name)
+            .ToListAsync();
+
+        return channels
+            .Select(x => x.ToDto())
+            .ToList();
+    }
 }

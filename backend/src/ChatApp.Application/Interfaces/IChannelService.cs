@@ -12,4 +12,8 @@ public interface IChannelService
     Task<ChannelResponseDto> GetByIdAsync(
         Guid channelId,
         Guid userId);
+
+    Task<IReadOnlyCollection<ChannelResponseDto>> GetByWorkspaceIdAsync(
+        Guid workspaceId,
+        Guid userId);
 }
