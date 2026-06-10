@@ -15,4 +15,7 @@ public class Channel
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Workspace Workspace { get; set; } = null!;
+
+    public ICollection<Message> Messages { get; set; }
+        = new List<Message>();
 }
