@@ -1,4 +1,5 @@
-﻿using ChatApp.Application.DTOs.Messages;
+﻿using ChatApp.Application.DTOs.Common;
+using ChatApp.Application.DTOs.Messages;
 using ChatApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,5 +51,20 @@ public class MessagesController : ControllerBase
             userId);
 
         return Ok(message);
+    }
+
+    [HttpGet("channels/{channelId:guid}/messages")]
+    public async Task<ActionResult<PagedResult<MessageResponseDto>>> GetByChannelId(
+        Guid channelId,
+        [FromQuery] MessageQueryDto query)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var result = await _messageService.GetByChannelIdAsync(
+                channelId,
+                userId,
+                query);
+
+        return Ok(result);
     }
 }
