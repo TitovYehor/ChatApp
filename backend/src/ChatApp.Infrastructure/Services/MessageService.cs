@@ -1,4 +1,5 @@
-﻿using ChatApp.Application.DTOs.Messages;
+﻿using ChatApp.Application.DTOs.Common;
+using ChatApp.Application.DTOs.Messages;
 using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
@@ -79,5 +80,54 @@ public class MessageService : IMessageService
         }
 
         return message.ToDto();
+    }
+
+    public async Task<PagedResult<MessageResponseDto>> GetByChannelIdAsync(
+        Guid channelId,
+        Guid userId,
+        MessageQueryDto query)
+    {
+        var hasAccess = await _dbContext.Channels
+            .AnyAsync(c =>
+                c.Id == channelId &&
+                c.Workspace.Members.Any(
+                    m => m.UserId == userId));
+
+        if (!hasAccess)
+        {
+            throw new NotFoundException("Channel not found");
+        }
+
+        var totalCount = await _dbContext.Messages
+            .CountAsync(m =>
+                m.ChannelId == channelId);
+
+        var messages = await _dbContext.Messages
+            .AsNoTracking()
+            .Where(m => m.ChannelId == channelId)
+            .OrderBy(m => m.CreatedAt)
+            .Skip(
+                (query.PageNumber - 1)
+                * query.PageSize)
+            .Take(query.PageSize)
+            .Select(m => new MessageResponseDto
+            {
+                Id = m.Id,
+                ChannelId = m.ChannelId,
+                UserId = m.UserId,
+                Username = m.User.Username,
+                Content = m.Content,
+                CreatedAt = m.CreatedAt,
+                UpdatedAt = m.UpdatedAt
+            })
+            .ToListAsync();
+
+        return new PagedResult<MessageResponseDto>
+        {
+            Items = messages,
+            PageNumber = query.PageNumber,
+            PageSize = query.PageSize,
+            TotalCount = totalCount
+        };
     }
 }

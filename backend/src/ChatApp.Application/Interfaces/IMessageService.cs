@@ -1,4 +1,5 @@
-﻿using ChatApp.Application.DTOs.Messages;
+﻿using ChatApp.Application.DTOs.Common;
+using ChatApp.Application.DTOs.Messages;
 
 namespace ChatApp.Application.Interfaces;
 
@@ -12,4 +13,9 @@ public interface IMessageService
     Task<MessageResponseDto> GetByIdAsync(
         Guid messageId,
         Guid userId);
+
+    Task<PagedResult<MessageResponseDto>> GetByChannelIdAsync(
+        Guid channelId,
+        Guid userId,
+        MessageQueryDto query);
 }
