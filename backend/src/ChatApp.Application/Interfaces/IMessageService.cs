@@ -8,4 +8,8 @@ public interface IMessageService
         Guid channelId,
         Guid userId,
         CreateMessageRequestDto request);
+
+    Task<MessageResponseDto> GetByIdAsync(
+        Guid messageId,
+        Guid userId);
 }

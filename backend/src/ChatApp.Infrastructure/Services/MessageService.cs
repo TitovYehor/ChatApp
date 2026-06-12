@@ -60,4 +60,24 @@ public class MessageService : IMessageService
 
         return message.ToDto();
     }
+
+    public async Task<MessageResponseDto> GetByIdAsync(
+        Guid messageId,
+        Guid userId)
+    {
+        var message = await _dbContext.Messages
+            .AsNoTracking()
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(x =>
+                x.Id == messageId &&
+                x.Channel.Workspace.Members.Any(
+                    m => m.UserId == userId));
+
+        if (message == null)
+        {
+            throw new NotFoundException("Message not found");
+        }
+
+        return message.ToDto();
+    }
 }
