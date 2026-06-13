@@ -82,4 +82,17 @@ public class MessagesController : ControllerBase
 
         return Ok(message);
     }
+
+    [HttpDelete("messages/{messageId:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid messageId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        await _messageService.DeleteAsync(
+            messageId,
+            userId);
+
+        return NoContent();
+    }
 }
