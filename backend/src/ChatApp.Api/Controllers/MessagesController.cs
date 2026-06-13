@@ -67,4 +67,19 @@ public class MessagesController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPut("messages/{messageId:guid}")]
+    public async Task<ActionResult<MessageResponseDto>> Update(
+        Guid messageId,
+        UpdateMessageRequestDto request)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var message = await _messageService.UpdateAsync(
+            messageId,
+            userId,
+            request);
+
+        return Ok(message);
+    }
 }
