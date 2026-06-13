@@ -18,4 +18,9 @@ public interface IMessageService
         Guid channelId,
         Guid userId,
         MessageQueryDto query);
+
+    Task<MessageResponseDto> UpdateAsync(
+        Guid messageId,
+        Guid userId,
+        UpdateMessageRequestDto request);
 }

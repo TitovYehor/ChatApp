@@ -130,4 +130,33 @@ public class MessageService : IMessageService
             TotalCount = totalCount
         };
     }
+
+    public async Task<MessageResponseDto> UpdateAsync(
+        Guid messageId,
+        Guid userId,
+        UpdateMessageRequestDto request)
+    {
+        var message = await _dbContext.Messages
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(x =>
+                x.Id == messageId &&
+                x.UserId == userId);
+
+        if (message == null)
+        {
+            throw new NotFoundException("Message not found");
+        }
+
+        if (message.Content == request.Content.Trim())
+        {
+            return message.ToDto();
+        }
+
+        message.Content = request.Content.Trim();
+        message.UpdatedAt = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        return message.ToDto();
+    }
 }
