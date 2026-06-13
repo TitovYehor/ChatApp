@@ -159,4 +159,23 @@ public class MessageService : IMessageService
 
         return message.ToDto();
     }
+
+    public async Task DeleteAsync(
+        Guid messageId, 
+        Guid userId)
+    {
+        var message = await _dbContext.Messages
+            .FirstOrDefaultAsync(x =>
+                x.Id == messageId &&
+                x.UserId == userId);
+
+        if (message == null)
+        {
+            throw new NotFoundException("Message not found");
+        }
+
+        _dbContext.Messages.Remove(message);
+
+        await _dbContext.SaveChangesAsync();
+    }
 }

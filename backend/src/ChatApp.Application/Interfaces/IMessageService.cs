@@ -23,4 +23,8 @@ public interface IMessageService
         Guid messageId,
         Guid userId,
         UpdateMessageRequestDto request);
+
+    Task DeleteAsync(
+        Guid messageId,
+        Guid userId);
 }
