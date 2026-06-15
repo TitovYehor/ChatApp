@@ -6,6 +6,8 @@ using ChatApp.Api.Middleware;
 using ChatApp.Infrastructure.Authentication;
 using ChatApp.Infrastructure.Persistence;
 using ChatApp.Infrastructure.Services;
+using ChatApp.RealTime.Extensions;
+using ChatApp.RealTime.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -25,6 +27,8 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+
+builder.Services.AddRealTime();
 
 builder.Services.AddControllers();
 
@@ -82,5 +86,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/hubs/chat");
 
 await app.RunAsync();
