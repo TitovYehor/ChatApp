@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ChatApp.RealTime.Services;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatApp.RealTime.Extensions;
 
@@ -8,6 +10,8 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddSignalR();
+
+        services.AddSingleton<IUserIdProvider, UserIdProvider>();
 
         return services;
     }
