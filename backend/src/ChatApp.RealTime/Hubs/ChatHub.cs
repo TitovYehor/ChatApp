@@ -22,7 +22,7 @@ public sealed class ChatHub : Hub
         _logger.LogInformation(
             "Connection established. ConnectionId: {ConnectionId}. UserId: {UserId}",
             Context.ConnectionId,
-            GetUserId());
+            Context.UserIdentifier);
 
         await base.OnConnectedAsync();
     }
@@ -33,7 +33,7 @@ public sealed class ChatHub : Hub
         _logger.LogInformation(
             "Connection closed. ConnectionId: {ConnectionId}. UserId: {UserId}",
             Context.ConnectionId,
-            GetUserId());
+            Context.UserIdentifier);
 
         await base.OnDisconnectedAsync(exception);
     }
@@ -42,8 +42,8 @@ public sealed class ChatHub : Hub
         JoinChannelRequest request)
     {
         _logger.LogInformation(
-            "Connection {ConnectionId} joined channel {ChannelId}",
-            Context.ConnectionId,
+            "User {UserId} joined channel {ChannelId}",
+            GetCurrentUserId(),
             request.ChannelId);
 
         await Groups.AddToGroupAsync(
@@ -66,11 +66,13 @@ public sealed class ChatHub : Hub
                 request.ChannelId));
     }
 
-    private string? GetUserId()
+    private Guid GetCurrentUserId()
     {
-        return Context.User?
-            .FindFirst(
-                System.Security.Claims.ClaimTypes.NameIdentifier)?
-            .Value;
+        if (Context.UserIdentifier is null)
+        {
+            throw new HubException("User is not authenticated");
+        }
+
+        return Guid.Parse(Context.UserIdentifier);
     }
 }
