@@ -1,4 +1,6 @@
-﻿using ChatApp.RealTime.Services;
+﻿using ChatApp.Application.Interfaces;
+using ChatApp.RealTime.Notifications;
+using ChatApp.RealTime.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +14,8 @@ public static class DependencyInjection
         services.AddSignalR();
 
         services.AddSingleton<IUserIdProvider, UserIdProvider>();
+
+        services.AddScoped<IChatNotifier, SignalRChatNotifier>();
 
         return services;
     }
