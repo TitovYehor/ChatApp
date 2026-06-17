@@ -13,10 +13,14 @@ public class MessageService : IMessageService
 {
     private readonly AppDbContext _dbContext;
 
+    private readonly IChatNotifier _chatNotifier;
+
     public MessageService(
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        IChatNotifier chatNotifier)
     {
         _dbContext = dbContext;
+        _chatNotifier = chatNotifier;
     }
 
     public async Task<MessageResponseDto> CreateAsync(
@@ -59,7 +63,13 @@ public class MessageService : IMessageService
             .Reference(x => x.User)
             .LoadAsync();
 
-        return message.ToDto();
+        var response = message.ToDto();
+
+        await _chatNotifier.MessageCreatedAsync(
+            message.ChannelId,
+            response);
+
+        return response;
     }
 
     public async Task<MessageResponseDto> GetByIdAsync(
@@ -157,7 +167,13 @@ public class MessageService : IMessageService
 
         await _dbContext.SaveChangesAsync();
 
-        return message.ToDto();
+        var response = message.ToDto();
+
+        await _chatNotifier.MessageUpdatedAsync(
+            message.ChannelId,
+            response);
+
+        return response;
     }
 
     public async Task DeleteAsync(
@@ -174,8 +190,14 @@ public class MessageService : IMessageService
             throw new NotFoundException("Message not found");
         }
 
+        var channelId = message.ChannelId;
+
         _dbContext.Messages.Remove(message);
 
         await _dbContext.SaveChangesAsync();
+
+        await _chatNotifier.MessageDeletedAsync(
+            channelId,
+            messageId);
     }
 }
