@@ -13,13 +13,17 @@ public sealed class ChatHub : Hub
 {
     private readonly IMessageService _messageService;
 
+    private readonly IChannelAccessService _channelAccessService;
+
     private readonly ILogger<ChatHub> _logger;
 
     public ChatHub(
         IMessageService messageService,
+        IChannelAccessService channelAccessService,
         ILogger<ChatHub> logger)
     {
         _messageService = messageService;
+        _channelAccessService = channelAccessService;
         _logger = logger;
     }
 
@@ -47,29 +51,41 @@ public sealed class ChatHub : Hub
     public async Task JoinChannel(
         JoinChannelRequest request)
     {
-        _logger.LogInformation(
-            "User {UserId} joined channel {ChannelId}",
-            GetCurrentUserId(),
-            request.ChannelId);
+        var userId = GetCurrentUserId();
+
+        var hasAccess = await _channelAccessService
+            .CanAccessChannelAsync(
+                userId,
+                request.ChannelId);
+
+        if (!hasAccess)
+        {
+            throw new HubException("Access denied");
+        }
 
         await Groups.AddToGroupAsync(
             Context.ConnectionId,
             SignalRGroups.Channel(
                 request.ChannelId));
+
+        _logger.LogInformation(
+            "User {UserId} joined channel {ChannelId}",
+            GetCurrentUserId(),
+            request.ChannelId);
     }
 
     public async Task LeaveChannel(
         LeaveChannelRequest request)
     {
-        _logger.LogInformation(
-            "Connection {ConnectionId} left channel {ChannelId}",
-            Context.ConnectionId,
-            request.ChannelId);
-
         await Groups.RemoveFromGroupAsync(
             Context.ConnectionId,
             SignalRGroups.Channel(
                 request.ChannelId));
+
+        _logger.LogInformation(
+            "Connection {ConnectionId} left channel {ChannelId}",
+            Context.ConnectionId,
+            request.ChannelId);
     }
 
     public async Task<MessageResponseDto> SendMessage(
