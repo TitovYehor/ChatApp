@@ -1,4 +1,6 @@
-﻿using ChatApp.Application.Realtime;
+﻿using ChatApp.Application.DTOs.Messages;
+using ChatApp.Application.Interfaces;
+using ChatApp.Application.Realtime;
 using ChatApp.Application.Realtime.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -9,11 +11,15 @@ namespace ChatApp.RealTime.Hubs;
 [Authorize]
 public sealed class ChatHub : Hub
 {
+    private readonly IMessageService _messageService;
+
     private readonly ILogger<ChatHub> _logger;
 
     public ChatHub(
+        IMessageService messageService,
         ILogger<ChatHub> logger)
     {
+        _messageService = messageService;
         _logger = logger;
     }
 
@@ -64,6 +70,55 @@ public sealed class ChatHub : Hub
             Context.ConnectionId,
             SignalRGroups.Channel(
                 request.ChannelId));
+    }
+
+    public async Task<MessageResponseDto> SendMessage(
+        Guid channelId,
+        CreateMessageRequestDto request)
+    {
+        var userId = GetCurrentUserId();
+
+        _logger.LogInformation(
+            "User {UserId} sent message to channel {ChannelId}",
+            userId,
+            channelId);
+
+        return await _messageService.CreateAsync(
+            channelId,
+            userId,
+            request);
+    }
+
+    public async Task<MessageResponseDto> UpdateMessage(
+        Guid messageId,
+        UpdateMessageRequestDto request)
+    {
+        var userId = GetCurrentUserId();
+
+        _logger.LogInformation(
+            "User {UserId} updating message {MessageId}",
+            userId,
+            messageId);
+
+        return await _messageService.UpdateAsync(
+            messageId,
+            userId,
+            request);
+    }
+
+    public async Task DeleteMessage(
+        Guid messageId)
+    {
+        var userId = GetCurrentUserId();
+
+        _logger.LogInformation(
+            "User {UserId} deleting message {MessageId}",
+            userId,
+            messageId);
+
+        await _messageService.DeleteAsync(
+            messageId,
+            userId);
     }
 
     private Guid GetCurrentUserId()
