@@ -1,6 +1,6 @@
 ﻿using ChatApp.Application.Interfaces;
 using ChatApp.Application.Realtime;
-using ChatApp.Application.Realtime.Requests;
+using ChatApp.Contracts.Realtime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;

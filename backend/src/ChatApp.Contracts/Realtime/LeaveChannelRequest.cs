@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.Realtime.Requests;
+﻿namespace ChatApp.Contracts.Realtime;
 
 public sealed class LeaveChannelRequest
 {
