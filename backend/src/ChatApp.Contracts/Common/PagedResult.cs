@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.DTOs.Common;
+﻿namespace ChatApp.Contracts.Common;
 
 public class PagedResult<T>
 {
