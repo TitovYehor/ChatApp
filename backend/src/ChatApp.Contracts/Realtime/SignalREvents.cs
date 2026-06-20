@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.Realtime;
+﻿namespace ChatApp.Contracts.Realtime;
 
 public static class SignalREvents
 {

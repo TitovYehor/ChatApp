@@ -13,7 +13,6 @@
     <Folder Include="Messages\" />
     <Folder Include="Workspaces\" />
     <Folder Include="Users\" />
-    <Folder Include="SignalR\" />
   </ItemGroup>
 
 </Project>
