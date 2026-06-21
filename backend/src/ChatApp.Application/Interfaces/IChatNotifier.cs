@@ -1,4 +1,4 @@
-﻿using ChatApp.Application.DTOs.Messages;
+﻿using ChatApp.Contracts.Messages.Responses;
 
 namespace ChatApp.Application.Interfaces;
 

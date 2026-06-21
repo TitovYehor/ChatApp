@@ -1,4 +1,4 @@
-﻿using ChatApp.Application.DTOs.Messages;
+﻿using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Domain.Entities;
 
 namespace ChatApp.Application.Mappings;

@@ -1,4 +1,4 @@
-﻿using ChatApp.Application.DTOs.Messages;
+﻿using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Realtime;
 using ChatApp.Contracts.Realtime;

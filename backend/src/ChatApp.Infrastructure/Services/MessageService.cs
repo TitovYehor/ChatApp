@@ -1,8 +1,9 @@
 ﻿using ChatApp.Contracts.Common;
-using ChatApp.Application.DTOs.Messages;
 using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
+using ChatApp.Contracts.Messages.Requests;
+using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Domain.Entities;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

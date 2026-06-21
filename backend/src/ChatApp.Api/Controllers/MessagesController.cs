@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Common;
-using ChatApp.Application.DTOs.Messages;
+using ChatApp.Contracts.Messages.Requests;
+using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

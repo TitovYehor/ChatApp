@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Common;
-using ChatApp.Application.DTOs.Messages;
+using ChatApp.Contracts.Messages.Requests;
+using ChatApp.Contracts.Messages.Responses;
 
 namespace ChatApp.Application.Interfaces;
 
