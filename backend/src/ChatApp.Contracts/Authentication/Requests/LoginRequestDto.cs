@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.DTOs.Auth;
+﻿namespace ChatApp.Contracts.Authentication.Requests;
 
 public class LoginRequestDto
 {
