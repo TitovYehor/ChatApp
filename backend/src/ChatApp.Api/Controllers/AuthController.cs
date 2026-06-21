@@ -1,5 +1,6 @@
-﻿using ChatApp.Application.DTOs.Auth;
-using ChatApp.Application.Interfaces;
+﻿using ChatApp.Application.Interfaces;
+using ChatApp.Contracts.Authentication.Requests;
+using ChatApp.Contracts.Authentication.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

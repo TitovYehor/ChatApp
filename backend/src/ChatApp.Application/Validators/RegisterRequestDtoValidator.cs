@@ -1,4 +1,4 @@
-﻿using ChatApp.Application.DTOs.Auth;
+﻿using ChatApp.Contracts.Authentication.Requests;
 using FluentValidation;
 
 namespace ChatApp.Application.Validators;
