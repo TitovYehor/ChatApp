@@ -1,30 +1,31 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using ChatApp.SignalRTester.Application;
+using ChatApp.SignalRTester.Configuration;
+using ChatApp.SignalRTester.Services;
+using ChatApp.SignalRTester.UI;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-Console.WriteLine("JWT Token:");
+var builder = Host.CreateApplicationBuilder(args);
 
-var token = Console.ReadLine();
+builder.Configuration.AddJsonFile(
+    "appsettings.json",
+    optional: false,
+    reloadOnChange: true);
 
-var connection = new HubConnectionBuilder()
-    .WithUrl(
-        "https://localhost:7163/hubs/chat",
-        options =>
-        {
-            options.AccessTokenProvider =
-                () => Task.FromResult(token);
-        })
-    .WithAutomaticReconnect()
-    .Build();
+builder.Services.Configure<AppSettings>(
+    builder.Configuration.GetSection(AppSettings.SectionName));
 
-try
-{
-    await connection.StartAsync();
+builder.Services.AddSingleton<IApiClient, ApiClient>();
 
-    Console.WriteLine($"Connected. ConnectionId: {connection.ConnectionId}");
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Connection failed: {ex.Message}");
-}
+builder.Services.AddSingleton<ISignalRClient, SignalRClient>();
 
-Console.WriteLine("Press Enter to exit");
-Console.ReadLine();
+builder.Services.AddSingleton<IConsoleMenu, ConsoleMenu>();
+
+builder.Services.AddSingleton<IConsoleApplication, ConsoleApplication>();
+
+using var host = builder.Build();
+
+var menu = host.Services.GetRequiredService<ConsoleMenu>();
+
+await menu.RunAsync();
