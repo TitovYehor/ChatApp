@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.DTOs.Messages;
+﻿namespace ChatApp.Contracts.Messages.Responses;
 
 public class MessageResponseDto
 {
