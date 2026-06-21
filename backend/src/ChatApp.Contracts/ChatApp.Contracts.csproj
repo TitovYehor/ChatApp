@@ -10,7 +10,6 @@
     <Folder Include="Authentication\" />
     <Folder Include="Channels\" />
     <Folder Include="Common\" />
-    <Folder Include="Messages\" />
     <Folder Include="Workspaces\" />
     <Folder Include="Users\" />
   </ItemGroup>
