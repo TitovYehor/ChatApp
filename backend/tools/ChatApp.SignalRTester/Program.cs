@@ -1,6 +1,7 @@
 ﻿using ChatApp.SignalRTester.Application;
+using ChatApp.SignalRTester.Clients.Authentication;
+using ChatApp.SignalRTester.Clients.Realtime;
 using ChatApp.SignalRTester.Configuration;
-using ChatApp.SignalRTester.Services;
 using ChatApp.SignalRTester.UI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,9 @@ builder.Configuration.AddJsonFile(
 builder.Services.Configure<AppSettings>(
     builder.Configuration.GetSection(AppSettings.SectionName));
 
-builder.Services.AddSingleton<IApiClient, ApiClient>();
+builder.Services.AddHttpClient();
+
+builder.Services.AddSingleton<IAuthenticationApiClient, AuthenticationApiClient>();
 
 builder.Services.AddSingleton<ISignalRClient, SignalRClient>();
 
@@ -26,6 +29,6 @@ builder.Services.AddSingleton<IConsoleApplication, ConsoleApplication>();
 
 using var host = builder.Build();
 
-var menu = host.Services.GetRequiredService<ConsoleMenu>();
+var application = host.Services.GetRequiredService<IConsoleApplication>();
 
-await menu.RunAsync();
+await application.RunAsync();
