@@ -1,5 +1,6 @@
 ﻿using ChatApp.SignalRTester.Clients.Authentication;
 using ChatApp.SignalRTester.UI;
+using ChatApp.SignalRTester.UI.Models;
 
 namespace ChatApp.SignalRTester.Application;
 
@@ -20,6 +21,24 @@ public class ConsoleApplication : IConsoleApplication
 
     public async Task RunAsync()
     {
-        await _menu.RunAsync();
+        while (true)
+        {
+            var option = await _menu.ShowAsync();
+
+            switch (option)
+            {
+                case MenuOption.Login:
+                    Console.WriteLine();
+                    Console.WriteLine("Login selected");
+                    break;
+
+                case MenuOption.Exit:
+                    return;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Press ENTER...");
+            Console.ReadLine();
+        }
     }
 }
