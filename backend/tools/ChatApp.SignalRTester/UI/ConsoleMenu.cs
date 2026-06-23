@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Authentication.Requests;
 using ChatApp.SignalRTester.Clients.Authentication;
+using ChatApp.SignalRTester.UI.Models;
 
 namespace ChatApp.SignalRTester.UI;
 
@@ -14,60 +15,27 @@ public class ConsoleMenu : IConsoleMenu
         _authenticationApiClient = authenticationApiClient;
     }
 
-    public async Task RunAsync()
+    public async Task<MenuOption> ShowAsync()
     {
         Console.Clear();
 
-        Console.WriteLine("==================================");
-        Console.WriteLine("      ChatApp SignalR Tester      ");
-        Console.WriteLine("==================================");
+        Console.WriteLine("==============================");
+        Console.WriteLine("    ChatApp SignalR Tester    ");
+        Console.WriteLine("==============================");
         Console.WriteLine();
 
-        Console.Write("Email: ");
-        var email = Console.ReadLine();
+        Console.WriteLine("1. Login");
+        Console.WriteLine("0. Exit");
+        Console.WriteLine();
 
-        Console.Write("Password: ");
-        var password = Console.ReadLine();
+        Console.Write("Select option: ");
 
-        if (string.IsNullOrWhiteSpace(email))
+        var input = Console.ReadLine();
+
+        return input switch
         {
-            Console.WriteLine("Email is required");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            Console.WriteLine("Password is required");
-            return;
-        }
-
-        var request = new LoginRequestDto
-        {
-            Email = email,
-            Password = password
+            "1" => MenuOption.Login,
+            _ => MenuOption.Exit
         };
-
-        var response = await _authenticationApiClient.LoginAsync(request);
-
-        if (response == null)
-        {
-            Console.WriteLine();
-            Console.WriteLine("Login failed");
-
-            return;
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("Login successful");
-        Console.WriteLine();
-
-        Console.WriteLine($"Username: {response.Username}");
-        Console.WriteLine($"Email: {response.Email}");
-        Console.WriteLine();
-        Console.WriteLine("JWT:");
-        Console.WriteLine(response.Token);
-
-        Console.ReadLine();
-        await Task.CompletedTask;
     }
 }
