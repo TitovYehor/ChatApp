@@ -1,4 +1,4 @@
-﻿using ChatApp.Api.Models;
+﻿using ChatApp.Contracts.Common;
 using System.Text.Json;
 
 namespace ChatApp.Api.Middleware;
