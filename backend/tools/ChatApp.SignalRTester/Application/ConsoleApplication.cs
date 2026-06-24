@@ -63,15 +63,17 @@ public class ConsoleApplication : IConsoleApplication
             Password = password
         };
 
-        var response = await _authenticationApiClient.LoginAsync(request);
+        var result = await _authenticationApiClient.LoginAsync(request);
 
-        if (response == null)
+        if (!result.IsSuccess)
         {
             Console.WriteLine();
-            Console.WriteLine("Login failed");
+            Console.WriteLine(result.ErrorMessage);
 
             return;
         }
+
+        var response = result.Data!;
 
         Console.WriteLine();
         Console.WriteLine("Login successful!");
