@@ -1,8 +1,9 @@
-﻿using System.Net.Http.Json;
-using ChatApp.Contracts.Authentication.Requests;
+﻿using ChatApp.Contracts.Authentication.Requests;
 using ChatApp.Contracts.Authentication.Responses;
 using ChatApp.SignalRTester.Configuration;
+using ChatApp.SignalRTester.Models;
 using Microsoft.Extensions.Options;
+using System.Net.Http.Json;
 
 namespace ChatApp.SignalRTester.Clients.Authentication;
 
@@ -21,7 +22,7 @@ public class AuthenticationApiClient : IAuthenticationApiClient
             new Uri(options.Value.ApiBaseUrl);
     }
 
-    public async Task<AuthResponseDto?> LoginAsync(
+    public async Task<ApiResult<AuthResponseDto>> LoginAsync(
         LoginRequestDto request)
     {
         var response = await _httpClient.PostAsJsonAsync(
@@ -30,12 +31,13 @@ public class AuthenticationApiClient : IAuthenticationApiClient
 
         if (!response.IsSuccessStatusCode)
         {
-            return null;
+            return ApiResult<AuthResponseDto>.Failure(
+                $"Request failed ({(int)response.StatusCode})");
         }
 
         var authResponse = await response.Content
             .ReadFromJsonAsync<AuthResponseDto>();
 
-        return authResponse;
+        return ApiResult<AuthResponseDto>.Success(authResponse!);
     }
 }
