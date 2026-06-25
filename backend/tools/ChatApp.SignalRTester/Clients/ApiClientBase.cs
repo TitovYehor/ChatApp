@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Json;
-using ChatApp.Contracts.Common;
+﻿using ChatApp.Contracts.Common;
 using ChatApp.SignalRTester.Models;
+using ChatApp.SignalRTester.Session;
+using System.Net.Http.Json;
 
 namespace ChatApp.SignalRTester.Clients;
 
@@ -8,10 +9,14 @@ public abstract class ApiClientBase
 {
     protected readonly HttpClient HttpClient;
 
+    protected readonly UserSession UserSession;
+
     protected ApiClientBase(
-        HttpClient httpClient)
+        HttpClient httpClient,
+        UserSession userSession)
     {
         HttpClient = httpClient;
+        UserSession = userSession;
     }
 
     protected Task<ApiResult<TResponse>> PostAsync<TRequest, TResponse>(
@@ -96,6 +101,13 @@ public abstract class ApiClientBase
     {
         try
         {
+            if (UserSession.IsAuthenticated)
+            {
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+                    "Bearer",
+                    UserSession.Token);
+            }
+
             var response = await HttpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
