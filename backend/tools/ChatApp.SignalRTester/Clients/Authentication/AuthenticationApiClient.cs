@@ -2,6 +2,7 @@
 using ChatApp.Contracts.Authentication.Responses;
 using ChatApp.SignalRTester.Configuration;
 using ChatApp.SignalRTester.Models;
+using ChatApp.SignalRTester.Session;
 using Microsoft.Extensions.Options;
 
 namespace ChatApp.SignalRTester.Clients.Authentication;
@@ -10,8 +11,9 @@ public class AuthenticationApiClient : ApiClientBase, IAuthenticationApiClient
 {
     public AuthenticationApiClient(
         IHttpClientFactory httpClientFactory,
-        IOptions<AppSettings> options)
-        : base(httpClientFactory.CreateClient())
+        IOptions<AppSettings> options,
+        UserSession userSession)
+        : base(httpClientFactory.CreateClient(), userSession)
     {
         HttpClient.BaseAddress = new Uri(options.Value.ApiBaseUrl);
     }
