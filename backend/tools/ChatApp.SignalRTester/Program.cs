@@ -2,6 +2,7 @@
 using ChatApp.SignalRTester.Clients.Authentication;
 using ChatApp.SignalRTester.Clients.Realtime;
 using ChatApp.SignalRTester.Configuration;
+using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI;
 using ChatApp.SignalRTester.UI.Input;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,8 @@ builder.Services.AddSingleton<IConsoleMenu, ConsoleMenu>();
 builder.Services.AddSingleton<IConsoleApplication, ConsoleApplication>();
 
 builder.Services.AddSingleton<IConsoleInput, ConsoleInput>();
+
+builder.Services.AddSingleton<UserSession>();
 
 using var host = builder.Build();
 
