@@ -1,30 +1,34 @@
-﻿namespace ChatApp.SignalRTester.Session;
+﻿using ChatApp.Contracts.Authentication.Responses;
+
+namespace ChatApp.SignalRTester.Session;
 
 public class UserSession
 {
-    public string? Token { get; private set; }
+    public Guid UserId { get; private set; }
 
-    public string? Username { get; private set; }
+    public string Username { get; private set; } = string.Empty;
 
-    public string? Email { get; private set; }
+    public string Email { get; private set; } = string.Empty;
+
+    public string? AccessToken { get; private set; }
 
     public bool IsAuthenticated =>
-        !string.IsNullOrWhiteSpace(Token);
+        !string.IsNullOrWhiteSpace(AccessToken);
 
     public void SignIn(
-        string token,
-        string username,
-        string email)
+        AuthResponseDto response)
     {
-        Token = token;
-        Username = username;
-        Email = email;
+        UserId = response.User.Id;
+        Username = response.User.Username;
+        Email = response.User.Email;
+        AccessToken = response.AccessToken;
     }
 
     public void SignOut()
     {
-        Token = null;
-        Username = null;
-        Email = null;
+        UserId = Guid.Empty;
+        Username = string.Empty;
+        Email = string.Empty;
+        AccessToken = null;
     }
 }
