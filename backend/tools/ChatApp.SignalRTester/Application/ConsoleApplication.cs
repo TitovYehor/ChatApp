@@ -79,10 +79,7 @@ public class ConsoleApplication : IConsoleApplication
 
         var response = result.Data!;
 
-        _userSession.SignIn(
-            response.Token,
-            response.Username,
-            response.Email);
+        _userSession.SignIn(response);
 
         Console.WriteLine();
         Console.WriteLine("Login successful");
