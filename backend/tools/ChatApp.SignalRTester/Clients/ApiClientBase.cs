@@ -105,7 +105,7 @@ public abstract class ApiClientBase
             {
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
                     "Bearer",
-                    UserSession.Token);
+                    UserSession.AccessToken);
             }
 
             var response = await HttpClient.SendAsync(request);
