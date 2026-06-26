@@ -1,10 +1,10 @@
-﻿namespace ChatApp.Contracts.Authentication.Responses;
+﻿using ChatApp.Contracts.Users;
+
+namespace ChatApp.Contracts.Authentication.Responses;
 
 public class AuthResponseDto
 {
-    public string Token { get; set; } = string.Empty;
+    public string AccessToken { get; set; } = string.Empty;
 
-    public string Username { get; set; } = string.Empty;
-
-    public string Email { get; set; } = string.Empty;
+    public AuthenticatedUserDto User { get; set; } = new();
 }
