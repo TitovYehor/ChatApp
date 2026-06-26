@@ -2,6 +2,7 @@
 using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Authentication.Requests;
 using ChatApp.Contracts.Authentication.Responses;
+using ChatApp.Contracts.Users;
 using ChatApp.Domain.Entities;
 using ChatApp.Infrastructure.Authentication;
 using ChatApp.Infrastructure.Persistence;
@@ -57,9 +58,13 @@ public class AuthService : IAuthService
 
         return new AuthResponseDto
         {
-            Token = token,
-            Username = user.Username,
-            Email = user.Email
+            AccessToken = token,
+            User = new AuthenticatedUserDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email
+            }
         };
     }
 
@@ -86,9 +91,13 @@ public class AuthService : IAuthService
 
         return new AuthResponseDto
         {
-            Token = token,
-            Username = user.Username,
-            Email = user.Email
+            AccessToken = token,
+            User = new AuthenticatedUserDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email
+            }
         };
     }
 
