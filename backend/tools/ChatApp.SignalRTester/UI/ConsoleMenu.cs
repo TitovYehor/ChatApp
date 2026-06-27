@@ -19,7 +19,7 @@ public class ConsoleMenu : IConsoleMenu
         _session = session;
     }
 
-    public async Task<MenuOption> ShowAsync()
+    public async Task<MenuOption?> ShowAsync()
     {
         Console.Clear();
 
@@ -39,34 +39,56 @@ public class ConsoleMenu : IConsoleMenu
 
         Console.WriteLine();
 
-        if (!_session.IsAuthenticated)
-        {
-            Console.WriteLine("1. Login");
-        }
-        else
-        {
-            Console.WriteLine("2. Logout");
-        }
+        var menuItems = BuildMenu();
 
-        Console.WriteLine("0. Exit");
+        foreach (var item in menuItems.Where(x => x.Visible))
+        {
+            Console.WriteLine($"{item.Number}. {item.Text}");
+        }
 
         Console.Write("Select option: ");
 
         var input = Console.ReadLine();
 
-        if (!_session.IsAuthenticated)
+        if (!int.TryParse(input, out var selectedNumber))
         {
-            return input switch
-            {
-                "1" => MenuOption.Login,
-                _ => MenuOption.Exit
-            };
+            return null;
         }
 
-        return input switch
+        var selectedItem = menuItems
+            .FirstOrDefault(x =>
+                x.Visible &&
+                x.Number == selectedNumber);
+
+        return selectedItem?.Option;
+    }
+
+    private IReadOnlyList<MenuItem> BuildMenu()
+    {
+        return
+        [
+            new MenuItem
         {
-            "2" => MenuOption.Logout,
-            _ => MenuOption.Exit
-        };
+            Number = 1,
+            Text = "Login",
+            Option = MenuOption.Login,
+            Visible = !_session.IsAuthenticated
+        },
+
+        new MenuItem
+        {
+            Number = 2,
+            Text = "Logout",
+            Option = MenuOption.Logout,
+            Visible = _session.IsAuthenticated
+        },
+
+        new MenuItem
+        {
+            Number = 0,
+            Text = "Exit",
+            Option = MenuOption.Exit
+        }
+        ];
     }
 }

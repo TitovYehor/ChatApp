@@ -4,5 +4,5 @@ namespace ChatApp.SignalRTester.UI;
 
 public interface IConsoleMenu
 {
-    Task<MenuOption> ShowAsync();
+    Task<MenuOption?> ShowAsync();
 }
