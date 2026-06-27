@@ -35,7 +35,16 @@ public class ConsoleApplication : IConsoleApplication
         {
             var option = await _menu.ShowAsync();
 
-            switch (option)
+            if (option == null)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Invalid selection");
+                Console.WriteLine();
+
+                continue;
+            }
+
+            switch (option.Value)
             {
                 case MenuOption.Login:
                     await LoginAsync();
