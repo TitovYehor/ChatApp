@@ -4,5 +4,7 @@ public enum MenuOption
 {
     Exit = 0,
 
-    Login = 1
+    Login = 1,
+
+    Logout = 2
 }
