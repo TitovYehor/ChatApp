@@ -41,6 +41,10 @@ public class ConsoleApplication : IConsoleApplication
                     await LoginAsync();
                     break;
 
+                case MenuOption.Logout:
+                    Logout();
+                    break;
+
                 case MenuOption.Exit:
                     return;
             }
@@ -87,5 +91,13 @@ public class ConsoleApplication : IConsoleApplication
 
         Console.WriteLine($"Welcome {_userSession.Username}!");
         Console.WriteLine($"Email: {_userSession.Email}");
+    }
+
+    private void Logout()
+    {
+        _userSession.SignOut();
+
+        Console.WriteLine();
+        Console.WriteLine("Logged out successfully");
     }
 }
