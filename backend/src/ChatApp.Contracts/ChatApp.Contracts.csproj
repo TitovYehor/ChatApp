@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Channels\" />
     <Folder Include="Common\" />
-    <Folder Include="Workspaces\" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.DTOs.Workspaces;
+﻿namespace ChatApp.Contracts.Workspaces.Requests;
 
 public class CreateWorkspaceRequestDto
 {
