@@ -1,21 +1,15 @@
-﻿using ChatApp.Contracts.Authentication.Requests;
-using ChatApp.SignalRTester.Clients.Authentication;
-using ChatApp.SignalRTester.Session;
+﻿using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI.Models;
 
 namespace ChatApp.SignalRTester.UI;
 
 public class ConsoleMenu : IConsoleMenu
 {
-    private readonly IAuthenticationApiClient _authenticationApiClient;
-
     private readonly UserSession _session;
 
     public ConsoleMenu(
-        IAuthenticationApiClient authenticationApiClient,
         UserSession session)
     {
-        _authenticationApiClient = authenticationApiClient;
         _session = session;
     }
 
@@ -73,6 +67,14 @@ public class ConsoleMenu : IConsoleMenu
             Text = "Login",
             Option = MenuOption.Login,
             Visible = !_session.IsAuthenticated
+        },
+
+        new MenuItem
+        {
+            Number = 1,
+            Text = "Create workspace",
+            Option = MenuOption.CreateWorkspace,
+            Visible = _session.IsAuthenticated
         },
 
         new MenuItem
