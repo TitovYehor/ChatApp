@@ -6,5 +6,7 @@ public enum MenuOption
 
     Login = 1,
 
-    Logout = 2
+    Logout = 2,
+
+    CreateWorkspace = 3,
 }
