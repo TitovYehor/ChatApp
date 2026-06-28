@@ -1,5 +1,7 @@
 ﻿using ChatApp.Contracts.Authentication.Requests;
+using ChatApp.Contracts.Workspaces.Requests;
 using ChatApp.SignalRTester.Clients.Authentication;
+using ChatApp.SignalRTester.Clients.Workspaces;
 using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI;
 using ChatApp.SignalRTester.UI.Input;
@@ -13,6 +15,8 @@ public class ConsoleApplication : IConsoleApplication
 
     private readonly IAuthenticationApiClient _authenticationApiClient;
 
+    private readonly IWorkspaceApiClient _workspaceApiClient;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly UserSession _userSession;
@@ -21,11 +25,13 @@ public class ConsoleApplication : IConsoleApplication
         IConsoleMenu menu,
         IConsoleInput consoleInput,
         IAuthenticationApiClient authenticationApiClient,
+        IWorkspaceApiClient workspaceApiClient,
         UserSession userSession)
     {
         _menu = menu;
         _consoleInput = consoleInput;
         _authenticationApiClient = authenticationApiClient;
+        _workspaceApiClient = workspaceApiClient;
         _userSession = userSession;
     }
 
@@ -48,6 +54,10 @@ public class ConsoleApplication : IConsoleApplication
             {
                 case MenuOption.Login:
                     await LoginAsync();
+                    break;
+
+                case MenuOption.CreateWorkspace:
+                    await CreateWorkspaceAsync();
                     break;
 
                 case MenuOption.Logout:
@@ -108,5 +118,45 @@ public class ConsoleApplication : IConsoleApplication
 
         Console.WriteLine();
         Console.WriteLine("Logged out successfully");
+    }
+
+    private async Task CreateWorkspaceAsync()
+    {
+        Console.WriteLine();
+        Console.WriteLine("=== Create Workspace ===");
+        Console.WriteLine();
+
+        var name =
+            _consoleInput.ReadRequiredString("Name");
+
+        var description =
+            _consoleInput.ReadRequiredString("Description");
+
+        var request =
+            new CreateWorkspaceRequestDto
+            {
+                Name = name,
+                Description = description
+            };
+
+        var result =
+            await _workspaceApiClient.CreateAsync(request);
+
+        if (!result.IsSuccess)
+        {
+            Console.WriteLine();
+            Console.WriteLine(result.ErrorMessage);
+            return;
+        }
+
+        var workspace = result.Data!;
+
+        Console.WriteLine();
+        Console.WriteLine("Workspace created successfully");
+        Console.WriteLine();
+
+        Console.WriteLine($"Id: {workspace.Id}");
+        Console.WriteLine($"Name: {workspace.Name}");
+        Console.WriteLine($"Description: {workspace.Description}");
     }
 }
