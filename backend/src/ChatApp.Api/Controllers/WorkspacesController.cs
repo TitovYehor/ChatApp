@@ -1,5 +1,6 @@
-﻿using ChatApp.Application.DTOs.Workspaces;
-using ChatApp.Application.Interfaces;
+﻿using ChatApp.Application.Interfaces;
+using ChatApp.Contracts.Workspaces.Requests;
+using ChatApp.Contracts.Workspaces.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

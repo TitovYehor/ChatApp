@@ -1,4 +1,5 @@
-﻿using ChatApp.Application.DTOs.Workspaces;
+﻿using ChatApp.Contracts.Workspaces.Requests;
+using ChatApp.Contracts.Workspaces.Responses;
 
 namespace ChatApp.Application.Interfaces;
 

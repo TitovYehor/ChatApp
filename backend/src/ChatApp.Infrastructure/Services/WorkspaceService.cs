@@ -1,7 +1,8 @@
-﻿using ChatApp.Application.DTOs.Workspaces;
-using ChatApp.Application.Exceptions;
+﻿using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
+using ChatApp.Contracts.Workspaces.Requests;
+using ChatApp.Contracts.Workspaces.Responses;
 using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
