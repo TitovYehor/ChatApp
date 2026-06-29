@@ -60,6 +60,10 @@ public class ConsoleApplication : IConsoleApplication
                     await CreateWorkspaceAsync();
                     break;
 
+                case MenuOption.ListWorkspaces:
+                    await ListWorkspacesAsync();
+                    break;
+
                 case MenuOption.Logout:
                     Logout();
                     break;
@@ -158,5 +162,42 @@ public class ConsoleApplication : IConsoleApplication
         Console.WriteLine($"Id: {workspace.Id}");
         Console.WriteLine($"Name: {workspace.Name}");
         Console.WriteLine($"Description: {workspace.Description}");
+    }
+
+    private async Task ListWorkspacesAsync()
+    {
+        Console.WriteLine();
+        Console.WriteLine("=== Workspaces ===");
+        Console.WriteLine();
+
+        var result =
+            await _workspaceApiClient.GetAllAsync();
+
+        if (!result.IsSuccess)
+        {
+            Console.WriteLine(result.ErrorMessage);
+            return;
+        }
+
+        var workspaces = result.Data!;
+
+        if (workspaces.Count == 0)
+        {
+            Console.WriteLine("No workspaces found");
+            return;
+        }
+
+        var index = 1;
+
+        foreach (var workspace in workspaces)
+        {
+            Console.WriteLine($"{index}.");
+            Console.WriteLine($"Id: {workspace.Id}");
+            Console.WriteLine($"Name: {workspace.Name}");
+            Console.WriteLine($"Description: {workspace.Description}");
+            Console.WriteLine();
+
+            index++;
+        }
     }
 }
