@@ -9,4 +9,6 @@ public enum MenuOption
     Logout = 2,
 
     CreateWorkspace = 3,
+
+    ListWorkspaces = 4,
 }
