@@ -80,6 +80,14 @@ public class ConsoleMenu : IConsoleMenu
         new MenuItem
         {
             Number = 2,
+            Text = "List workspaces",
+            Option = MenuOption.ListWorkspaces,
+            Visible = _session.IsAuthenticated
+        },
+
+        new MenuItem
+        {
+            Number = 3,
             Text = "Logout",
             Option = MenuOption.Logout,
             Visible = _session.IsAuthenticated
