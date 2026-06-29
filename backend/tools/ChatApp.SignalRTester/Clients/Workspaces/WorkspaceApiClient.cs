@@ -25,4 +25,10 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
             "api/workspaces",
             request);
     }
+
+    public Task<ApiResult<IReadOnlyList<WorkspaceResponseDto>>> GetAllAsync()
+    {
+        return GetAsync<IReadOnlyList<WorkspaceResponseDto>>(
+            "api/workspaces");
+    }
 }

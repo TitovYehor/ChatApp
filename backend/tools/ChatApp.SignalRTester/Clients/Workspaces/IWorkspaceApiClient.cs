@@ -8,4 +8,6 @@ public interface IWorkspaceApiClient
 {
     Task<ApiResult<WorkspaceResponseDto>> CreateAsync(
         CreateWorkspaceRequestDto request);
+
+    Task<ApiResult<IReadOnlyList<WorkspaceResponseDto>>> GetAllAsync();
 }
