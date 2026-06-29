@@ -1,7 +1,8 @@
-﻿using ChatApp.Application.DTOs.Channels;
-using ChatApp.Application.Exceptions;
+﻿using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
+using ChatApp.Contracts.Channels.Requests;
+using ChatApp.Contracts.Channels.Responses;
 using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;

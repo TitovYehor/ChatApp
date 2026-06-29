@@ -1,4 +1,4 @@
-﻿using ChatApp.Application.DTOs.Channels;
+﻿using ChatApp.Contracts.Channels.Requests;
 using FluentValidation;
 
 namespace ChatApp.Application.Validators;

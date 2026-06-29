@@ -1,4 +1,5 @@
-﻿using ChatApp.Application.DTOs.Channels;
+﻿using ChatApp.Contracts.Channels.Requests;
+using ChatApp.Contracts.Channels.Responses;
 using ChatApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

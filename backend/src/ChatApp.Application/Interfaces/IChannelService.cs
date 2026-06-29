@@ -1,4 +1,5 @@
-﻿using ChatApp.Application.DTOs.Channels;
+﻿using ChatApp.Contracts.Channels.Requests;
+using ChatApp.Contracts.Channels.Responses;
 
 namespace ChatApp.Application.Interfaces;
 
