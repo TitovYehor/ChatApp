@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.DTOs.Channels;
+﻿namespace ChatApp.Contracts.Channels.Requests;
 
 public class CreateChannelRequestDto
 {

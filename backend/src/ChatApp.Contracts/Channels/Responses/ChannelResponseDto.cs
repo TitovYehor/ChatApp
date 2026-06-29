@@ -1,4 +1,4 @@
-﻿namespace ChatApp.Application.DTOs.Channels;
+﻿namespace ChatApp.Contracts.Channels.Responses;
 
 public class ChannelResponseDto
 {
