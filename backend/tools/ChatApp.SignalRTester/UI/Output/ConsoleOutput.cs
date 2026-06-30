@@ -68,6 +68,17 @@ public class ConsoleOutput : IConsoleOutput
         }
     }
 
+    public void WriteWorkspaceSelection(
+        IReadOnlyList<WorkspaceResponseDto> workspaces)
+    {
+        for (var i = 0; i < workspaces.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {workspaces[i].Name}");
+        }
+
+        Console.WriteLine();
+    }
+
     public void WriteChannel(
         ChannelResponseDto channel)
     {
