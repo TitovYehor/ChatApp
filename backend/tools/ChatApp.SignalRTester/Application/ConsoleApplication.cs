@@ -69,6 +69,10 @@ public class ConsoleApplication : IConsoleApplication
                     await ListWorkspacesAsync();
                     break;
 
+                case MenuOption.SelectWorkspace:
+                    await SelectWorkspaceAsync();
+                    break;
+
                 case MenuOption.Logout:
                     Logout();
                     break;
@@ -193,5 +197,39 @@ public class ConsoleApplication : IConsoleApplication
 
             index++;
         }
+    }
+
+    private async Task SelectWorkspaceAsync()
+    {
+        _consoleOutput.WriteHeader("Select Workspace");
+
+        var result = await _workspaceApiClient.GetAllAsync();
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        var workspaces = result.Data!;
+
+        if (workspaces.Count == 0)
+        {
+            _consoleOutput.WriteInfo("No workspaces found");
+            return;
+        }
+
+        _consoleOutput.WriteWorkspaceSelection(workspaces);
+
+        var selection = _consoleInput.ReadInt(
+            "Select workspace",
+            1,
+            workspaces.Count);
+
+        var workspace = workspaces[selection - 1];
+
+        _userSession.SelectWorkspace(workspace);
+
+        _consoleOutput.WriteSuccess($"Workspace '{workspace.Name}' selected");
     }
 }
