@@ -6,6 +6,7 @@ using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI;
 using ChatApp.SignalRTester.UI.Input;
 using ChatApp.SignalRTester.UI.Models;
+using ChatApp.SignalRTester.UI.Output;
 
 namespace ChatApp.SignalRTester.Application;
 
@@ -19,17 +20,21 @@ public class ConsoleApplication : IConsoleApplication
 
     private readonly IConsoleInput _consoleInput;
 
+    private readonly IConsoleOutput _consoleOutput;
+
     private readonly UserSession _userSession;
 
     public ConsoleApplication(
         IConsoleMenu menu,
         IConsoleInput consoleInput,
+        IConsoleOutput consoleOutput,
         IAuthenticationApiClient authenticationApiClient,
         IWorkspaceApiClient workspaceApiClient,
         UserSession userSession)
     {
         _menu = menu;
         _consoleInput = consoleInput;
+        _consoleOutput = consoleOutput;
         _authenticationApiClient = authenticationApiClient;
         _workspaceApiClient = workspaceApiClient;
         _userSession = userSession;
@@ -80,9 +85,7 @@ public class ConsoleApplication : IConsoleApplication
 
     private async Task LoginAsync()
     {
-        Console.WriteLine();
-        Console.WriteLine("=== Login ===");
-        Console.WriteLine();
+        _consoleOutput.WriteHeader("Login");
 
         var email = _consoleInput.ReadRequiredString("Email");
 
@@ -96,11 +99,11 @@ public class ConsoleApplication : IConsoleApplication
 
         var result = await _authenticationApiClient.LoginAsync(request);
 
+        _consoleOutput.WriteSeparator();
+
         if (!result.IsSuccess)
         {
-            Console.WriteLine();
-            Console.WriteLine(result.ErrorMessage);
-
+            _consoleOutput.WriteError(result.ErrorMessage!);
             return;
         }
 
@@ -108,74 +111,66 @@ public class ConsoleApplication : IConsoleApplication
 
         _userSession.SignIn(response);
 
-        Console.WriteLine();
-        Console.WriteLine("Login successful");
-        Console.WriteLine();
+        _consoleOutput.WriteSuccess("Login successful");
 
-        Console.WriteLine($"Welcome {_userSession.Username}!");
-        Console.WriteLine($"Email: {_userSession.Email}");
+        _consoleOutput.WriteSeparator();
+
+        _consoleOutput.WriteInfo($"Welcome {_userSession.Username}!");
+        _consoleOutput.WriteInfo($"Email: {_userSession.Email}");
     }
 
     private void Logout()
     {
         _userSession.SignOut();
 
-        Console.WriteLine();
-        Console.WriteLine("Logged out successfully");
+        _consoleOutput.WriteSeparator();
+        _consoleOutput.WriteSuccess("Logged out successfully");
     }
 
     private async Task CreateWorkspaceAsync()
     {
-        Console.WriteLine();
-        Console.WriteLine("=== Create Workspace ===");
-        Console.WriteLine();
+        _consoleOutput.WriteHeader("Create Workspace");
 
-        var name =
-            _consoleInput.ReadRequiredString("Name");
+        var name = _consoleInput.ReadRequiredString("Name");
 
-        var description =
-            _consoleInput.ReadRequiredString("Description");
+        var description = _consoleInput.ReadRequiredString("Description");
 
-        var request =
-            new CreateWorkspaceRequestDto
-            {
-                Name = name,
-                Description = description
-            };
+        var request = new CreateWorkspaceRequestDto
+        {
+            Name = name,
+            Description = description
+        };
 
-        var result =
-            await _workspaceApiClient.CreateAsync(request);
+        var result = await _workspaceApiClient.CreateAsync(request);
+
+        _consoleOutput.WriteSeparator();
 
         if (!result.IsSuccess)
         {
-            Console.WriteLine();
-            Console.WriteLine(result.ErrorMessage);
+            _consoleOutput.WriteError(result.ErrorMessage!);
             return;
         }
 
         var workspace = result.Data!;
 
-        Console.WriteLine();
-        Console.WriteLine("Workspace created successfully");
-        Console.WriteLine();
+        _consoleOutput.WriteSuccess("Workspace created successfully");
 
-        Console.WriteLine($"Id: {workspace.Id}");
-        Console.WriteLine($"Name: {workspace.Name}");
-        Console.WriteLine($"Description: {workspace.Description}");
+        _consoleOutput.WriteSeparator();
+
+        _consoleOutput.WriteWorkspace(workspace);
     }
 
     private async Task ListWorkspacesAsync()
     {
-        Console.WriteLine();
-        Console.WriteLine("=== Workspaces ===");
-        Console.WriteLine();
+        _consoleOutput.WriteHeader("Workspaces");
 
-        var result =
-            await _workspaceApiClient.GetAllAsync();
+        var result = await _workspaceApiClient.GetAllAsync();
+
+        _consoleOutput.WriteSeparator();
 
         if (!result.IsSuccess)
         {
-            Console.WriteLine(result.ErrorMessage);
+            _consoleOutput.WriteError(result.ErrorMessage!);
             return;
         }
 
@@ -183,7 +178,7 @@ public class ConsoleApplication : IConsoleApplication
 
         if (workspaces.Count == 0)
         {
-            Console.WriteLine("No workspaces found");
+            _consoleOutput.WriteInfo("No workspaces found");
             return;
         }
 
@@ -191,11 +186,10 @@ public class ConsoleApplication : IConsoleApplication
 
         foreach (var workspace in workspaces)
         {
-            Console.WriteLine($"{index}.");
-            Console.WriteLine($"Id: {workspace.Id}");
-            Console.WriteLine($"Name: {workspace.Name}");
-            Console.WriteLine($"Description: {workspace.Description}");
-            Console.WriteLine();
+            _consoleOutput.WriteInfo($"{index}");
+            _consoleOutput.WriteWorkspace(workspace);
+            
+            _consoleOutput.WriteSeparator();
 
             index++;
         }
