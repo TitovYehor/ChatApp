@@ -31,6 +31,16 @@ public class ConsoleMenu : IConsoleMenu
             Console.WriteLine("Not signed in");
         }
 
+        if (_session.CurrentWorkspace != null)
+        {
+            Console.WriteLine($"Workspace: {_session.CurrentWorkspace.Name}");
+        }
+
+        if (_session.CurrentChannel != null)
+        {
+            Console.WriteLine($"Channel: #{_session.CurrentChannel.Name}");
+        }
+
         Console.WriteLine();
 
         var menuItems = BuildMenu();
@@ -88,6 +98,16 @@ public class ConsoleMenu : IConsoleMenu
         new MenuItem
         {
             Number = 3,
+            Text = _session.CurrentWorkspace == null
+                ? "Select workspace"
+                : "Change workspace",
+            Option = MenuOption.SelectWorkspace,
+            Visible = _session.IsAuthenticated
+        },
+
+        new MenuItem
+        {
+            Number = 4,
             Text = "Logout",
             Option = MenuOption.Logout,
             Visible = _session.IsAuthenticated
