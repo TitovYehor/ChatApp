@@ -6,6 +6,7 @@ using ChatApp.SignalRTester.Configuration;
 using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI;
 using ChatApp.SignalRTester.UI.Input;
+using ChatApp.SignalRTester.UI.Output;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,6 +34,7 @@ builder.Services.AddSingleton<IConsoleMenu, ConsoleMenu>();
 builder.Services.AddSingleton<IConsoleApplication, ConsoleApplication>();
 
 builder.Services.AddSingleton<IConsoleInput, ConsoleInput>();
+builder.Services.AddSingleton<IConsoleOutput, ConsoleOutput>();
 
 builder.Services.AddSingleton<UserSession>();
 
