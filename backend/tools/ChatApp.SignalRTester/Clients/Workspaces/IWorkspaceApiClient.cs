@@ -10,4 +10,7 @@ public interface IWorkspaceApiClient
         CreateWorkspaceRequestDto request);
 
     Task<ApiResult<IReadOnlyList<WorkspaceResponseDto>>> GetAllAsync();
+
+    Task<ApiResult<WorkspaceResponseDto>> GetByIdAsync(
+        Guid workspaceId);
 }

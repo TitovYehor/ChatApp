@@ -31,4 +31,11 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
         return GetAsync<IReadOnlyList<WorkspaceResponseDto>>(
             "api/workspaces");
     }
+
+    public Task<ApiResult<WorkspaceResponseDto>> GetByIdAsync(
+        Guid workspaceId)
+    {
+        return GetAsync<WorkspaceResponseDto>(
+            $"api/workspaces/{workspaceId}");
+    }
 }
