@@ -28,6 +28,7 @@ builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IChannelAccessService, ChannelAccessService>();
+builder.Services.AddScoped<IWorkspaceAuthorizationService, WorkspaceAuthorizationService>();
 
 builder.Services.AddRealTime();
 
