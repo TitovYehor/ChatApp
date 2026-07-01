@@ -15,10 +15,14 @@ public class ChannelService : IChannelService
 {
     private readonly AppDbContext _dbContext;
 
+    private readonly IWorkspaceAuthorizationService _workspaceAuthorization;
+
     public ChannelService(
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        IWorkspaceAuthorizationService workspaceAuthorization)
     {
         this._dbContext = dbContext;
+        this._workspaceAuthorization = workspaceAuthorization;
     }
 
     public async Task<ChannelResponseDto> CreateAsync(
@@ -26,15 +30,10 @@ public class ChannelService : IChannelService
         Guid userId,
         CreateChannelRequestDto request)
     {
-        var isMember = await _dbContext.WorkspaceMembers
-            .AnyAsync(x =>
-                x.WorkspaceId == workspaceId &&
-                x.UserId == userId);
-
-        if (!isMember)
-        {
-            throw new ForbiddenException("User is not a member of the workspace");
-        }
+        await _workspaceAuthorization
+            .EnsureCanCreateChannelAsync(
+                workspaceId,
+                userId);
 
         var channel = new Channel
         {
@@ -90,15 +89,10 @@ public class ChannelService : IChannelService
         Guid workspaceId,
         Guid userId)
     {
-        var isMember = await _dbContext.WorkspaceMembers
-            .AnyAsync(x =>
-                x.WorkspaceId == workspaceId &&
-                x.UserId == userId);
-
-        if (!isMember)
-        {
-            throw new ForbiddenException("User is not a member of this workspace");
-        }
+        await _workspaceAuthorization
+            .EnsureCanAccessWorkspaceAsync(
+                workspaceId,
+                userId);
 
         var channels = await _dbContext.Channels
             .AsNoTracking()
