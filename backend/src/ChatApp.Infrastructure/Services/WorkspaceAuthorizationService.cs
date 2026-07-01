@@ -1,5 +1,6 @@
 ﻿using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
+using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -80,5 +81,38 @@ public class WorkspaceAuthorizationService: IWorkspaceAuthorizationService
             throw new ForbiddenException(
                 "Only workspace administrators can manage channels");
         }
+    }
+
+    public async Task<Channel> GetManageableChannelAsync(
+        Guid channelId,
+        Guid userId)
+    {
+        var channel = await _dbContext.Channels
+            .Include(c => c.Workspace)
+            .ThenInclude(w => w.Members)
+            .FirstOrDefaultAsync(c => c.Id == channelId);
+
+        if (channel == null)
+        {
+            throw new NotFoundException("Channel not found");
+        }
+
+        var member = channel.Workspace.Members
+            .FirstOrDefault(m => m.UserId == userId);
+
+        if (member == null)
+        {
+            throw new ForbiddenException(
+                "User does not have access to this channel");
+        }
+
+        if (member.Role != WorkspaceRole.Owner &&
+            member.Role != WorkspaceRole.Admin)
+        {
+            throw new ForbiddenException(
+                "Only workspace administrators can manage channels");
+        }
+
+        return channel;
     }
 }

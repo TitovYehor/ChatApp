@@ -1,4 +1,6 @@
-﻿namespace ChatApp.Application.Interfaces;
+﻿using ChatApp.Domain.Entities;
+
+namespace ChatApp.Application.Interfaces;
 
 public interface IWorkspaceAuthorizationService
 {
@@ -11,6 +13,10 @@ public interface IWorkspaceAuthorizationService
         Guid userId);
 
     Task EnsureCanManageChannelAsync(
+        Guid channelId,
+        Guid userId);
+
+    Task<Channel> GetManageableChannelAsync(
         Guid channelId,
         Guid userId);
 }
