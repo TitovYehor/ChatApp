@@ -17,4 +17,13 @@ public interface IChannelService
     Task<IReadOnlyCollection<ChannelResponseDto>> GetByWorkspaceIdAsync(
         Guid workspaceId,
         Guid userId);
+
+    Task<ChannelResponseDto> UpdateAsync(
+        Guid channelId,
+        Guid userId,
+        UpdateChannelRequestDto request);
+
+    Task DeleteAsync(
+        Guid channelId,
+        Guid userId);
 }

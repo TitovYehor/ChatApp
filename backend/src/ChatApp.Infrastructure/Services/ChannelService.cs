@@ -104,4 +104,59 @@ public class ChannelService : IChannelService
             .Select(x => x.ToDto())
             .ToList();
     }
+
+    public async Task<ChannelResponseDto> UpdateAsync(
+        Guid channelId,
+        Guid userId,
+        UpdateChannelRequestDto request)
+    {
+        var channel = await _workspaceAuthorization
+            .GetManageableChannelAsync(
+                channelId,
+                userId);
+
+        var newName = request.Name.Trim();
+
+        if (channel.Name == newName)
+        {
+            return channel.ToDto();
+        }
+
+        channel.Name = newName;
+
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+            when (ex.InnerException is PostgresException postgresException
+                   && postgresException.SqlState ==
+                      PostgresErrorCodes.UniqueViolation)
+        {
+            if (postgresException.ConstraintName ==
+                DatabaseConstraintNames.UniqueChannelNamePerWorkspace)
+            {
+                throw new ConflictException(
+                    "Channel with this name already exists");
+            }
+
+            throw;
+        }
+
+        return channel.ToDto();
+    }
+
+    public async Task DeleteAsync(
+        Guid channelId,
+        Guid userId)
+    {
+        var channel = await _workspaceAuthorization
+            .GetManageableChannelAsync(
+                channelId,
+                userId);
+
+        _dbContext.Channels.Remove(channel);
+
+        await _dbContext.SaveChangesAsync();
+    }
 }
