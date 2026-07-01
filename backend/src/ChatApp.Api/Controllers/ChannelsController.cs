@@ -53,7 +53,7 @@ public class ChannelsController : ControllerBase
         return Ok(channel);
     }
 
-    [HttpGet("/api/workspaces/{workspaceId:guid}/channels")]
+    [HttpGet("workspaces/{workspaceId:guid}/channels")]
     public async Task<ActionResult<IReadOnlyCollection<ChannelResponseDto>>> GetByWorkspaceId(
         Guid workspaceId)
     {
@@ -64,5 +64,33 @@ public class ChannelsController : ControllerBase
             userId);
 
         return Ok(channels);
+    }
+
+    [HttpPut("channels/{channelId:guid}")]
+    public async Task<ActionResult<ChannelResponseDto>> Update(
+        Guid channelId,
+        UpdateChannelRequestDto request)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var channel = await _channelService.UpdateAsync(
+            channelId,
+            userId,
+            request);
+
+        return Ok(channel);
+    }
+
+    [HttpDelete("channels/{channelId:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid channelId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        await _channelService.DeleteAsync(
+            channelId,
+            userId);
+
+        return NoContent();
     }
 }
