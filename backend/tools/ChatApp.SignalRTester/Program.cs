@@ -1,4 +1,5 @@
 ﻿using ChatApp.SignalRTester.Application;
+using ChatApp.SignalRTester.Application.Workflows;
 using ChatApp.SignalRTester.Clients.Authentication;
 using ChatApp.SignalRTester.Clients.Realtime;
 using ChatApp.SignalRTester.Clients.Workspaces;
@@ -35,6 +36,9 @@ builder.Services.AddSingleton<IConsoleApplication, ConsoleApplication>();
 
 builder.Services.AddSingleton<IConsoleInput, ConsoleInput>();
 builder.Services.AddSingleton<IConsoleOutput, ConsoleOutput>();
+
+builder.Services.AddSingleton<AuthenticationWorkflow>();
+builder.Services.AddSingleton<WorkspaceWorkflow>();
 
 builder.Services.AddSingleton<UserSession>();
 
