@@ -83,7 +83,21 @@ public class ConsoleOutput : IConsoleOutput
         ChannelResponseDto channel)
     {
         Console.WriteLine($"Id: {channel.Id}");
+
         Console.WriteLine($"Name: {channel.Name}");
+
+        Console.WriteLine($"Created: {channel.CreatedAt:u}");
+    }
+
+    public void WriteChannelSelection(
+        IReadOnlyList<ChannelResponseDto> channels)
+    {
+        for (var i = 0; i < channels.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {channels[i].Name}");
+        }
+
+        Console.WriteLine();
     }
 
     public void WriteMessage(
