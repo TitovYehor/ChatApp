@@ -12,5 +12,11 @@ public enum MenuOption
 
     SelectWorkspace = 4,
 
-    Logout = 5,
+    CreateChannel = 5,
+
+    ListChannels = 6,
+
+    SelectChannel = 7,
+
+    Logout = 8,
 }
