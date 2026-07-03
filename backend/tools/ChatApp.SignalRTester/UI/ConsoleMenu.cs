@@ -22,24 +22,11 @@ public class ConsoleMenu : IConsoleMenu
         Console.WriteLine("==============================");
         Console.WriteLine();
 
-        if (_session.IsAuthenticated)
-        {
-            Console.WriteLine($"Signed in as {_session.Username}");
-        }
-        else
-        {
-            Console.WriteLine("Not signed in");
-        }
+        Console.WriteLine($"User: {_session.Username}");
 
-        if (_session.CurrentWorkspace != null)
-        {
-            Console.WriteLine($"Workspace: {_session.CurrentWorkspace.Name}");
-        }
+        Console.WriteLine($"Workspace: {(_session.CurrentWorkspace?.Name ?? "-")}");
 
-        if (_session.CurrentChannel != null)
-        {
-            Console.WriteLine($"Channel: #{_session.CurrentChannel.Name}");
-        }
+        Console.WriteLine($"Channel: {(_session.CurrentChannel?.Name ?? "-")}");
 
         Console.WriteLine();
 
@@ -108,6 +95,35 @@ public class ConsoleMenu : IConsoleMenu
         new MenuItem
         {
             Number = 4,
+            Text = "Create channel",
+            Option = MenuOption.CreateChannel,
+            Visible = _session.IsAuthenticated &&
+                      _session.CurrentWorkspace != null
+        },
+
+        new MenuItem
+        {
+            Number = 5,
+            Text = "List channels",
+            Option = MenuOption.ListChannels,
+            Visible = _session.IsAuthenticated &&
+                      _session.CurrentWorkspace != null
+        },
+
+        new MenuItem
+        {
+            Number = 6,
+            Text = _session.CurrentChannel == null
+                ? "Select channel"
+                : "Change channel",
+            Option = MenuOption.SelectChannel,
+            Visible = _session.IsAuthenticated &&
+                      _session.CurrentWorkspace != null
+        },
+
+        new MenuItem
+        {
+            Number = 9,
             Text = "Logout",
             Option = MenuOption.Logout,
             Visible = _session.IsAuthenticated
