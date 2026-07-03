@@ -1,6 +1,4 @@
-﻿using ChatApp.Contracts.Authentication.Requests;
-using ChatApp.Contracts.Workspaces.Requests;
-using ChatApp.SignalRTester.Application.Workflows;
+﻿using ChatApp.SignalRTester.Application.Workflows;
 using ChatApp.SignalRTester.UI;
 using ChatApp.SignalRTester.UI.Models;
 
@@ -14,14 +12,18 @@ public class ConsoleApplication : IConsoleApplication
 
     private readonly WorkspaceWorkflow _workspaceWorkflow;
 
+    private readonly ChannelWorkflow _channelWorkflow;
+
     public ConsoleApplication(
         IConsoleMenu menu,
         AuthenticationWorkflow authenticationWorkflow,
-        WorkspaceWorkflow workspaceWorkflow)
+        WorkspaceWorkflow workspaceWorkflow,
+        ChannelWorkflow channelWorkflow)
     {
         _menu = menu;
         _authenticationWorkflow = authenticationWorkflow;
         _workspaceWorkflow = workspaceWorkflow;
+        _channelWorkflow = channelWorkflow;
     }
 
     public async Task RunAsync()
@@ -55,6 +57,18 @@ public class ConsoleApplication : IConsoleApplication
 
                 case MenuOption.SelectWorkspace:
                     await _workspaceWorkflow.SelectWorkspaceAsync();
+                    break;
+
+                case MenuOption.CreateChannel:
+                    await _channelWorkflow.CreateChannelAsync();
+                    break;
+
+                case MenuOption.ListChannels:
+                    await _channelWorkflow.ListChannelsAsync();
+                    break;
+
+                case MenuOption.SelectChannel:
+                    await _channelWorkflow.SelectChannelAsync();
                     break;
 
                 case MenuOption.Logout:
