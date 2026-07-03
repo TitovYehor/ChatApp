@@ -52,9 +52,13 @@ public class UserSession
         CurrentChannel = null;
     }
 
-    public void SelectChannel(
+    public Guid? SelectChannel(
         ChannelResponseDto channel)
     {
+        var previous = CurrentChannel?.Id;
+
         CurrentChannel = channel;
+
+        return previous;
     }
 }
