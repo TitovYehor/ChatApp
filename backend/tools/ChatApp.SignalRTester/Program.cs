@@ -43,6 +43,7 @@ builder.Services.AddSingleton<IConsoleOutput, ConsoleOutput>();
 builder.Services.AddSingleton<AuthenticationWorkflow>();
 builder.Services.AddSingleton<WorkspaceWorkflow>();
 builder.Services.AddSingleton<ChannelWorkflow>();
+builder.Services.AddSingleton<SignalRWorkflow>();
 
 builder.Services.AddSingleton<RealtimeSessionManager>();
 
