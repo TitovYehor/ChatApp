@@ -1,4 +1,5 @@
 ﻿using ChatApp.Contracts.Messages.Responses;
+using ChatApp.Contracts.Realtime;
 using ChatApp.SignalRTester.Configuration;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
@@ -19,29 +20,28 @@ public class SignalRClient : ISignalRClient
                 .Build();
 
         _connection.On<MessageResponseDto>(
-            "MessageCreated",
+            SignalREvents.MessageCreated,
             dto =>
             {
                 MessageCreated?.Invoke(dto);
             });
 
         _connection.On<MessageResponseDto>(
-            "MessageUpdated",
+            SignalREvents.MessageUpdated,
             dto =>
             {
                 MessageUpdated?.Invoke(dto);
             });
 
         _connection.On<Guid>(
-            "MessageDeleted",
+            SignalREvents.MessageDeleted,
             id =>
             {
                 MessageDeleted?.Invoke(id);
             });
     }
 
-    public bool IsConnected =>
-        _connection.State == HubConnectionState.Connected;
+    public bool IsConnected => _connection.State == HubConnectionState.Connected;
 
     public event Action<MessageResponseDto>? MessageCreated;
 
@@ -73,7 +73,7 @@ public class SignalRClient : ISignalRClient
         Guid channelId)
     {
         return _connection.InvokeAsync(
-            "JoinChannel",
+            SignalRMethods.JoinChannel,
             channelId);
     }
 
@@ -81,7 +81,7 @@ public class SignalRClient : ISignalRClient
         Guid channelId)
     {
         return _connection.InvokeAsync(
-            "LeaveChannel",
+            SignalRMethods.LeaveChannel,
             channelId);
     }
 }
