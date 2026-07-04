@@ -18,5 +18,9 @@ public enum MenuOption
 
     SelectChannel = 7,
 
-    Logout = 8,
+    ConnectSignalR = 8,
+
+    DisconnectSignalR = 9,
+
+    Logout = 10,
 }
