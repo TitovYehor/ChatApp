@@ -1,4 +1,5 @@
 ﻿using ChatApp.SignalRTester.Session;
+using ChatApp.SignalRTester.SignalR;
 using ChatApp.SignalRTester.UI.Models;
 
 namespace ChatApp.SignalRTester.UI;
@@ -7,10 +8,14 @@ public class ConsoleMenu : IConsoleMenu
 {
     private readonly UserSession _session;
 
+    private readonly ISignalRClient _signalRClient;
+
     public ConsoleMenu(
-        UserSession session)
+        UserSession session,
+        ISignalRClient signalRClient)
     {
         _session = session;
+        _signalRClient = signalRClient;
     }
 
     public async Task<MenuOption?> ShowAsync()
@@ -27,6 +32,8 @@ public class ConsoleMenu : IConsoleMenu
         Console.WriteLine($"Workspace: {(_session.CurrentWorkspace?.Name ?? "-")}");
 
         Console.WriteLine($"Channel: {(_session.CurrentChannel?.Name ?? "-")}");
+
+        Console.WriteLine($"SignalR: {(_signalRClient.IsConnected ? "Connected" : "Disconnected")}");
 
         Console.WriteLine();
 
@@ -119,6 +126,26 @@ public class ConsoleMenu : IConsoleMenu
             Option = MenuOption.SelectChannel,
             Visible = _session.IsAuthenticated &&
                       _session.CurrentWorkspace != null
+        },
+
+        new MenuItem
+        {
+            Number = 7,
+            Text = "Connect to SignalR",
+            Option = MenuOption.ConnectSignalR,
+            Visible = _session.IsAuthenticated &&
+                      _session.CurrentWorkspace != null &&
+                      _session.CurrentChannel != null &&
+                      !_signalRClient.IsConnected
+        },
+
+        new MenuItem
+        {
+            Number = 8,
+            Text = "Disconnect from SignalR",
+            Option = MenuOption.DisconnectSignalR,
+            Visible = _session.IsAuthenticated &&
+                      _signalRClient.IsConnected
         },
 
         new MenuItem
