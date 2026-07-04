@@ -1,6 +1,7 @@
 ﻿using ChatApp.Contracts.Channels.Requests;
 using ChatApp.SignalRTester.Clients.Channels;
 using ChatApp.SignalRTester.Session;
+using ChatApp.SignalRTester.SignalR;
 using ChatApp.SignalRTester.UI.Input;
 using ChatApp.SignalRTester.UI.Output;
 
@@ -10,6 +11,8 @@ public class ChannelWorkflow
 {
     private readonly IChannelApiClient _channelApiClient;
 
+    private readonly ISignalRClient _signalRClient;
+
     private readonly UserSession _userSession;
 
     private readonly IConsoleInput _consoleInput;
@@ -18,11 +21,13 @@ public class ChannelWorkflow
 
     public ChannelWorkflow(
         IChannelApiClient channelApiClient,
+        ISignalRClient signalRClient,
         UserSession userSession,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     {
         _channelApiClient = channelApiClient;
+        _signalRClient = signalRClient;
         _userSession = userSession;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
@@ -144,7 +149,21 @@ public class ChannelWorkflow
 
         var channel = channels[selection - 1];
 
+        var previousChannelId = _userSession.CurrentChannel?.Id;
+
         _userSession.SelectChannel(channel);
+
+        if (_signalRClient.IsConnected)
+        {
+            if (previousChannelId.HasValue)
+            {
+                await _signalRClient.LeaveChannelAsync(
+                    previousChannelId.Value);
+            }
+
+            await _signalRClient.JoinChannelAsync(
+                channel.Id);
+        }
 
         _consoleOutput.WriteSuccess($"Channel '{channel.Name}' selected");
     }
