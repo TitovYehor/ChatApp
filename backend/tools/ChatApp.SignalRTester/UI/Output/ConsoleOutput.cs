@@ -103,13 +103,33 @@ public class ConsoleOutput : IConsoleOutput
     public void WriteMessage(
         MessageResponseDto message)
     {
-        Console.WriteLine($"[{message.CreatedAt:t}] {message.Username}");
+        Console.WriteLine($"Id:        {message.Id}");
+        Console.WriteLine($"Author:    {message.Username}");
+        Console.WriteLine($"Content:   {message.Content}");
+        Console.WriteLine($"Created:   {message.CreatedAt:u}");
 
-        Console.WriteLine(message.Content);
-
-        if (message.UpdatedAt != null)
+        if (message.UpdatedAt.HasValue)
         {
-            Console.WriteLine("(edited)");
+            Console.WriteLine($"Updated:   {message.UpdatedAt:u}");
+        }
+    }
+
+    public void WriteMessageList(
+        IReadOnlyList<MessageResponseDto> messages)
+    {
+        if (messages.Count == 0)
+        {
+            WriteInfo("No messages");
+            return;
+        }
+
+        for (var i = 0; i < messages.Count; i++)
+        {
+            Console.WriteLine($"[{i + 1}]");
+
+            WriteMessage(messages[i]);
+
+            WriteSeparator();
         }
     }
 }

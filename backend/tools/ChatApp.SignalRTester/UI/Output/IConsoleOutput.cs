@@ -27,4 +27,6 @@ public interface IConsoleOutput
     void WriteChannelSelection(IReadOnlyList<ChannelResponseDto> channels);
 
     void WriteMessage(MessageResponseDto message);
+
+    void WriteMessageList(IReadOnlyList<MessageResponseDto> messages);
 }
