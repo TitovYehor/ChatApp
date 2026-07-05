@@ -3,6 +3,7 @@ using ChatApp.SignalRTester.Application.Services;
 using ChatApp.SignalRTester.Application.Workflows;
 using ChatApp.SignalRTester.Clients.Authentication;
 using ChatApp.SignalRTester.Clients.Channels;
+using ChatApp.SignalRTester.Clients.Messages;
 using ChatApp.SignalRTester.Clients.Workspaces;
 using ChatApp.SignalRTester.Configuration;
 using ChatApp.SignalRTester.Session;
@@ -32,6 +33,7 @@ builder.Services.AddSingleton<IAuthenticationApiClient, AuthenticationApiClient>
 builder.Services.AddSingleton<IWorkspaceApiClient, WorkspaceApiClient>();
 builder.Services.AddSingleton<IChannelApiClient, ChannelApiClient>();
 builder.Services.AddSingleton<ISignalRClient, SignalRClient>();
+builder.Services.AddSingleton<IMessageApiClient, MessageApiClient>();
 
 builder.Services.AddSingleton<IConsoleMenu, ConsoleMenu>();
 
