@@ -56,7 +56,7 @@ public abstract class ApiClientBase
             });
     }
 
-    protected async Task<ApiResult<bool>> DeleteAsync(string url)
+    protected async Task<ApiResult<bool>> DeleteRequestAsync(string url)
     {
         try
         {
@@ -151,5 +151,21 @@ public abstract class ApiClientBase
             return ApiResult<TResponse>.Failure(
                 $"Unexpected error: {ex.Message}");
         }
+    }
+
+    protected static string AppendQueryString(
+        string url,
+        IDictionary<string, string?> parameters)
+    {
+        var query = string.Join(
+            "&",
+            parameters
+                .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                .Select(x =>
+                    $"{Uri.EscapeDataString(x.Key)}={Uri.EscapeDataString(x.Value!)}"));
+
+        return string.IsNullOrEmpty(query)
+            ? url
+            : $"{url}?{query}";
     }
 }
