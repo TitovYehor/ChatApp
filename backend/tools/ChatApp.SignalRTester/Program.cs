@@ -46,6 +46,7 @@ builder.Services.AddSingleton<AuthenticationWorkflow>();
 builder.Services.AddSingleton<WorkspaceWorkflow>();
 builder.Services.AddSingleton<ChannelWorkflow>();
 builder.Services.AddSingleton<SignalRWorkflow>();
+builder.Services.AddSingleton<MessageWorkflow>();
 
 builder.Services.AddSingleton<RealtimeSessionManager>();
 
