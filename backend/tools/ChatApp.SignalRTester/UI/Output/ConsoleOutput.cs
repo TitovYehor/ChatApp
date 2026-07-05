@@ -103,15 +103,18 @@ public class ConsoleOutput : IConsoleOutput
     public void WriteMessage(
         MessageResponseDto message)
     {
-        Console.WriteLine($"Id:        {message.Id}");
-        Console.WriteLine($"Author:    {message.Username}");
-        Console.WriteLine($"Content:   {message.Content}");
-        Console.WriteLine($"Created:   {message.CreatedAt:u}");
+        Console.WriteLine($"{message.Username}");
+
+        Console.WriteLine($"Created: {message.CreatedAt:u}");
 
         if (message.UpdatedAt.HasValue)
         {
-            Console.WriteLine($"Updated:   {message.UpdatedAt:u}");
+            Console.WriteLine($"Updated: {message.UpdatedAt:u}");
         }
+
+        Console.WriteLine();
+
+        Console.WriteLine(message.Content);
     }
 
     public void WriteMessageList(
