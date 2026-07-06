@@ -16,18 +16,22 @@ public class ConsoleApplication : IConsoleApplication
 
     private readonly SignalRWorkflow _signalRWorkflow;
 
+    private readonly MessageWorkflow _messageWorkflow;
+
     public ConsoleApplication(
         IConsoleMenu menu,
         AuthenticationWorkflow authenticationWorkflow,
         WorkspaceWorkflow workspaceWorkflow,
         ChannelWorkflow channelWorkflow,
-        SignalRWorkflow signalRWorkflow)
+        SignalRWorkflow signalRWorkflow,
+        MessageWorkflow messageWorkflow)
     {
         _menu = menu;
         _authenticationWorkflow = authenticationWorkflow;
         _workspaceWorkflow = workspaceWorkflow;
         _channelWorkflow = channelWorkflow;
         _signalRWorkflow = signalRWorkflow;
+        _messageWorkflow = messageWorkflow;
     }
 
     public async Task RunAsync()
@@ -73,6 +77,10 @@ public class ConsoleApplication : IConsoleApplication
 
                 case MenuOption.SelectChannel:
                     await _channelWorkflow.SelectChannelAsync();
+                    break;
+
+                case MenuOption.LoadMessages:
+                    await _messageWorkflow.LoadMessagesAsync();
                     break;
 
                 case MenuOption.ConnectSignalR:
