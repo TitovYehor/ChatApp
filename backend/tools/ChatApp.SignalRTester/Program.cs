@@ -1,5 +1,6 @@
 ﻿using ChatApp.SignalRTester.Application;
 using ChatApp.SignalRTester.Application.Services;
+using ChatApp.SignalRTester.Application.State;
 using ChatApp.SignalRTester.Application.Workflows;
 using ChatApp.SignalRTester.Clients.Authentication;
 using ChatApp.SignalRTester.Clients.Channels;
@@ -28,6 +29,8 @@ builder.Services.Configure<AppSettings>(
 builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton<UserSession>();
+
+builder.Services.AddSingleton<MessageCache>();
 
 builder.Services.AddSingleton<IAuthenticationApiClient, AuthenticationApiClient>();
 builder.Services.AddSingleton<IWorkspaceApiClient, WorkspaceApiClient>();
