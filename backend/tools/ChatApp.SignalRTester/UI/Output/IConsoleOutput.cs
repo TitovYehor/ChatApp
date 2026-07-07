@@ -28,5 +28,5 @@ public interface IConsoleOutput
 
     void WriteMessage(MessageResponseDto message);
 
-    void WriteMessageList(IReadOnlyList<MessageResponseDto> messages);
+    void WriteMessageList(IReadOnlyCollection<MessageResponseDto> messages);
 }

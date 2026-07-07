@@ -118,7 +118,7 @@ public class ConsoleOutput : IConsoleOutput
     }
 
     public void WriteMessageList(
-        IReadOnlyList<MessageResponseDto> messages)
+        IReadOnlyCollection<MessageResponseDto> messages)
     {
         if (messages.Count == 0)
         {
@@ -126,13 +126,17 @@ public class ConsoleOutput : IConsoleOutput
             return;
         }
 
-        for (var i = 0; i < messages.Count; i++)
-        {
-            Console.WriteLine($"[{i + 1}]");
+        var index = 1;
 
-            WriteMessage(messages[i]);
+        foreach (var message in messages)
+        {
+            Console.WriteLine($"[{index}]");
+
+            WriteMessage(message);
 
             WriteSeparator();
+
+            index++;
         }
     }
 }
