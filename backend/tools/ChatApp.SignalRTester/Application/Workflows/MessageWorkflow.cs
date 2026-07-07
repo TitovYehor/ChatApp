@@ -49,25 +49,30 @@ public class MessageWorkflow
             PageSize = 50
         };
 
+        _consoleOutput.WriteInfo("Loading messages...");
+
         var result = await _messageApiClient.GetByChannelAsync(
             _userSession.CurrentChannel.Id,
             query);
 
         if (!result.IsSuccess)
         {
+            _consoleOutput.WriteSeparator();
             _consoleOutput.WriteError(result.ErrorMessage!);
             return;
         }
 
-        _messageCache.Replace(result.Data!.Items);
+        var messages = result.Data!.Items;
+
+        _messageCache.Replace(messages);
 
         _consoleOutput.WriteSeparator();
 
-        _consoleOutput.WriteInfo($"Loaded {_messageCache.Messages.Count} message(s)");
+        _consoleOutput.WriteInfo($"Loaded {messages.Count} message(s)");
 
         _consoleOutput.WriteSeparator();
 
-        _consoleOutput.WriteMessageList(_messageCache.Messages);
+        _consoleOutput.WriteMessageList(messages);
     }
 
     public async Task SendMessageAsync()
@@ -99,5 +104,7 @@ public class MessageWorkflow
         }
 
         _consoleOutput.WriteSuccess("Message sent");
+
+        _consoleOutput.WriteInfo("Waiting for realtime notification...");
     }
 }
