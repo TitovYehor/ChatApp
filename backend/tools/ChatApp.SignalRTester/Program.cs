@@ -1,5 +1,7 @@
 ﻿using ChatApp.SignalRTester.Application;
+using ChatApp.SignalRTester.Application.Realtime;
 using ChatApp.SignalRTester.Application.Services;
+using ChatApp.SignalRTester.Application.Startup;
 using ChatApp.SignalRTester.Application.State;
 using ChatApp.SignalRTester.Application.Workflows;
 using ChatApp.SignalRTester.Clients.Authentication;
@@ -32,6 +34,11 @@ builder.Services.AddSingleton<UserSession>();
 
 builder.Services.AddSingleton<MessageCache>();
 
+builder.Services.AddSingleton<MessageRealtimeHandler>();
+
+builder.Services.AddSingleton<IApplicationInitializer>(serviceProvider =>
+        serviceProvider.GetRequiredService<MessageRealtimeHandler>());
+
 builder.Services.AddSingleton<IAuthenticationApiClient, AuthenticationApiClient>();
 builder.Services.AddSingleton<IWorkspaceApiClient, WorkspaceApiClient>();
 builder.Services.AddSingleton<IChannelApiClient, ChannelApiClient>();
@@ -54,6 +61,13 @@ builder.Services.AddSingleton<MessageWorkflow>();
 builder.Services.AddSingleton<RealtimeSessionManager>();
 
 using var host = builder.Build();
+
+var initializers = host.Services.GetServices<IApplicationInitializer>();
+
+foreach (var initializer in initializers)
+{
+    await initializer.InitializeAsync();
+}
 
 var application = host.Services.GetRequiredService<IConsoleApplication>();
 
