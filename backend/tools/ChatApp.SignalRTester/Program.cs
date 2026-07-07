@@ -31,6 +31,7 @@ builder.Services.Configure<AppSettings>(
 builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton<UserSession>();
+builder.Services.AddSingleton<RealtimeSession>();
 
 builder.Services.AddSingleton<MessageCache>();
 
