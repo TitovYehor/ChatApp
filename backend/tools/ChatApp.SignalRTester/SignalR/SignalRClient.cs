@@ -2,6 +2,7 @@
 using ChatApp.Contracts.Realtime;
 using ChatApp.SignalRTester.Configuration;
 using ChatApp.SignalRTester.Session;
+using ChatApp.SignalRTester.Session.AuthenticationState;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
 
@@ -13,17 +14,28 @@ public class SignalRClient : ISignalRClient
 
     private readonly RealtimeSession _realtimeSession;
 
+    private readonly IAccessTokenProvider _tokenProvider;
+
     public SignalRClient(
         IOptions<AppSettings> options,
-        RealtimeSession realtimeSession)
+        RealtimeSession realtimeSession,
+        IAccessTokenProvider tokenProvider)
     {
         _realtimeSession = realtimeSession;
 
-        _connection =
-            new HubConnectionBuilder()
-                .WithUrl(options.Value.HubUrl)
-                .WithAutomaticReconnect()
-                .Build();
+        _tokenProvider = tokenProvider;
+
+        _connection = new HubConnectionBuilder()
+            .WithUrl(
+                options.Value.HubUrl,
+                configuration =>
+                {
+                    configuration.AccessTokenProvider = () =>
+                        Task.FromResult(
+                            _tokenProvider.GetToken());
+                })
+            .WithAutomaticReconnect()
+            .Build();
 
         RegisterLifecycleEvents();
 
@@ -67,7 +79,10 @@ public class SignalRClient : ISignalRClient
     {
         await _connection.InvokeAsync(
             SignalRMethods.JoinChannel,
-            channelId);
+            new JoinChannelRequest
+            {
+                ChannelId = channelId
+            });
 
         _realtimeSession.JoinedChannel(channelId);
     }
@@ -77,7 +92,10 @@ public class SignalRClient : ISignalRClient
     {
         await _connection.InvokeAsync(
             SignalRMethods.LeaveChannel,
-            channelId);
+            new LeaveChannelRequest
+            {
+                ChannelId = channelId
+            });
 
         _realtimeSession.LeftChannel();
     }
