@@ -10,6 +10,7 @@ using ChatApp.SignalRTester.Clients.Messages;
 using ChatApp.SignalRTester.Clients.Workspaces;
 using ChatApp.SignalRTester.Configuration;
 using ChatApp.SignalRTester.Session;
+using ChatApp.SignalRTester.Session.AuthenticationState;
 using ChatApp.SignalRTester.SignalR;
 using ChatApp.SignalRTester.UI;
 using ChatApp.SignalRTester.UI.Input;
@@ -32,6 +33,8 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton<UserSession>();
 builder.Services.AddSingleton<RealtimeSession>();
+
+builder.Services.AddSingleton<IAccessTokenProvider, AccessTokenProvider>();
 
 builder.Services.AddSingleton<MessageCache>();
 
