@@ -83,6 +83,10 @@ public class ConsoleApplication : IConsoleApplication
                     await _messageWorkflow.LoadMessagesAsync();
                     break;
 
+                case MenuOption.SendMessage:
+                    await _messageWorkflow.SendMessageAsync();
+                    break;
+
                 case MenuOption.ConnectSignalR:
                     await _signalRWorkflow.ConnectAsync();
                     break;
