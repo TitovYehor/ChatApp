@@ -20,9 +20,11 @@ public enum MenuOption
 
     LoadMessages = 8,
 
-    ConnectSignalR = 9,
+    SendMessage = 9,
 
-    DisconnectSignalR = 10,
+    ConnectSignalR = 10,
 
-    Logout = 11,
+    DisconnectSignalR = 11,
+
+    Logout = 12,
 }
