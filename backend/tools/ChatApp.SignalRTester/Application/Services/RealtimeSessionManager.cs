@@ -7,40 +7,52 @@ public class RealtimeSessionManager
 {
     private readonly ISignalRClient _signalRClient;
 
-    private readonly UserSession _session;
+    private readonly RealtimeSession _realtimeSession;
+
+    private readonly UserSession _userSession;
 
     public RealtimeSessionManager(
         ISignalRClient signalRClient,
-        UserSession session)
+        RealtimeSession realtimeSession,
+        UserSession userSession)
     {
         _signalRClient = signalRClient;
-        _session = session;
+        _realtimeSession = realtimeSession;
+        _userSession = userSession;
+
+        _signalRClient.Disconnected += OnDisconnected;
     }
+
+    public bool IsConnected => _realtimeSession.IsConnected;
 
     public async Task ConnectAsync()
     {
-        if (_signalRClient.IsConnected)
+        if (_realtimeSession.IsConnected)
         {
             return;
         }
 
         await _signalRClient.ConnectAsync();
 
-        if (_session.CurrentChannel != null)
+        _realtimeSession.Connected();
+
+        if (_userSession.CurrentChannel != null)
         {
             await _signalRClient.JoinChannelAsync(
-                _session.CurrentChannel.Id);
+                _userSession.CurrentChannel.Id);
         }
     }
 
     public async Task DisconnectAsync()
     {
-        if (!_signalRClient.IsConnected)
+        if (!_realtimeSession.IsConnected)
         {
             return;
         }
 
         await _signalRClient.DisconnectAsync();
+
+        _realtimeSession.Disconnected();
     }
 
     public async Task ChangeChannelAsync(
@@ -57,5 +69,10 @@ public class RealtimeSessionManager
 
         await _signalRClient.JoinChannelAsync(
             newChannelId);
+    }
+
+    private void OnDisconnected()
+    {
+        _realtimeSession.Disconnected();
     }
 }
