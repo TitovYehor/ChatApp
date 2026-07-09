@@ -1,7 +1,6 @@
 ﻿using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Contracts.Realtime;
 using ChatApp.SignalRTester.Configuration;
-using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.Session.AuthenticationState;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
@@ -12,17 +11,12 @@ public class SignalRClient : ISignalRClient
 {
     private readonly HubConnection _connection;
 
-    private readonly RealtimeSession _realtimeSession;
-
     private readonly IAccessTokenProvider _tokenProvider;
 
     public SignalRClient(
         IOptions<AppSettings> options,
-        RealtimeSession realtimeSession,
         IAccessTokenProvider tokenProvider)
     {
-        _realtimeSession = realtimeSession;
-
         _tokenProvider = tokenProvider;
 
         _connection = new HubConnectionBuilder()
@@ -50,6 +44,8 @@ public class SignalRClient : ISignalRClient
 
     public event Action<Guid>? MessageDeleted;
 
+    public event Action? Disconnected;
+
     public async Task ConnectAsync()
     {
         if (IsConnected)
@@ -58,8 +54,6 @@ public class SignalRClient : ISignalRClient
         }
 
         await _connection.StartAsync();
-
-        _realtimeSession.Connected();
     }
 
     public async Task DisconnectAsync()
@@ -70,34 +64,28 @@ public class SignalRClient : ISignalRClient
         }
 
         await _connection.StopAsync();
-
-        _realtimeSession.Disconnected();
     }
 
-    public async Task JoinChannelAsync(
+    public Task JoinChannelAsync(
         Guid channelId)
     {
-        await _connection.InvokeAsync(
+        return _connection.InvokeAsync(
             SignalRMethods.JoinChannel,
             new JoinChannelRequest
             {
                 ChannelId = channelId
             });
-
-        _realtimeSession.JoinedChannel(channelId);
     }
 
-    public async Task LeaveChannelAsync(
+    public Task LeaveChannelAsync(
         Guid channelId)
     {
-        await _connection.InvokeAsync(
+        return _connection.InvokeAsync(
             SignalRMethods.LeaveChannel,
             new LeaveChannelRequest
             {
                 ChannelId = channelId
             });
-
-        _realtimeSession.LeftChannel();
     }
 
     private void RegisterLifecycleEvents()
@@ -108,7 +96,7 @@ public class SignalRClient : ISignalRClient
     private Task OnClosedAsync(
         Exception? exception)
     {
-        _realtimeSession.Disconnected();
+        Disconnected?.Invoke();
 
         return Task.CompletedTask;
     }

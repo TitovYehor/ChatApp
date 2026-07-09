@@ -21,4 +21,6 @@ public interface ISignalRClient
     event Action<MessageResponseDto>? MessageUpdated;
 
     event Action<Guid>? MessageDeleted;
+
+    event Action? Disconnected;
 }
