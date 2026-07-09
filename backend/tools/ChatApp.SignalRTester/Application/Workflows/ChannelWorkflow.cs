@@ -1,7 +1,7 @@
 ﻿using ChatApp.Contracts.Channels.Requests;
+using ChatApp.SignalRTester.Application.Services;
 using ChatApp.SignalRTester.Clients.Channels;
 using ChatApp.SignalRTester.Session;
-using ChatApp.SignalRTester.SignalR;
 using ChatApp.SignalRTester.UI.Input;
 using ChatApp.SignalRTester.UI.Output;
 
@@ -11,7 +11,7 @@ public class ChannelWorkflow
 {
     private readonly IChannelApiClient _channelApiClient;
 
-    private readonly ISignalRClient _signalRClient;
+    private readonly RealtimeSessionManager _realtimeSessionManager;
 
     private readonly UserSession _userSession;
 
@@ -23,14 +23,14 @@ public class ChannelWorkflow
 
     public ChannelWorkflow(
         IChannelApiClient channelApiClient,
-        ISignalRClient signalRClient,
+        RealtimeSessionManager realtimeSessionManager,
         UserSession userSession,
         MessageWorkflow messageWorkflow,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     {
         _channelApiClient = channelApiClient;
-        _signalRClient = signalRClient;
+        _realtimeSessionManager = realtimeSessionManager;
         _userSession = userSession;
         _messageWorkflow = messageWorkflow;
         _consoleInput = consoleInput;
@@ -155,18 +155,11 @@ public class ChannelWorkflow
 
         var previousChannelId = _userSession.CurrentChannel?.Id;
 
-        if (previousChannelId.HasValue &&
-            _signalRClient.IsConnected)
-        {
-            await _signalRClient.LeaveChannelAsync(
-                previousChannelId.Value);
-        }
-
         try
         {
-            await _signalRClient.ConnectAsync();
-
-            await _signalRClient.JoinChannelAsync(channel.Id);
+            await _realtimeSessionManager.ChangeChannelAsync(
+                previousChannelId,
+                channel.Id);
         }
         catch (Exception ex)
         {
