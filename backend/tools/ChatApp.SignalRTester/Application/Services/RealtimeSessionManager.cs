@@ -47,10 +47,7 @@ public class RealtimeSessionManager
         Guid? previousChannelId,
         Guid newChannelId)
     {
-        if (!_signalRClient.IsConnected)
-        {
-            return;
-        }
+        await ConnectAsync();
 
         if (previousChannelId.HasValue)
         {
