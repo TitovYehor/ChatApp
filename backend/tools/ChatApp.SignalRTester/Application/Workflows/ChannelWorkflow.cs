@@ -15,6 +15,8 @@ public class ChannelWorkflow
 
     private readonly UserSession _userSession;
 
+    private readonly MessageWorkflow _messageWorkflow;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly IConsoleOutput _consoleOutput;
@@ -23,12 +25,14 @@ public class ChannelWorkflow
         IChannelApiClient channelApiClient,
         ISignalRClient signalRClient,
         UserSession userSession,
+        MessageWorkflow messageWorkflow,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     {
         _channelApiClient = channelApiClient;
         _signalRClient = signalRClient;
         _userSession = userSession;
+        _messageWorkflow = messageWorkflow;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
     }
@@ -151,19 +155,28 @@ public class ChannelWorkflow
 
         var previousChannelId = _userSession.CurrentChannel?.Id;
 
+        if (previousChannelId.HasValue &&
+            _signalRClient.IsConnected)
+        {
+            await _signalRClient.LeaveChannelAsync(
+                previousChannelId.Value);
+        }
+
+        try
+        {
+            await _signalRClient.ConnectAsync();
+
+            await _signalRClient.JoinChannelAsync(channel.Id);
+        }
+        catch (Exception ex)
+        {
+            _consoleOutput.WriteError($"Unable to connect to realtime service: {ex.Message}");
+            return;
+        }
+
         _userSession.SelectChannel(channel);
 
-        if (_signalRClient.IsConnected)
-        {
-            if (previousChannelId.HasValue)
-            {
-                await _signalRClient.LeaveChannelAsync(
-                    previousChannelId.Value);
-            }
-
-            await _signalRClient.JoinChannelAsync(
-                channel.Id);
-        }
+        await _messageWorkflow.LoadMessagesAsync();
 
         _consoleOutput.WriteSuccess($"Channel '{channel.Name}' selected");
     }
