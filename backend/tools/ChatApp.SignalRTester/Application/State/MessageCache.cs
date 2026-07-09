@@ -19,6 +19,11 @@ public class MessageCache
     public void Add(
         MessageResponseDto message)
     {
+        if (_messages.Any(x => x.Id == message.Id))
+        {
+            return;
+        }
+
         _messages.Add(message);
     }
 
