@@ -44,6 +44,8 @@ public class SignalRClient : ISignalRClient
 
     public event Action<Guid>? MessageDeleted;
 
+    public event Action? Connected;
+
     public event Action? Disconnected;
 
     public async Task ConnectAsync()
@@ -54,6 +56,8 @@ public class SignalRClient : ISignalRClient
         }
 
         await _connection.StartAsync();
+
+        Connected?.Invoke();
     }
 
     public async Task DisconnectAsync()
@@ -64,6 +68,8 @@ public class SignalRClient : ISignalRClient
         }
 
         await _connection.StopAsync();
+
+        Disconnected?.Invoke();
     }
 
     public Task JoinChannelAsync(
@@ -91,6 +97,20 @@ public class SignalRClient : ISignalRClient
     private void RegisterLifecycleEvents()
     {
         _connection.Closed += OnClosedAsync;
+
+        _connection.Reconnecting += error =>
+        {
+            Disconnected?.Invoke();
+
+            return Task.CompletedTask;
+        };
+
+        _connection.Reconnected += connectionId =>
+        {
+            Connected?.Invoke();
+
+            return Task.CompletedTask;
+        };
     }
 
     private Task OnClosedAsync(
