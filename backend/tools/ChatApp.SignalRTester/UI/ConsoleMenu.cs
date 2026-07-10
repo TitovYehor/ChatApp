@@ -66,122 +66,142 @@ public class ConsoleMenu : IConsoleMenu
         return
         [
             new MenuItem
-        {
-            Number = 1,
-            Text = "Login",
-            Option = MenuOption.Login,
-            Visible = !_session.IsAuthenticated
-        },
+            {
+                Number = 1,
+                Text = "Login",
+                Option = MenuOption.Login,
+                Visible = !_session.IsAuthenticated
+            },
 
-        new MenuItem
-        {
-            Number = 1,
-            Text = "Create workspace",
-            Option = MenuOption.CreateWorkspace,
-            Visible = _session.IsAuthenticated
-        },
+            new MenuItem
+            {
+                Number = 2,
+                Text = "Create workspace",
+                Option = MenuOption.CreateWorkspace,
+                Visible = _session.IsAuthenticated
+            },
 
-        new MenuItem
-        {
-            Number = 2,
-            Text = "List workspaces",
-            Option = MenuOption.ListWorkspaces,
-            Visible = _session.IsAuthenticated
-        },
+            new MenuItem
+            {
+                Number = 3,
+                Text = "List workspaces",
+                Option = MenuOption.ListWorkspaces,
+                Visible = _session.IsAuthenticated
+            },
 
-        new MenuItem
-        {
-            Number = 3,
-            Text = _session.CurrentWorkspace == null
-                ? "Select workspace"
-                : "Change workspace",
-            Option = MenuOption.SelectWorkspace,
-            Visible = _session.IsAuthenticated
-        },
+            new MenuItem
+            {
+                Number = 4,
+                Text = _session.CurrentWorkspace == null
+                    ? "Select workspace"
+                    : "Change workspace",
+                Option = MenuOption.SelectWorkspace,
+                Visible = _session.IsAuthenticated
+            },
 
-        new MenuItem
-        {
-            Number = 4,
-            Text = "Create channel",
-            Option = MenuOption.CreateChannel,
-            Visible = _session.IsAuthenticated &&
-                      _session.CurrentWorkspace != null
-        },
+            new MenuItem
+            {
+                Number = 5,
+                Text = "Create channel",
+                Option = MenuOption.CreateChannel,
+                Visible = _session.IsAuthenticated &&
+                          _session.CurrentWorkspace != null
+            },
 
-        new MenuItem
-        {
-            Number = 5,
-            Text = "List channels",
-            Option = MenuOption.ListChannels,
-            Visible = _session.IsAuthenticated &&
-                      _session.CurrentWorkspace != null
-        },
+            new MenuItem
+            {
+                Number = 6,
+                Text = "List channels",
+                Option = MenuOption.ListChannels,
+                Visible = _session.IsAuthenticated &&
+                          _session.CurrentWorkspace != null
+            },
 
-        new MenuItem
-        {
-            Number = 6,
-            Text = _session.CurrentChannel == null
-                ? "Select channel"
-                : "Change channel",
-            Option = MenuOption.SelectChannel,
-            Visible = _session.IsAuthenticated &&
-                      _session.CurrentWorkspace != null
-        },
+            new MenuItem
+            {
+                Number = 7,
+                Text = _session.CurrentChannel == null
+                    ? "Select channel"
+                    : "Change channel",
+                Option = MenuOption.SelectChannel,
+                Visible = _session.IsAuthenticated &&
+                          _session.CurrentWorkspace != null
+            },
 
-        new MenuItem
-        {
-            Number = 7,
-            Text = "Load messages",
-            Option = MenuOption.LoadMessages,
-            Visible =
-                _session.IsAuthenticated &&
-                _session.CurrentChannel != null
-        },
+            new MenuItem
+            {
+                Number = 8,
+                Text = "Load messages",
+                Option = MenuOption.LoadMessages,
+                Visible =
+                    _session.IsAuthenticated &&
+                    _session.CurrentChannel != null
+            },
 
-        new MenuItem
-        {
-            Number = 8,
-            Text = "Send message",
-            Option = MenuOption.SendMessage,
-            Visible =
-                _session.IsAuthenticated &&
-                _session.CurrentChannel != null
-        },
+            new MenuItem
+            {
+                Number = 9,
+                Text = "Send message",
+                Option = MenuOption.SendMessage,
+                Visible =
+                    _session.IsAuthenticated &&
+                    _session.CurrentChannel != null
+            },
 
-        new MenuItem
-        {
-            Number = 9,
-            Text = "Connect to SignalR",
-            Option = MenuOption.ConnectSignalR,
-            Visible = _session.IsAuthenticated &&
-                      _session.CurrentWorkspace != null &&
-                      _session.CurrentChannel != null &&
-                      !_signalRClient.IsConnected
-        },
+            new MenuItem
+            {
+                Number = 10,
+                Text = "Update message",
+                Option = MenuOption.UpdateMessage,
+                Visible =
+                    _session.IsAuthenticated &&
+                    _session.CurrentChannel != null
+            },
 
-        new MenuItem
-        {
-            Number = 10,
-            Text = "Disconnect from SignalR",
-            Option = MenuOption.DisconnectSignalR,
-            Visible = _session.IsAuthenticated &&
-                      _signalRClient.IsConnected
-        },
+            new MenuItem
+            {
+                Number = 11,
+                Text = "Delete message",
+                Option = MenuOption.DeleteMessage,
+                Visible =
+                    _session.IsAuthenticated &&
+                    _session.CurrentChannel != null
+            },
 
-        new MenuItem
-        {
-            Number = 11,
-            Text = "Logout",
-            Option = MenuOption.Logout,
-            Visible = _session.IsAuthenticated
-        },
+            new MenuItem
+            {
+                Number = 12,
+                Text = "Connect to SignalR",
+                Option = MenuOption.ConnectSignalR,
+                Visible = _session.IsAuthenticated &&
+                          _session.CurrentWorkspace != null &&
+                          _session.CurrentChannel != null &&
+                          !_signalRClient.IsConnected
+            },
 
-        new MenuItem
-        {
-            Number = 0,
-            Text = "Exit",
-            Option = MenuOption.Exit
-        }
+            new MenuItem
+            {
+                Number = 13,
+                Text = "Disconnect from SignalR",
+                Option = MenuOption.DisconnectSignalR,
+                Visible = _session.IsAuthenticated &&
+                          _signalRClient.IsConnected
+            },
+
+            new MenuItem
+            {
+                Number = 14,
+                Text = "Logout",
+                Option = MenuOption.Logout,
+                Visible = _session.IsAuthenticated
+            },
+
+            new MenuItem
+            {
+                Number = 0,
+                Text = "Exit",
+                Option = MenuOption.Exit
+            }
         ];
     }
 }
