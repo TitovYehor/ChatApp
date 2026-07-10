@@ -5,13 +5,13 @@ public class RealtimeSession
     public bool IsConnected { get; private set; }
 
 
-    public void Connected()
+    public void MarkConnected()
     {
         IsConnected = true;
     }
 
 
-    public void Disconnected()
+    public void MarkDisconnected()
     {
         IsConnected = false;
     }
