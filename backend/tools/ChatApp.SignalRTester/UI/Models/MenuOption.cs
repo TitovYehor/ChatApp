@@ -22,9 +22,13 @@ public enum MenuOption
 
     SendMessage = 9,
 
-    ConnectSignalR = 10,
+    UpdateMessage = 10,
 
-    DisconnectSignalR = 11,
+    DeleteMessage = 11,
 
-    Logout = 12,
+    ConnectSignalR = 12,
+
+    DisconnectSignalR = 13,
+
+    Logout = 14,
 }
