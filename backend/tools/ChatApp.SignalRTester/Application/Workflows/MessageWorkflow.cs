@@ -107,4 +107,90 @@ public class MessageWorkflow
 
         _consoleOutput.WriteInfo("Waiting for realtime notification...");
     }
+
+    public async Task UpdateMessageAsync()
+    {
+        if (_userSession.CurrentChannel == null)
+        {
+            _consoleOutput.WriteError("No channel selected");
+            return;
+        }
+
+        if (_messageCache.Messages.Count == 0)
+        {
+            _consoleOutput.WriteInfo("No messages loaded");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Update Message");
+
+        _consoleOutput.WriteMessageList(_messageCache.Messages);
+
+        var selection = _consoleInput.ReadInt(
+            "Select message",
+            1,
+            _messageCache.Messages.Count);
+
+        var message = _messageCache.Messages[selection - 1];
+
+        var content = _consoleInput.ReadRequiredString("New content");
+
+        var request = new UpdateMessageRequestDto
+        {
+            Content = content
+        };
+
+        var result = await _messageApiClient.UpdateAsync(
+            message.Id,
+            request);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSuccess("Message update requested");
+
+        _consoleOutput.WriteInfo("Waiting for realtime notification...");
+    }
+
+    public async Task DeleteMessageAsync()
+    {
+        if (_userSession.CurrentChannel == null)
+        {
+            _consoleOutput.WriteError("No channel selected");
+            return;
+        }
+
+        if (_messageCache.Messages.Count == 0)
+        {
+            _consoleOutput.WriteInfo("No messages loaded");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Delete Message");
+
+        _consoleOutput.WriteMessageList(_messageCache.Messages);
+
+        var selection = _consoleInput.ReadInt(
+            "Select message",
+            1,
+            _messageCache.Messages.Count);
+
+        var message = _messageCache.Messages[selection - 1];
+
+        var result = await _messageApiClient.DeleteAsync(
+            message.Id);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSuccess("Message delete requested");
+
+        _consoleOutput.WriteInfo("Waiting for realtime notification...");
+    }
 }
