@@ -1,55 +1,43 @@
-﻿using ChatApp.SignalRTester.Session;
-using ChatApp.SignalRTester.SignalR;
+﻿using ChatApp.SignalRTester.Application.Services;
 using ChatApp.SignalRTester.UI.Output;
 
 namespace ChatApp.SignalRTester.Application.Workflows;
 
 public class SignalRWorkflow
 {
-    private readonly ISignalRClient _signalRClient;
-    private readonly UserSession _userSession;
+    private readonly RealtimeSessionManager _realtimeSessionManager;
     private readonly IConsoleOutput _consoleOutput;
 
     public SignalRWorkflow(
-        ISignalRClient signalRClient,
-        UserSession userSession,
+        RealtimeSessionManager realtimeSessionManager,
         IConsoleOutput consoleOutput)
     {
-        _signalRClient = signalRClient;
-        _userSession = userSession;
+        _realtimeSessionManager = realtimeSessionManager;
         _consoleOutput = consoleOutput;
     }
 
     public async Task ConnectAsync()
     {
-        if (_signalRClient.IsConnected)
+        if (_realtimeSessionManager.IsConnected)
         {
             _consoleOutput.WriteInfo("Already connected");
-
             return;
         }
 
-        await _signalRClient.ConnectAsync();
-
-        if (_userSession.CurrentChannel != null)
-        {
-            await _signalRClient.JoinChannelAsync(
-                _userSession.CurrentChannel.Id);
-        }
+        await _realtimeSessionManager.ConnectAsync();
 
         _consoleOutput.WriteSuccess("Connected to SignalR");
     }
 
     public async Task DisconnectAsync()
     {
-        if (!_signalRClient.IsConnected)
+        if (!_realtimeSessionManager.IsConnected)
         {
             _consoleOutput.WriteInfo("Not connected");
-
             return;
         }
 
-        await _signalRClient.DisconnectAsync();
+        await _realtimeSessionManager.DisconnectAsync();
 
         _consoleOutput.WriteSuccess("Disconnected");
     }
