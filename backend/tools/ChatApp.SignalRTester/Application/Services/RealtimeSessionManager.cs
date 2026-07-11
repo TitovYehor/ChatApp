@@ -20,11 +20,11 @@ public class RealtimeSessionManager
         _realtimeSession = realtimeSession;
         _userSession = userSession;
 
-        _signalRClient.Connected +=
-            () => _realtimeSession.MarkConnected();
+        _signalRClient.Connected += OnConnected;
 
-        _signalRClient.Disconnected +=
-            () => _realtimeSession.MarkDisconnected();
+        _signalRClient.Disconnected += OnDisconnected;
+
+        _signalRClient.Reconnected += OnReconnected;
     }
 
     public bool IsConnected => _signalRClient.IsConnected;
@@ -47,12 +47,12 @@ public class RealtimeSessionManager
 
     public async Task DisconnectAsync()
     {
-        if (!_signalRClient.IsConnected)
+        if (_signalRClient.IsConnected)
         {
-            return;
+            await _signalRClient.DisconnectAsync();
         }
 
-        await _signalRClient.DisconnectAsync();
+        _realtimeSession.MarkDisconnected();
     }
 
     public async Task ChangeChannelAsync(
@@ -69,5 +69,35 @@ public class RealtimeSessionManager
 
         await _signalRClient.JoinChannelAsync(
             newChannelId);
+    }
+
+    private void OnConnected()
+    {
+        _realtimeSession.MarkConnected();
+    }
+
+    private void OnDisconnected()
+    {
+        _realtimeSession.MarkDisconnected();
+    }
+
+    private async void OnReconnected()
+    {
+        try
+        {
+            _realtimeSession.MarkConnected();
+
+            if (_userSession.CurrentChannel == null)
+            {
+                return;
+            }
+
+            await _signalRClient.JoinChannelAsync(
+                _userSession.CurrentChannel.Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unable to restore SignalR channel subscription: {ex.Message}");
+        }
     }
 }
