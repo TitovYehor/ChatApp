@@ -1,4 +1,5 @@
 ﻿using ChatApp.Contracts.Authentication.Requests;
+using ChatApp.SignalRTester.Application.Services;
 using ChatApp.SignalRTester.Clients.Authentication;
 using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI.Input;
@@ -12,6 +13,8 @@ public class AuthenticationWorkflow
 
     private readonly UserSession _userSession;
 
+    private readonly RealtimeSessionManager _realtimeSessionManager;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly IConsoleOutput _consoleOutput;
@@ -19,11 +22,13 @@ public class AuthenticationWorkflow
     public AuthenticationWorkflow(
         IAuthenticationApiClient authenticationApiClient,
         UserSession userSession,
+        RealtimeSessionManager realtimeSessionManager,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     { 
         _authenticationApiClient = authenticationApiClient;
         _userSession = userSession;
+        _realtimeSessionManager = realtimeSessionManager;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
     }
@@ -64,11 +69,14 @@ public class AuthenticationWorkflow
         _consoleOutput.WriteInfo($"Email: {_userSession.Email}");
     }
 
-    public void Logout()
+    public async Task LogoutAsync()
     {
+        await _realtimeSessionManager.DisconnectAsync();
+
         _userSession.SignOut();
 
         _consoleOutput.WriteSeparator();
+
         _consoleOutput.WriteSuccess("Logged out successfully");
     }
 }
