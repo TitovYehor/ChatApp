@@ -25,4 +25,6 @@ public interface ISignalRClient
     event Action? Connected;
 
     event Action? Disconnected;
+
+    event Action? Reconnected;
 }
