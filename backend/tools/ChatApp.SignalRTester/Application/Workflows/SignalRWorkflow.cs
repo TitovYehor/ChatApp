@@ -24,9 +24,16 @@ public class SignalRWorkflow
             return;
         }
 
-        await _realtimeSessionManager.ConnectAsync();
+        try
+        {
+            await _realtimeSessionManager.ConnectAsync();
 
-        _consoleOutput.WriteSuccess("Connected to SignalR");
+            _consoleOutput.WriteSuccess("Connected to SignalR");
+        }
+        catch (Exception ex)
+        {
+            _consoleOutput.WriteError($"SignalR connection failed: {ex.Message}");
+        }
     }
 
     public async Task DisconnectAsync()
@@ -37,8 +44,15 @@ public class SignalRWorkflow
             return;
         }
 
-        await _realtimeSessionManager.DisconnectAsync();
+        try
+        {
+            await _realtimeSessionManager.DisconnectAsync();
 
-        _consoleOutput.WriteSuccess("Disconnected");
+            _consoleOutput.WriteSuccess("Disconnected");
+        }
+        catch (Exception ex)
+        {
+            _consoleOutput.WriteError($"SignalR disconnection failed: {ex.Message}");
+        }
     }
 }
