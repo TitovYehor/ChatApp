@@ -58,11 +58,9 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.CreateWorkspace:
                     await _workspaceWorkflow.CreateWorkspaceAsync();
                     break;
-
                 case MenuOption.ListWorkspaces:
                     await _workspaceWorkflow.ListWorkspacesAsync();
                     break;
-
                 case MenuOption.SelectWorkspace:
                     await _workspaceWorkflow.SelectWorkspaceAsync();
                     break;
@@ -74,7 +72,6 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.ListChannels:
                     await _channelWorkflow.ListChannelsAsync();
                     break;
-
                 case MenuOption.SelectChannel:
                     await _channelWorkflow.SelectChannelAsync();
                     break;
@@ -82,15 +79,19 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.LoadMessages:
                     await _messageWorkflow.LoadMessagesAsync();
                     break;
-
                 case MenuOption.SendMessage:
                     await _messageWorkflow.SendMessageAsync();
+                    break;
+                case MenuOption.UpdateMessage:
+                    await _messageWorkflow.UpdateMessageAsync();
+                    break;
+                case MenuOption.DeleteMessage:
+                    await _messageWorkflow.DeleteMessageAsync();
                     break;
 
                 case MenuOption.ConnectSignalR:
                     await _signalRWorkflow.ConnectAsync();
                     break;
-
                 case MenuOption.DisconnectSignalR:
                     await _signalRWorkflow.DisconnectAsync();
                     break;
