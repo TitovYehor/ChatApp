@@ -97,7 +97,7 @@ public class ConsoleApplication : IConsoleApplication
                     break;
 
                 case MenuOption.Logout:
-                    _authenticationWorkflow.Logout();
+                    await _authenticationWorkflow.LogoutAsync();
                     break;
 
                 case MenuOption.Exit:
