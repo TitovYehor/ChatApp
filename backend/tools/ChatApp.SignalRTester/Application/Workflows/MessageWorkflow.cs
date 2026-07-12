@@ -72,7 +72,7 @@ public class MessageWorkflow
 
         _consoleOutput.WriteSeparator();
 
-        _consoleOutput.WriteMessageList(messages);
+        _consoleOutput.WriteMessageList(_messageCache.Messages);
     }
 
     public async Task SendMessageAsync()
