@@ -40,13 +40,7 @@ public class MessageRealtimeHandler : IApplicationInitializer
     {
         _messageCache.Add(message);
 
-        _consoleOutput.WriteSeparator();
-
-        _consoleOutput.WriteSuccess("Realtime event: Message created");
-
-        _consoleOutput.WriteMessage(message);
-
-        _consoleOutput.WriteSeparator();
+        _consoleOutput.WriteRealtimeMessageCreated(message);
     }
 
     private void OnMessageUpdated(
@@ -54,13 +48,7 @@ public class MessageRealtimeHandler : IApplicationInitializer
     {
         _messageCache.Update(message);
 
-        _consoleOutput.WriteSeparator();
-
-        _consoleOutput.WriteInfo("Realtime event: Message updated");
-
-        _consoleOutput.WriteMessage(message);
-
-        _consoleOutput.WriteSeparator();
+        _consoleOutput.WriteRealtimeMessageUpdated(message);
     }
 
     private void OnMessageDeleted(
@@ -68,10 +56,6 @@ public class MessageRealtimeHandler : IApplicationInitializer
     {
         _messageCache.Remove(messageId);
 
-        _consoleOutput.WriteSeparator();
-
-        _consoleOutput.WriteInfo($"Realtime event: Message deleted ({messageId})");
-
-        _consoleOutput.WriteSeparator();
+        _consoleOutput.WriteRealtimeMessageDeleted(messageId);
     }
 }
