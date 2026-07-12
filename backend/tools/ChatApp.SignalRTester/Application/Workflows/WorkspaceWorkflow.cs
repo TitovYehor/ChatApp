@@ -1,4 +1,5 @@
 ﻿using ChatApp.Contracts.Workspaces.Requests;
+using ChatApp.SignalRTester.Application.Services;
 using ChatApp.SignalRTester.Clients.Workspaces;
 using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI.Input;
@@ -12,6 +13,8 @@ public class WorkspaceWorkflow
 
     private readonly UserSession _userSession;
 
+    private readonly RealtimeSessionManager _realtimeSessionManager;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly IConsoleOutput _consoleOutput;
@@ -19,11 +22,13 @@ public class WorkspaceWorkflow
     public WorkspaceWorkflow(
         IWorkspaceApiClient workspaceApiClient,
         UserSession userSession,
+        RealtimeSessionManager realtimeSessionManager,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     { 
         _workspaceApiClient = workspaceApiClient;
         _userSession = userSession;
+        _realtimeSessionManager = realtimeSessionManager;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
     }
@@ -124,6 +129,14 @@ public class WorkspaceWorkflow
             workspaces.Count);
 
         var workspace = workspaces[selection - 1];
+
+        var previousChannelId = _userSession.CurrentChannel?.Id;
+
+        if (previousChannelId.HasValue)
+        {
+            await _realtimeSessionManager.LeaveChannelAsync(
+                previousChannelId.Value);
+        }
 
         _userSession.SelectWorkspace(workspace);
 
