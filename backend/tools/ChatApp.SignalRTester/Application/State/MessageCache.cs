@@ -25,6 +25,8 @@ public class MessageCache
         }
 
         _messages.Add(message);
+
+        _messages.Sort((x, y) => x.CreatedAt.CompareTo(y.CreatedAt));
     }
 
     public bool Remove(
