@@ -71,6 +71,17 @@ public class RealtimeSessionManager
             newChannelId);
     }
 
+    public async Task LeaveChannelAsync(
+        Guid channelId)
+    {
+        if (!_signalRClient.IsConnected)
+        {
+            return;
+        }
+
+        await _signalRClient.LeaveChannelAsync(channelId);
+    }
+
     private void OnConnected()
     {
         _realtimeSession.MarkConnected();
