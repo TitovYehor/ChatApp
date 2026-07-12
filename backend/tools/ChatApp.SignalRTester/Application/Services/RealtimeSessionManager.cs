@@ -97,7 +97,7 @@ public class RealtimeSessionManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Unable to restore SignalR channel subscription: {ex.Message}");
+            Console.WriteLine($"Unable to restore realtime channel: {ex.Message}");
         }
     }
 }

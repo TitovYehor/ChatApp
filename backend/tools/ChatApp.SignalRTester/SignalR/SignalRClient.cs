@@ -70,8 +70,6 @@ public class SignalRClient : ISignalRClient
         }
 
         await _connection.StopAsync();
-
-        Disconnected?.Invoke();
     }
 
     public Task JoinChannelAsync(
