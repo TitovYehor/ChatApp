@@ -29,4 +29,13 @@ public interface IConsoleOutput
     void WriteMessage(MessageResponseDto message);
 
     void WriteMessageList(IReadOnlyCollection<MessageResponseDto> messages);
+
+    void WriteRealtimeMessageCreated(
+        MessageResponseDto message);
+
+    void WriteRealtimeMessageUpdated(
+        MessageResponseDto message);
+
+    void WriteRealtimeMessageDeleted(
+        Guid messageId);
 }

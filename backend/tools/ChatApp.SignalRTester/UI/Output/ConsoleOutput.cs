@@ -139,4 +139,38 @@ public class ConsoleOutput : IConsoleOutput
             index++;
         }
     }
+
+    public void WriteRealtimeMessageCreated(
+        MessageResponseDto message)
+    {
+        WriteSeparator();
+
+        WriteSuccess("New message received");
+
+        WriteMessage(message);
+
+        WriteSeparator();
+    }
+
+    public void WriteRealtimeMessageUpdated(
+        MessageResponseDto message)
+    {
+        WriteSeparator();
+
+        WriteInfo("Message updated");
+
+        WriteMessage(message);
+
+        WriteSeparator();
+    }
+
+    public void WriteRealtimeMessageDeleted(
+        Guid messageId)
+    {
+        WriteSeparator();
+
+        WriteInfo($"Message deleted: {messageId}");
+
+        WriteSeparator();
+    }
 }
