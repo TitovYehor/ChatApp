@@ -142,4 +142,28 @@ public class WorkspaceWorkflow
 
         _consoleOutput.WriteSuccess($"Workspace '{workspace.Name}' selected");
     }
+
+    public async Task JoinWorkspaceAsync()
+    {
+        _consoleOutput.WriteHeader("Join Workspace");
+
+        var idText = _consoleInput.ReadRequiredString("Workspace Id");
+
+        if (!Guid.TryParse(idText, out var workspaceId))
+        {
+            _consoleOutput.WriteError("Invalid workspace id");
+            return;
+        }
+
+        var result = await _workspaceApiClient.JoinAsync(
+            workspaceId);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSuccess("Joined workspace successfully");
+    }
 }
