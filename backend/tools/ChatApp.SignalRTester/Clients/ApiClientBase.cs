@@ -153,6 +153,59 @@ public abstract class ApiClientBase
         }
     }
 
+    protected async Task<ApiResult<bool>> PostEmptyAsync(
+        string url)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                url);
+
+            if (UserSession.IsAuthenticated)
+            {
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue(
+                        "Bearer",
+                        UserSession.AccessToken);
+            }
+
+            var response = await HttpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content
+                    .ReadFromJsonAsync<ErrorResponse>();
+
+                if (error != null)
+                {
+                    return ApiResult<bool>.Failure(
+                        error.Message);
+                }
+
+                return ApiResult<bool>.Failure(
+                    $"HTTP {(int)response.StatusCode}");
+            }
+
+            return ApiResult<bool>.Success(true);
+        }
+        catch (HttpRequestException)
+        {
+            return ApiResult<bool>.Failure(
+                "Unable to connect to the server");
+        }
+        catch (TaskCanceledException)
+        {
+            return ApiResult<bool>.Failure(
+                "The request timed out");
+        }
+        catch (Exception ex)
+        {
+            return ApiResult<bool>.Failure(
+                $"Unexpected error: {ex.Message}");
+        }
+    }
+
     protected static string AppendQueryString(
         string url,
         IDictionary<string, string?> parameters)
