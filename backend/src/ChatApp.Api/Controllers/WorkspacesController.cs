@@ -62,4 +62,17 @@ public class WorkspacesController : ControllerBase
 
         return Ok(workspaces);
     }
+
+    [HttpPost("{id:guid}/join")]
+    public async Task<IActionResult> Join(
+        Guid id)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        await _workspaceService.JoinAsync(
+            id,
+            userId);
+
+        return NoContent();
+    }
 }
