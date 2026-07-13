@@ -85,4 +85,40 @@ public class WorkspaceService : IWorkspaceService
             .Select(x => x.ToDto())
             .ToList();
     }
+
+    public async Task JoinAsync(
+        Guid workspaceId,
+        Guid userId)
+    {
+        var workspaceExists = await _dbContext.Workspaces
+            .AnyAsync(x =>
+                x.Id == workspaceId);
+
+        if (!workspaceExists)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var alreadyMember = await _dbContext.WorkspaceMembers
+            .AnyAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == userId);
+
+        if (alreadyMember)
+        {
+            throw new ConflictException("User is already a member of this workspace");
+        }
+
+        var membership = new WorkspaceMember
+        {
+            WorkspaceId = workspaceId,
+            UserId = userId,
+            Role = WorkspaceRole.Member
+        };
+
+        _dbContext.WorkspaceMembers.Add(
+            membership);
+
+        await _dbContext.SaveChangesAsync();
+    }
 }

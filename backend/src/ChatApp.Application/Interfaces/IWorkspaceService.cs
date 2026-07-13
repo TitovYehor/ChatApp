@@ -15,4 +15,8 @@ public interface IWorkspaceService
 
     Task<IReadOnlyCollection<WorkspaceResponseDto>> GetAllAsync(
         Guid userId);
+
+    Task JoinAsync(
+        Guid workspaceId,
+        Guid userId);
 }
