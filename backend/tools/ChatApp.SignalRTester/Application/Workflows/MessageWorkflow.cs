@@ -150,7 +150,7 @@ public class MessageWorkflow
             return;
         }
 
-        _consoleOutput.WriteSuccess("Message update requested");
+        _consoleOutput.WriteSuccess("Message updated");
 
         _consoleOutput.WriteInfo("Waiting for realtime notification...");
     }
@@ -189,7 +189,7 @@ public class MessageWorkflow
             return;
         }
 
-        _consoleOutput.WriteSuccess("Message delete requested");
+        _consoleOutput.WriteSuccess("Message deleted");
 
         _consoleOutput.WriteInfo("Waiting for realtime notification...");
     }

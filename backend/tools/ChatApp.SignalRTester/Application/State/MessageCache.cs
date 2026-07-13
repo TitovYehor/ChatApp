@@ -45,21 +45,19 @@ public class MessageCache
         return true;
     }
 
-    public bool Update(
+    public void Update(
         MessageResponseDto message)
     {
-        var existing = _messages.FirstOrDefault(
-            x => x.Id == message.Id);
+        var index = _messages.FindIndex(
+        x => x.Id == message.Id);
 
-        if (existing == null)
+        if (index == -1)
         {
-            return false;
+            _messages.Add(message);
+
+            return;
         }
 
-        var index = _messages.IndexOf(existing);
-
         _messages[index] = message;
-
-        return true;
     }
 }
