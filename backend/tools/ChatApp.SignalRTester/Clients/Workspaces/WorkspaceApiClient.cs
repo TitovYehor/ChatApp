@@ -38,4 +38,11 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
         return GetAsync<WorkspaceResponseDto>(
             $"api/workspaces/{workspaceId}");
     }
+
+    public async Task<ApiResult<bool>> JoinAsync(
+        Guid workspaceId)
+    {
+        return await PostEmptyAsync(
+            $"api/workspaces/{workspaceId}/join");
+    }
 }
