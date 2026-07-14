@@ -12,23 +12,25 @@ public enum MenuOption
 
     SelectWorkspace = 4,
 
-    CreateChannel = 5,
+    JoinWorkspace = 5,
 
-    ListChannels = 6,
+    CreateChannel = 6,
 
-    SelectChannel = 7,
+    ListChannels = 7,
 
-    LoadMessages = 8,
+    SelectChannel = 8,
 
-    SendMessage = 9,
+    LoadMessages = 9,
 
-    UpdateMessage = 10,
+    SendMessage = 10,
 
-    DeleteMessage = 11,
+    UpdateMessage = 11,
 
-    ConnectSignalR = 12,
+    DeleteMessage = 12,
 
-    DisconnectSignalR = 13,
+    ConnectSignalR = 13,
 
-    Logout = 14,
+    DisconnectSignalR = 14,
+
+    Logout = 15,
 }
