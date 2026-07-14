@@ -155,8 +155,6 @@ public class ChannelWorkflow
 
         var previousChannelId = _userSession.CurrentChannel?.Id;
 
-        _userSession.SelectChannel(channel);
-
         try
         {
             await _realtimeSessionManager.ChangeChannelAsync(
@@ -168,6 +166,8 @@ public class ChannelWorkflow
             _consoleOutput.WriteError($"Unable to change realtime channel: {ex.Message}");
             return;
         }
+
+        _userSession.SelectChannel(channel);
 
         await _messageWorkflow.LoadMessagesAsync();
 
