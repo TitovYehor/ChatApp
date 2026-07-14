@@ -97,7 +97,7 @@ public class RealtimeSessionManager
         _realtimeSession.MarkDisconnected();
     }
 
-    private async void OnReconnected()
+    private async Task OnReconnected()
     {
         try
         {
