@@ -26,5 +26,5 @@ public interface ISignalRClient
 
     event Action? Disconnected;
 
-    event Action? Reconnected;
+    event Func<Task>? Reconnected;
 }

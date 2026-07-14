@@ -48,7 +48,7 @@ public class SignalRClient : ISignalRClient
 
     public event Action? Disconnected;
 
-    public event Action? Reconnected;
+    public event Func<Task>? Reconnected;
 
     public async Task ConnectAsync()
     {
@@ -116,12 +116,13 @@ public class SignalRClient : ISignalRClient
         return Task.CompletedTask;
     }
 
-    private Task OnReconnectedAsync(
+    private async Task OnReconnectedAsync(
         string? connectionId)
     {
-        Reconnected?.Invoke();
-
-        return Task.CompletedTask;
+        if (Reconnected != null)
+        {
+            await Reconnected.Invoke();
+        }
     }
 
     private void RegisterMessageEvents()
