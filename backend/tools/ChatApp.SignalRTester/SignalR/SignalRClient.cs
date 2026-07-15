@@ -42,7 +42,7 @@ public class SignalRClient : ISignalRClient
 
     public event Action<MessageResponseDto>? MessageUpdated;
 
-    public event Action<Guid>? MessageDeleted;
+    public event Action<MessageDeletedResponseDto>? MessageDeleted;
 
     public event Action? Connected;
 
@@ -135,7 +135,7 @@ public class SignalRClient : ISignalRClient
             SignalREvents.MessageUpdated,
             RaiseMessageUpdated);
 
-        _connection.On<Guid>(
+        _connection.On<MessageDeletedResponseDto>(
             SignalREvents.MessageDeleted,
             RaiseMessageDeleted);
     }
@@ -153,8 +153,8 @@ public class SignalRClient : ISignalRClient
     }
 
     private void RaiseMessageDeleted(
-        Guid guid)
+        MessageDeletedResponseDto response)
     {
-        MessageDeleted?.Invoke(guid);
+        MessageDeleted?.Invoke(response);
     }
 }
