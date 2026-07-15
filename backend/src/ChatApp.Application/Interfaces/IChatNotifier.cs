@@ -14,5 +14,5 @@ public interface IChatNotifier
 
     Task MessageDeletedAsync(
         Guid channelId,
-        Guid messageId);
+        MessageDeletedResponseDto response);
 }

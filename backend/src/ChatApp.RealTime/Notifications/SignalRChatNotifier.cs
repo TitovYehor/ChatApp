@@ -43,13 +43,13 @@ public sealed class SignalRChatNotifier : IChatNotifier
 
     public async Task MessageDeletedAsync(
         Guid channelId,
-        Guid messageId)
+        MessageDeletedResponseDto response)
     {
         await _hubContext.Clients
             .Group(
                 SignalRGroups.Channel(channelId))
             .SendAsync(
                 SignalREvents.MessageDeleted,
-                messageId);
+                response);
     }
 }
