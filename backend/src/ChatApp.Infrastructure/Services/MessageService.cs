@@ -199,6 +199,10 @@ public class MessageService : IMessageService
 
         await _chatNotifier.MessageDeletedAsync(
             channelId,
-            messageId);
+            new MessageDeletedResponseDto
+            {
+                MessageId = messageId,
+                ChannelId = channelId
+            });
     }
 }
