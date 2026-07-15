@@ -60,4 +60,9 @@ public class MessageCache
 
         _messages[index] = message;
     }
+
+    public void Clear()
+    {
+        _messages.Clear();
+    }
 }
