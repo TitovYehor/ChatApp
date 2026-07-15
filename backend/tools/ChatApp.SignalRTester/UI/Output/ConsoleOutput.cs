@@ -1,7 +1,6 @@
 ﻿using ChatApp.Contracts.Channels.Responses;
 using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Contracts.Workspaces.Responses;
-using System.Threading.Channels;
 
 namespace ChatApp.SignalRTester.UI.Output;
 
@@ -142,13 +141,14 @@ public class ConsoleOutput : IConsoleOutput
     }
 
     public void WriteRealtimeMessageCreated(
-        MessageResponseDto message)
+        MessageResponseDto message,
+        string? channelName)
     {
         WriteSeparator();
 
         WriteSuccess("New message received");
 
-        WriteInfo($"Realtime message received in channel {message.ChannelId}");
+        WriteInfo($"Channel: {channelName}");
 
         WriteMessage(message);
 

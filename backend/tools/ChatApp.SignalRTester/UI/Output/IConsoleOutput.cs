@@ -31,7 +31,8 @@ public interface IConsoleOutput
     void WriteMessageList(IReadOnlyCollection<MessageResponseDto> messages);
 
     void WriteRealtimeMessageCreated(
-        MessageResponseDto message);
+        MessageResponseDto message,
+        string? channelName);
 
     void WriteRealtimeMessageUpdated(
         MessageResponseDto message);
