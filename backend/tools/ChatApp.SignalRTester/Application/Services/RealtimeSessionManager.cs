@@ -1,5 +1,4 @@
-﻿using ChatApp.SignalRTester.Application.Workflows;
-using ChatApp.SignalRTester.Session;
+﻿using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.SignalR;
 
 namespace ChatApp.SignalRTester.Application.Services;
@@ -12,18 +11,14 @@ public class RealtimeSessionManager
 
     private readonly UserSession _userSession;
 
-    private readonly MessageWorkflow _messageWorkflow;
-
     public RealtimeSessionManager(
         ISignalRClient signalRClient,
         RealtimeSession realtimeSession,
-        UserSession userSession,
-        MessageWorkflow messageWorkflow)
+        UserSession userSession)
     {
         _signalRClient = signalRClient;
         _realtimeSession = realtimeSession;
         _userSession = userSession;
-        _messageWorkflow = messageWorkflow;
 
         _signalRClient.Connected += OnConnected;
 
@@ -110,8 +105,6 @@ public class RealtimeSessionManager
 
             await _signalRClient.JoinChannelAsync(
                 _userSession.CurrentChannel.Id);
-
-            await _messageWorkflow.LoadMessagesAsync();
         }
         catch (Exception ex)
         {
