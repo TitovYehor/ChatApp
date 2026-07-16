@@ -14,6 +14,10 @@ public interface IWorkspaceApiClient
     Task<ApiResult<WorkspaceResponseDto>> GetByIdAsync(
         Guid workspaceId);
 
+    Task<ApiResult<bool>> AddMemberAsync(
+        Guid workspaceId,
+        AddWorkspaceMemberRequestDto request);
+
     Task<ApiResult<bool>> JoinAsync(
         Guid workspaceId);
 }
