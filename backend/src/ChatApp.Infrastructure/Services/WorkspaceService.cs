@@ -86,6 +86,59 @@ public class WorkspaceService : IWorkspaceService
             .ToList();
     }
 
+    public async Task AddMemberAsync(
+        Guid workspaceId,
+        Guid currentUserId,
+        AddWorkspaceMemberRequestDto request)
+    {
+        var workspace = await _dbContext.Workspaces
+            .Include(x => x.Members)
+            .FirstOrDefaultAsync(x =>
+                x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var currentMembership = workspace.Members
+            .FirstOrDefault(x =>
+                x.UserId == currentUserId);
+
+        if (currentMembership == null)
+        { 
+            throw new ForbiddenException("Inviting user are not a member of this workspace");
+        }
+        if (currentMembership.Role == WorkspaceRole.Member)
+        {
+            throw new ForbiddenException("Users with 'Member' role are not allowed to invite");
+        }
+
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(x =>
+                x.Email == request.UsernameOrEmail ||
+                x.Username == request.UsernameOrEmail);
+
+        if (user == null)
+        {
+            throw new NotFoundException("Invited user not found");
+        }
+        if (workspace.Members.Any(x => x.UserId == user.Id))
+        {
+            throw new ConflictException("User is already a workspace member");
+        }
+
+        _dbContext.WorkspaceMembers.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspace.Id,
+                UserId = user.Id,
+                Role = WorkspaceRole.Member
+            });
+
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task JoinAsync(
         Guid workspaceId,
         Guid userId)
