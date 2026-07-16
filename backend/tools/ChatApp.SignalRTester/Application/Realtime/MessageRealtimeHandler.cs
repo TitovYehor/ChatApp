@@ -50,7 +50,9 @@ public class MessageRealtimeHandler : IApplicationInitializer
 
         _messageCache.Add(message);
 
-        _consoleOutput.WriteRealtimeMessageCreated(message);
+        _consoleOutput.WriteRealtimeMessageCreated(
+            message,
+            _userSession.CurrentChannel?.Name);
     }
 
     private void OnMessageUpdated(
@@ -67,10 +69,15 @@ public class MessageRealtimeHandler : IApplicationInitializer
     }
 
     private void OnMessageDeleted(
-        Guid messageId)
+        MessageDeletedResponseDto response)
     {
-        _messageCache.Remove(messageId);
+        if (_userSession.CurrentChannel?.Id != response.ChannelId)
+        {
+            return;
+        }
 
-        _consoleOutput.WriteRealtimeMessageDeleted(messageId);
+        _messageCache.Remove(response.MessageId);
+
+        _consoleOutput.WriteRealtimeMessageDeleted(response.MessageId);
     }
 }
