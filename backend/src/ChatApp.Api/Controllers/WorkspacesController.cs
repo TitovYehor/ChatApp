@@ -78,6 +78,19 @@ public class WorkspacesController : ControllerBase
         return Ok();
     }
 
+    [HttpGet("{workspaceId:guid}/members")]
+    public async Task<ActionResult<IReadOnlyCollection<WorkspaceMemberResponseDto>>> GetMembers(
+        Guid workspaceId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var members = await _workspaceService.GetMembersAsync(
+            workspaceId,
+            userId);
+
+        return Ok(members);
+    }
+
     [HttpPost("{id:guid}/join")]
     public async Task<IActionResult> Join(
         Guid id)
