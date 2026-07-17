@@ -48,6 +48,13 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
             request);
     }
 
+    public Task<ApiResult<IReadOnlyList<WorkspaceMemberResponseDto>>> GetMembersAsync(
+        Guid workspaceId)
+    {
+        return GetAsync<IReadOnlyList<WorkspaceMemberResponseDto>>(
+            $"api/workspaces/{workspaceId}/members");
+    }
+
     public async Task<ApiResult<bool>> JoinAsync(
         Guid workspaceId)
     {
