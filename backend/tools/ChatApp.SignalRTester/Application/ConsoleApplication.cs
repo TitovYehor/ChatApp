@@ -64,6 +64,9 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.SelectWorkspace:
                     await _workspaceWorkflow.SelectWorkspaceAsync();
                     break;
+                case MenuOption.AddWorkspaceMember:
+                    await _workspaceWorkflow.AddMemberAsync();
+                    break;
                 case MenuOption.JoinWorkspace:
                     await _workspaceWorkflow.JoinWorkspaceAsync();
                     break;
