@@ -1,6 +1,7 @@
 ﻿using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Mappings;
+using ChatApp.Contracts.Workspaces.Enums;
 using ChatApp.Contracts.Workspaces.Requests;
 using ChatApp.Contracts.Workspaces.Responses;
 using ChatApp.Domain.Entities;
@@ -137,6 +138,39 @@ public class WorkspaceService : IWorkspaceService
             });
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> GetMembersAsync(
+        Guid workspaceId,
+        Guid userId)
+    {
+        var isMember = await _dbContext.WorkspaceMembers
+            .AnyAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == userId);
+
+        if (!isMember)
+        {
+            throw new ForbiddenException("Workspace is forbidden for non members");
+        }
+
+        var members = await _dbContext.WorkspaceMembers
+            .AsNoTracking()
+            .Where(x => x.WorkspaceId == workspaceId)
+            .Include(x => x.User)
+            .OrderBy(x => x.Role)
+            .ThenBy(x => x.User.Username)
+            .Select(x => new WorkspaceMemberResponseDto
+            {
+                UserId = x.UserId,
+                Username = x.User.Username,
+                Email = x.User.Email,
+                Role = (WorkspaceRoleDto)x.Role,
+                JoinedAt = x.JoinedAt
+            })
+            .ToListAsync();
+
+        return members;
     }
 
     public async Task JoinAsync(

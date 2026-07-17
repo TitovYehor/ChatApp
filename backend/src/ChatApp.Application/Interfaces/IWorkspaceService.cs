@@ -21,6 +21,10 @@ public interface IWorkspaceService
         Guid currentUserId,
         AddWorkspaceMemberRequestDto request);
 
+    Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> GetMembersAsync(
+        Guid workspaceId,
+        Guid userId);
+
     Task JoinAsync(
         Guid workspaceId,
         Guid userId);
