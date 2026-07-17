@@ -143,6 +143,39 @@ public class WorkspaceWorkflow
         _consoleOutput.WriteSuccess($"Workspace '{workspace.Name}' selected");
     }
 
+    public async Task AddMemberAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("Please select a workspace first");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Add Workspace Member");
+
+        var usernameOrEmail = _consoleInput.ReadRequiredString(
+            "Username or Email");
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = usernameOrEmail
+        };
+
+        var result = await _workspaceApiClient.AddMemberAsync(
+            _userSession.CurrentWorkspace.Id,
+            request);
+
+        _consoleOutput.WriteSeparator();
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSuccess("Member added successfully");
+    }
+
     public async Task JoinWorkspaceAsync()
     {
         _consoleOutput.WriteHeader("Join Workspace");
