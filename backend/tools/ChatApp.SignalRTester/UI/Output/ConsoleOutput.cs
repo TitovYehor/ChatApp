@@ -79,6 +79,38 @@ public class ConsoleOutput : IConsoleOutput
         Console.WriteLine();
     }
 
+    public void WriteWorkspaceMember(
+        WorkspaceMemberResponseDto member)
+    {
+        Console.WriteLine($"Username : {member.Username}");
+        Console.WriteLine($"Email    : {member.Email}");
+        Console.WriteLine($"Role     : {member.Role}");
+        Console.WriteLine($"Joined   : {member.JoinedAt:u}");
+    }
+
+    public void WriteWorkspaceMembers(
+        IReadOnlyCollection<WorkspaceMemberResponseDto> members)
+    {
+        if (members.Count == 0)
+        {
+            WriteInfo("No members");
+            return;
+        }
+
+        var index = 1;
+
+        foreach (var member in members)
+        {
+            Console.WriteLine($"{index}");
+
+            WriteWorkspaceMember(member);
+
+            WriteSeparator();
+
+            index++;
+        }
+    }
+
     public void WriteChannel(
         ChannelResponseDto channel)
     {

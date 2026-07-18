@@ -22,6 +22,10 @@ public interface IConsoleOutput
 
     void WriteWorkspaceSelection(IReadOnlyList<WorkspaceResponseDto> workspaces);
 
+    void WriteWorkspaceMember(WorkspaceMemberResponseDto member);
+
+    void WriteWorkspaceMembers(IReadOnlyCollection<WorkspaceMemberResponseDto> members);
+
     void WriteChannel(ChannelResponseDto channel);
 
     void WriteChannelSelection(IReadOnlyList<ChannelResponseDto> channels);
