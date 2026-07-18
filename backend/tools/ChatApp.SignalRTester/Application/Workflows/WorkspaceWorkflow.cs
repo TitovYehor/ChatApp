@@ -176,6 +176,30 @@ public class WorkspaceWorkflow
         _consoleOutput.WriteSuccess("Member added successfully");
     }
 
+    public async Task ListMembersAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("Please select a workspace first");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Workspace Members");
+
+        var result = await _workspaceApiClient.GetMembersAsync(
+            _userSession.CurrentWorkspace.Id);
+
+        _consoleOutput.WriteSeparator();
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteWorkspaceMembers(result.Data!);
+    }
+
     public async Task JoinWorkspaceAsync()
     {
         _consoleOutput.WriteHeader("Join Workspace");
