@@ -14,25 +14,27 @@ public enum MenuOption
 
     AddWorkspaceMember = 5,
 
-    JoinWorkspace = 6,
+    ListWorkspaceMembers = 6,
 
-    CreateChannel = 7,
+    JoinWorkspace = 7,
 
-    ListChannels = 8,
+    CreateChannel = 8,
 
-    SelectChannel = 9,
+    ListChannels = 9,
 
-    LoadMessages = 10,
+    SelectChannel = 10,
 
-    SendMessage = 11,
+    LoadMessages = 11,
 
-    UpdateMessage = 12,
+    SendMessage = 12,
 
-    DeleteMessage = 13,
+    UpdateMessage = 13,
 
-    ConnectSignalR = 14,
+    DeleteMessage = 14,
 
-    DisconnectSignalR = 15,
+    ConnectSignalR = 15,
 
-    Logout = 16,
+    DisconnectSignalR = 16,
+
+    Logout = 17,
 }
