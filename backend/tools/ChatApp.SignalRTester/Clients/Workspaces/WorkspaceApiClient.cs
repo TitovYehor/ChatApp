@@ -43,7 +43,7 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
         Guid workspaceId,
         AddWorkspaceMemberRequestDto request)
     {
-        return PostAsync<AddWorkspaceMemberRequestDto, bool>(
+        return PostEmptyAsync(
             $"api/workspaces/{workspaceId}/members",
             request);
     }
