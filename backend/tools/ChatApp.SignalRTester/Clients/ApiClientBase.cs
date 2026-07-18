@@ -1,6 +1,7 @@
 ﻿using ChatApp.Contracts.Common;
 using ChatApp.SignalRTester.Models;
 using ChatApp.SignalRTester.Session;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace ChatApp.SignalRTester.Clients;
@@ -203,6 +204,59 @@ public abstract class ApiClientBase
         {
             return ApiResult<bool>.Failure(
                 $"Unexpected error: {ex.Message}");
+        }
+    }
+
+    protected async Task<ApiResult<bool>> PostEmptyAsync<TRequest>(
+        string url,
+        TRequest request)
+    {
+        try
+        {
+            var requestMessage = new HttpRequestMessage(
+                HttpMethod.Post,
+                url)
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            if (UserSession.IsAuthenticated)
+            {
+                requestMessage.Headers.Authorization =
+                    new AuthenticationHeaderValue(
+                        "Bearer",
+                        UserSession.AccessToken);
+            }
+
+            var response = await HttpClient.SendAsync(requestMessage);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content
+                    .ReadFromJsonAsync<ErrorResponse>();
+
+                if (error != null)
+                {
+                    return ApiResult<bool>.Failure(error.Message);
+                }
+
+                return ApiResult<bool>.Failure(
+                    $"HTTP {(int)response.StatusCode}");
+            }
+
+            return ApiResult<bool>.Success(true);
+        }
+        catch (HttpRequestException)
+        {
+            return ApiResult<bool>.Failure("Unable to connect to the server");
+        }
+        catch (TaskCanceledException)
+        {
+            return ApiResult<bool>.Failure("The request timed out");
+        }
+        catch (Exception ex)
+        {
+            return ApiResult<bool>.Failure($"Unexpected error: {ex.Message}");
         }
     }
 
