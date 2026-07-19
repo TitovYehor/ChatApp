@@ -4,37 +4,39 @@ public enum MenuOption
 {
     Exit = 0,
 
-    Login = 1,
+    Register = 1,
 
-    CreateWorkspace = 2,
+    Login = 2,
 
-    ListWorkspaces = 3,
+    CreateWorkspace = 3,
 
-    SelectWorkspace = 4,
+    ListWorkspaces = 4,
 
-    AddWorkspaceMember = 5,
+    SelectWorkspace = 5,
 
-    ListWorkspaceMembers = 6,
+    AddWorkspaceMember = 6,
 
-    JoinWorkspace = 7,
+    ListWorkspaceMembers = 7,
 
-    CreateChannel = 8,
+    JoinWorkspace = 8,
 
-    ListChannels = 9,
+    CreateChannel = 9,
 
-    SelectChannel = 10,
+    ListChannels = 10,
 
-    LoadMessages = 11,
+    SelectChannel = 11,
 
-    SendMessage = 12,
+    LoadMessages = 12,
 
-    UpdateMessage = 13,
+    SendMessage = 13,
 
-    DeleteMessage = 14,
+    UpdateMessage = 14,
 
-    ConnectSignalR = 15,
+    DeleteMessage = 15,
 
-    DisconnectSignalR = 16,
+    ConnectSignalR = 16,
 
-    Logout = 17,
+    DisconnectSignalR = 17,
+
+    Logout = 18,
 }
