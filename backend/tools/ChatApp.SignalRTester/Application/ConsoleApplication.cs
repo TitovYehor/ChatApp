@@ -51,6 +51,9 @@ public class ConsoleApplication : IConsoleApplication
 
             switch (option.Value)
             {
+                case MenuOption.Register:
+                    await _authenticationWorkflow.RegisterAsync();
+                    break;
                 case MenuOption.Login:
                     await _authenticationWorkflow.LoginAsync();
                     break;
