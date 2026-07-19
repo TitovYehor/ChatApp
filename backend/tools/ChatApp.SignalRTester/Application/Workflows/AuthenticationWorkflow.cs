@@ -38,6 +38,47 @@ public class AuthenticationWorkflow
         _consoleOutput = consoleOutput;
     }
 
+    public async Task RegisterAsync()
+    {
+        _consoleOutput.WriteHeader("Register");
+
+        var username = _consoleInput.ReadRequiredString("Username");
+
+        var email = _consoleInput.ReadRequiredString("Email");
+
+        var password = _consoleInput.ReadRequiredString("Password");
+
+        var request = new RegisterRequestDto
+        {
+            Username = username,
+            Email = email,
+            Password = password
+        };
+
+        var result = await _authenticationApiClient.RegisterAsync(
+            request);
+
+        _consoleOutput.WriteSeparator();
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        var response = result.Data!;
+
+        _userSession.SignIn(response);
+
+        _consoleOutput.WriteSuccess("Registration successful");
+
+        _consoleOutput.WriteSeparator();
+
+        _consoleOutput.WriteInfo($"Welcome {_userSession.Username}!");
+
+        _consoleOutput.WriteInfo($"Email: {_userSession.Email}");
+    }
+
     public async Task LoginAsync()
     {
         _consoleOutput.WriteHeader("Login");
