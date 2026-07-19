@@ -6,6 +6,9 @@ namespace ChatApp.SignalRTester.Clients.Authentication;
 
 public interface IAuthenticationApiClient
 {
+    Task<ApiResult<AuthResponseDto>> RegisterAsync(
+        RegisterRequestDto request);
+
     Task<ApiResult<AuthResponseDto>> LoginAsync(
         LoginRequestDto request);
 }

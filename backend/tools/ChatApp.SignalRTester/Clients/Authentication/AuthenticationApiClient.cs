@@ -18,6 +18,14 @@ public class AuthenticationApiClient : ApiClientBase, IAuthenticationApiClient
         HttpClient.BaseAddress = new Uri(options.Value.ApiBaseUrl);
     }
 
+    public Task<ApiResult<AuthResponseDto>> RegisterAsync(
+        RegisterRequestDto request)
+    {
+        return PostAsync<RegisterRequestDto, AuthResponseDto>(
+            "api/auth/register",
+            request);
+    }
+
     public Task<ApiResult<AuthResponseDto>> LoginAsync(
         LoginRequestDto request)
     {
