@@ -33,7 +33,9 @@ public class AuthService : IAuthService
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
     {
         var existingUser = await _dbContext.Users
-            .FirstOrDefaultAsync(x => x.Email == request.Email);
+            .FirstOrDefaultAsync(x => 
+                x.Email == request.Email ||
+                x.Username == request.Username);
 
         if (existingUser is not null)
         {
