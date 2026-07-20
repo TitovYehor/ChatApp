@@ -208,4 +208,36 @@ public class WorkspaceService : IWorkspaceService
 
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task LeaveAsync(
+        Guid workspaceId,
+        Guid currentUserId)
+    {
+        var workspace = await _dbContext.Workspaces
+            .Include(x => x.Members)
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var membership = workspace.Members
+            .FirstOrDefault(x => x.UserId == currentUserId);
+
+        if (membership == null)
+        {
+            throw new ForbiddenException("User is not a workspace member");
+        }
+
+        if (membership.Role == WorkspaceRole.Owner &&
+            workspace.Members.Count(x => x.Role == WorkspaceRole.Owner) == 1)
+        {
+            throw new ConflictException("Workspace owner cannot leave while being the only owner");
+        }
+
+        _dbContext.WorkspaceMembers.Remove(membership);
+
+        await _dbContext.SaveChangesAsync();
+    }
 }

@@ -28,4 +28,8 @@ public interface IWorkspaceService
     Task JoinAsync(
         Guid workspaceId,
         Guid userId);
+
+    Task LeaveAsync(
+        Guid workspaceId,
+        Guid currentUserId);
 }
