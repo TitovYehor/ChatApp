@@ -212,8 +212,7 @@ public class WorkspaceWorkflow
             return;
         }
 
-        var result = await _workspaceApiClient.JoinAsync(
-            workspaceId);
+        var result = await _workspaceApiClient.JoinAsync(workspaceId);
 
         if (!result.IsSuccess)
         {
@@ -222,5 +221,45 @@ public class WorkspaceWorkflow
         }
 
         _consoleOutput.WriteSuccess("Joined workspace successfully");
+    }
+
+    public async Task LeaveWorkspaceAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("No workspace selected");
+            return;
+        }
+
+        var confirmed = _consoleInput.ReadConfirmation(
+            $"Leave workspace '{_userSession.CurrentWorkspace.Name}'?");
+
+        if (!confirmed)
+        {
+            _consoleOutput.WriteInfo("Operation cancelled");
+            return;
+        }
+
+        var workspaceId = _userSession.CurrentWorkspace.Id;
+
+        var result = await _workspaceApiClient.LeaveAsync(workspaceId);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        var currentChannel = _userSession.CurrentChannel?.Id;
+
+        _userSession.ClearWorkspace();
+
+        if (currentChannel.HasValue)
+        {
+            await _realtimeSessionManager.LeaveChannelAsync(
+                currentChannel.Value);
+        }
+
+        _consoleOutput.WriteSuccess("Left workspace successfully");
     }
 }
