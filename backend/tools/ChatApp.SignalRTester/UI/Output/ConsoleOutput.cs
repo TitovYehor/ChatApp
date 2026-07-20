@@ -6,6 +6,31 @@ namespace ChatApp.SignalRTester.UI.Output;
 
 public class ConsoleOutput : IConsoleOutput
 {
+    public bool ReadConfirmation(string message)
+    {
+        while (true)
+        {
+            Console.Write($"{message} (y/n): ");
+
+            var input = Console.ReadLine()?.Trim().ToLowerInvariant();
+
+            switch (input)
+            {
+                case "y":
+                case "yes":
+                    return true;
+
+                case "n":
+                case "no":
+                    return false;
+
+                default:
+                    Console.WriteLine("Please enter 'y' or 'n'");
+                    break;
+            }
+        }
+    }
+
     public void WriteHeader(string title)
     {
         Console.WriteLine();

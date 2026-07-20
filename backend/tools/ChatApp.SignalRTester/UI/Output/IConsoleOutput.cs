@@ -6,6 +6,8 @@ namespace ChatApp.SignalRTester.UI.Output;
 
 public interface IConsoleOutput
 {
+    bool ReadConfirmation(string message);
+
     void WriteHeader(string title);
 
     void WriteInfo(string message);
