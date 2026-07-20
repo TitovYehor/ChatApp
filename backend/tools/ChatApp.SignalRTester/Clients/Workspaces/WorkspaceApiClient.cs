@@ -61,4 +61,11 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
         return await PostEmptyAsync(
             $"api/workspaces/{workspaceId}/join");
     }
+
+    public Task<ApiResult<bool>> LeaveAsync(
+        Guid workspaceId)
+    {
+        return PostEmptyAsync(
+            $"api/workspaces/{workspaceId}/leave");
+    }
 }

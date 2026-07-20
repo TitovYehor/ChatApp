@@ -23,4 +23,7 @@ public interface IWorkspaceApiClient
 
     Task<ApiResult<bool>> JoinAsync(
         Guid workspaceId);
+
+    Task<ApiResult<bool>> LeaveAsync(
+        Guid workspaceId);
 }
