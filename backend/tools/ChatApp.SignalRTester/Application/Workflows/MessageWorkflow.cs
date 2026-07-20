@@ -180,6 +180,14 @@ public class MessageWorkflow
 
         var message = _messageCache.Messages[selection - 1];
 
+        var confirmed = _consoleInput.ReadConfirmation("Delete selected message?");
+
+        if (!confirmed)
+        {
+            _consoleOutput.WriteInfo("Operation cancelled");
+            return;
+        }
+
         var result = await _messageApiClient.DeleteAsync(
             message.Id);
 
