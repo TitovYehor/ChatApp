@@ -103,4 +103,17 @@ public class WorkspacesController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/leave")]
+    public async Task<IActionResult> Leave(
+        Guid id)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        await _workspaceService.LeaveAsync(
+            id,
+            userId);
+
+        return NoContent();
+    }
 }
