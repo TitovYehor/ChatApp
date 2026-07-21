@@ -240,4 +240,62 @@ public class WorkspaceService : IWorkspaceService
 
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task RemoveMemberAsync(
+        Guid workspaceId,
+        Guid currentUserId,
+        RemoveWorkspaceMemberRequestDto request)
+    {
+        var workspace = await _dbContext.Workspaces
+            .Include(x => x.Members)
+            .FirstOrDefaultAsync(x =>
+                x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var currentMembership = workspace.Members
+            .FirstOrDefault(x =>
+                x.UserId == currentUserId);
+
+        if (currentMembership == null)
+        {
+            throw new ForbiddenException("You are not a workspace member");
+        }
+
+        if (currentMembership.Role == WorkspaceRole.Member)
+        {
+            throw new ForbiddenException("Only Owner or Admin can remove members");
+        }
+
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(x =>
+                x.Username == request.UsernameOrEmail ||
+                x.Email == request.UsernameOrEmail);
+
+        if (user == null)
+        {
+            throw new NotFoundException("User not found");
+        }
+
+        var membership = workspace.Members
+            .FirstOrDefault(x =>
+                x.UserId == user.Id);
+
+        if (membership == null)
+        {
+            throw new NotFoundException("User is not a workspace member");
+        }
+
+        if (membership.Role == WorkspaceRole.Owner)
+        {
+            throw new ConflictException("Workspace owner cannot be removed");
+        }
+
+        _dbContext.WorkspaceMembers.Remove(membership);
+
+        await _dbContext.SaveChangesAsync();
+    }
 }

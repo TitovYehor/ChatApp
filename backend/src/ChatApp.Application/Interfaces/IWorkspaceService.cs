@@ -32,4 +32,9 @@ public interface IWorkspaceService
     Task LeaveAsync(
         Guid workspaceId,
         Guid currentUserId);
+
+    Task RemoveMemberAsync(
+        Guid workspaceId,
+        Guid currentUserId,
+        RemoveWorkspaceMemberRequestDto request);
 }
