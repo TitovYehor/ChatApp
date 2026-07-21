@@ -97,6 +97,47 @@ public abstract class ApiClientBase
         }
     }
 
+    protected async Task<ApiResult<bool>> DeleteAsync<TRequest>(
+        string url,
+        TRequest request)
+    {
+        try
+        {
+            var message = new HttpRequestMessage(
+                HttpMethod.Delete,
+                url)
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            if (UserSession.IsAuthenticated)
+            {
+                message.Headers.Authorization =
+                    new AuthenticationHeaderValue(
+                        "Bearer",
+                        UserSession.AccessToken);
+            }
+
+            var response = await HttpClient.SendAsync(message);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content
+                    .ReadFromJsonAsync<ErrorResponse>();
+
+                return ApiResult<bool>.Failure(
+                    error?.Message ??
+                    $"HTTP {(int)response.StatusCode}");
+            }
+
+            return ApiResult<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return ApiResult<bool>.Failure(ex.Message);
+        }
+    }
+
     protected async Task<ApiResult<TResponse>> SendAsync<TResponse>(
         HttpRequestMessage request)
     {
