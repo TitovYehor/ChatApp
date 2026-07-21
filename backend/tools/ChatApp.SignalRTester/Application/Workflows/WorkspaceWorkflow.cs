@@ -262,4 +262,42 @@ public class WorkspaceWorkflow
 
         _consoleOutput.WriteSuccess("Left workspace successfully");
     }
+
+    public async Task RemoveMemberAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("No workspace selected");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Remove Workspace Member");
+
+        var usernameOrEmail = _consoleInput.ReadRequiredString(
+            "Username or Email");
+
+        var confirmed = _consoleInput.ReadConfirmation(
+            $"Remove user '{usernameOrEmail}'?");
+
+        if (!confirmed)
+        {
+            _consoleOutput.WriteInfo("Operation cancelled");
+            return;
+        }
+
+        var result = await _workspaceApiClient.RemoveMemberAsync(
+            _userSession.CurrentWorkspace.Id,
+            new RemoveWorkspaceMemberRequestDto
+            {
+                UsernameOrEmail = usernameOrEmail
+            });
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSuccess("Member removed successfully");
+    }
 }
