@@ -116,4 +116,19 @@ public class WorkspacesController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpDelete("{workspaceId:guid}/members")]
+    public async Task<IActionResult> RemoveMember(
+        Guid workspaceId,
+        RemoveWorkspaceMemberRequestDto request)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        await _workspaceService.RemoveMemberAsync(
+            workspaceId,
+            userId,
+            request);
+
+        return NoContent();
+    }
 }
