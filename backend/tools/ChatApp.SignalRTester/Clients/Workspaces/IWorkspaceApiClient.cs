@@ -26,4 +26,8 @@ public interface IWorkspaceApiClient
 
     Task<ApiResult<bool>> LeaveAsync(
         Guid workspaceId);
+
+    Task<ApiResult<bool>> RemoveMemberAsync(
+        Guid workspaceId,
+        RemoveWorkspaceMemberRequestDto request);
 }

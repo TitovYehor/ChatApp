@@ -68,4 +68,13 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
         return PostEmptyAsync(
             $"api/workspaces/{workspaceId}/leave");
     }
+
+    public Task<ApiResult<bool>> RemoveMemberAsync(
+        Guid workspaceId,
+        RemoveWorkspaceMemberRequestDto request)
+    {
+        return DeleteAsync(
+            $"api/workspaces/{workspaceId}/members",
+            request);
+    }
 }
