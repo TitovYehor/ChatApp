@@ -109,7 +109,8 @@ public class ConsoleMenu : IConsoleMenu
                 Text = "Add workspace member",
                 Option = MenuOption.AddWorkspaceMember,
                 Visible = _session.IsAuthenticated && 
-                          _session.CurrentWorkspace != null
+                          _session.CurrentWorkspace != null &&
+                          _session.CanManageWorkspace
             },
             new MenuItem
             {
@@ -133,7 +134,8 @@ public class ConsoleMenu : IConsoleMenu
                 Text = "Remove workspace member",
                 Option = MenuOption.RemoveWorkspaceMember,
                 Visible = _session.IsAuthenticated &&
-                          _session.CurrentWorkspace != null
+                          _session.CurrentWorkspace != null &&
+                          _session.CanManageWorkspace
             },
             new MenuItem
             {
