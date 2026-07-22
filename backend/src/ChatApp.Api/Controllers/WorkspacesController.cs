@@ -131,4 +131,19 @@ public class WorkspacesController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPut("{workspaceId:guid}/members/role")]
+    public async Task<IActionResult> ChangeRole(
+        Guid workspaceId,
+        ChangeWorkspaceMemberRoleRequestDto request)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        await _workspaceService.ChangeMemberRoleAsync(
+            workspaceId,
+            userId,
+            request);
+
+        return NoContent();
+    }
 }
