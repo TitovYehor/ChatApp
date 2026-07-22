@@ -37,4 +37,9 @@ public interface IWorkspaceService
         Guid workspaceId,
         Guid currentUserId,
         RemoveWorkspaceMemberRequestDto request);
+
+    Task ChangeMemberRoleAsync(
+        Guid workspaceId,
+        Guid currentUserId,
+        ChangeWorkspaceMemberRoleRequestDto request);
 }

@@ -298,4 +298,61 @@ public class WorkspaceService : IWorkspaceService
 
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task ChangeMemberRoleAsync(
+        Guid workspaceId,
+        Guid currentUserId,
+        ChangeWorkspaceMemberRoleRequestDto request)
+    {
+        var workspace = await _dbContext.Workspaces
+            .Include(x => x.Members)
+            .ThenInclude(x => x.User)
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var current = workspace.Members
+            .FirstOrDefault(x => x.UserId == currentUserId);
+
+        if (current == null)
+        {
+            throw new ForbiddenException("Not a workspace member");
+        }
+
+        if (current.Role != WorkspaceRole.Owner)
+        {
+            throw new ForbiddenException("Only owner can change roles");
+        }
+
+        var member = workspace.Members
+            .FirstOrDefault(x =>
+                x.User.Email == request.UsernameOrEmail ||
+                x.User.Username == request.UsernameOrEmail);
+
+        if (member == null)
+        {
+            throw new NotFoundException("Member not found");
+        }
+
+        if (member.UserId == currentUserId)
+        {
+            throw new ConflictException("Owner cannot change own role");
+        }
+
+        if (member.Role == WorkspaceRole.Owner)
+        {
+            throw new ConflictException("Cannot modify workspace owner");
+        }
+
+        member.Role = request.Role switch
+        {
+            WorkspaceRoleDto.Admin => WorkspaceRole.Admin,
+            _ => WorkspaceRole.Member
+        };
+
+        await _dbContext.SaveChangesAsync();
+    }
 }
