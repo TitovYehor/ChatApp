@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Authentication.Responses;
 using ChatApp.Contracts.Channels.Responses;
+using ChatApp.Contracts.Workspaces.Enums;
 using ChatApp.Contracts.Workspaces.Responses;
 
 namespace ChatApp.SignalRTester.Session;
@@ -18,7 +19,16 @@ public class UserSession
 
     public WorkspaceResponseDto? CurrentWorkspace { get; private set; }
 
+    public WorkspaceRoleDto? CurrentWorkspaceRole { get; private set; }
+
     public ChannelResponseDto? CurrentChannel { get; private set; }
+
+    public bool CanManageWorkspace =>
+        CurrentWorkspaceRole == WorkspaceRoleDto.Owner ||
+        CurrentWorkspaceRole == WorkspaceRoleDto.Admin;
+
+    public bool IsWorkspaceOwner =>
+        CurrentWorkspaceRole == WorkspaceRoleDto.Owner;
 
     public void SignIn(
         AuthResponseDto response)
@@ -37,6 +47,7 @@ public class UserSession
         AccessToken = null;
         CurrentWorkspace = null;
         CurrentChannel = null;
+        CurrentWorkspaceRole = null;
     }
 
     public void SelectWorkspace(
@@ -44,12 +55,21 @@ public class UserSession
     {
         CurrentWorkspace = workspace;
         CurrentChannel = null;
+
+        CurrentWorkspaceRole = null;
+    }
+
+    public void SetWorkspaceRole(
+        WorkspaceRoleDto role)
+    {
+        CurrentWorkspaceRole = role;
     }
 
     public void ClearWorkspace()
     {
         CurrentWorkspace = null;
         CurrentChannel = null;
+        CurrentWorkspaceRole = null;
     }
 
     public Guid? SelectChannel(
