@@ -140,6 +140,16 @@ public class ConsoleMenu : IConsoleMenu
             new MenuItem
             {
                 Number = 10,
+                Text = "Change member role",
+                Option = MenuOption.ChangeWorkspaceMemberRole,
+                Visible =
+                    _session.IsAuthenticated &&
+                    _session.CurrentWorkspace != null && 
+                    _session.IsWorkspaceOwner
+            },
+            new MenuItem
+            {
+                Number = 11,
                 Text = "Join workspace",
                 Option = MenuOption.JoinWorkspace,
                 Visible = _session.IsAuthenticated
@@ -147,7 +157,7 @@ public class ConsoleMenu : IConsoleMenu
 
             new MenuItem
             {
-                Number = 11,
+                Number = 12,
                 Text = "Create channel",
                 Option = MenuOption.CreateChannel,
                 Visible = _session.IsAuthenticated &&
@@ -155,7 +165,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 12,
+                Number = 13,
                 Text = "List channels",
                 Option = MenuOption.ListChannels,
                 Visible = _session.IsAuthenticated &&
@@ -163,7 +173,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 13,
+                Number = 14,
                 Text = _session.CurrentChannel == null
                     ? "Select channel"
                     : "Change channel",
@@ -174,7 +184,7 @@ public class ConsoleMenu : IConsoleMenu
 
             new MenuItem
             {
-                Number = 14,
+                Number = 15,
                 Text = "Load messages",
                 Option = MenuOption.LoadMessages,
                 Visible = _session.IsAuthenticated &&
@@ -182,7 +192,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 15,
+                Number = 16,
                 Text = "Send message",
                 Option = MenuOption.SendMessage,
                 Visible = _session.IsAuthenticated &&
@@ -190,7 +200,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 16,
+                Number = 17,
                 Text = "Update message",
                 Option = MenuOption.UpdateMessage,
                 Visible = _session.IsAuthenticated &&
@@ -198,7 +208,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 17,
+                Number = 18,
                 Text = "Delete message",
                 Option = MenuOption.DeleteMessage,
                 Visible = _session.IsAuthenticated &&
@@ -207,7 +217,7 @@ public class ConsoleMenu : IConsoleMenu
 
             new MenuItem
             {
-                Number = 18,
+                Number = 19,
                 Text = "Connect to SignalR",
                 Option = MenuOption.ConnectSignalR,
                 Visible = _session.IsAuthenticated &&
@@ -217,7 +227,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 19,
+                Number = 20,
                 Text = "Disconnect from SignalR",
                 Option = MenuOption.DisconnectSignalR,
                 Visible = _session.IsAuthenticated &&
@@ -226,7 +236,7 @@ public class ConsoleMenu : IConsoleMenu
 
             new MenuItem
             {
-                Number = 20,
+                Number = 21,
                 Text = "Logout",
                 Option = MenuOption.Logout,
                 Visible = _session.IsAuthenticated
