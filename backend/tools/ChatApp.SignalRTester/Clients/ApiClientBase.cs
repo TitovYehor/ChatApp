@@ -57,6 +57,18 @@ public abstract class ApiClientBase
             });
     }
 
+    protected async Task<ApiResult<bool>> PutWithoutResponseAsync<TRequest>(
+        string url,
+        TRequest request)
+    {
+        var message = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(request)
+        };
+
+        return await SendWithoutResponseAsync(message);
+    }
+
     protected async Task<ApiResult<bool>> DeleteRequestAsync(string url)
     {
         try
@@ -97,45 +109,15 @@ public abstract class ApiClientBase
         }
     }
 
-    protected async Task<ApiResult<bool>> DeleteAsync<TRequest>(
+    protected Task<ApiResult<bool>> DeleteAsync<TRequest>(
         string url,
         TRequest request)
     {
-        try
-        {
-            var message = new HttpRequestMessage(
-                HttpMethod.Delete,
-                url)
+        return SendWithoutResponseAsync(
+            new HttpRequestMessage(HttpMethod.Delete, url)
             {
                 Content = JsonContent.Create(request)
-            };
-
-            if (UserSession.IsAuthenticated)
-            {
-                message.Headers.Authorization =
-                    new AuthenticationHeaderValue(
-                        "Bearer",
-                        UserSession.AccessToken);
-            }
-
-            var response = await HttpClient.SendAsync(message);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content
-                    .ReadFromJsonAsync<ErrorResponse>();
-
-                return ApiResult<bool>.Failure(
-                    error?.Message ??
-                    $"HTTP {(int)response.StatusCode}");
-            }
-
-            return ApiResult<bool>.Success(true);
-        }
-        catch (Exception ex)
-        {
-            return ApiResult<bool>.Failure(ex.Message);
-        }
+            });
     }
 
     protected async Task<ApiResult<TResponse>> SendAsync<TResponse>(
@@ -195,19 +177,15 @@ public abstract class ApiClientBase
         }
     }
 
-    protected async Task<ApiResult<bool>> PostEmptyAsync(
-        string url)
+    protected async Task<ApiResult<bool>> SendWithoutResponseAsync(
+    HttpRequestMessage request)
     {
         try
         {
-            var request = new HttpRequestMessage(
-                HttpMethod.Post,
-                url);
-
             if (UserSession.IsAuthenticated)
             {
                 request.Headers.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue(
+                    new AuthenticationHeaderValue(
                         "Bearer",
                         UserSession.AccessToken);
             }
@@ -221,8 +199,7 @@ public abstract class ApiClientBase
 
                 if (error != null)
                 {
-                    return ApiResult<bool>.Failure(
-                        error.Message);
+                    return ApiResult<bool>.Failure(error.Message);
                 }
 
                 return ApiResult<bool>.Failure(
@@ -248,57 +225,22 @@ public abstract class ApiClientBase
         }
     }
 
-    protected async Task<ApiResult<bool>> PostEmptyAsync<TRequest>(
+    protected Task<ApiResult<bool>> PostEmptyAsync(
+        string url)
+    {
+        return SendWithoutResponseAsync(
+            new HttpRequestMessage(HttpMethod.Post, url));
+    }
+
+    protected Task<ApiResult<bool>> PostEmptyAsync<TRequest>(
         string url,
         TRequest request)
     {
-        try
-        {
-            var requestMessage = new HttpRequestMessage(
-                HttpMethod.Post,
-                url)
+        return SendWithoutResponseAsync(
+            new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Content = JsonContent.Create(request)
-            };
-
-            if (UserSession.IsAuthenticated)
-            {
-                requestMessage.Headers.Authorization =
-                    new AuthenticationHeaderValue(
-                        "Bearer",
-                        UserSession.AccessToken);
-            }
-
-            var response = await HttpClient.SendAsync(requestMessage);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content
-                    .ReadFromJsonAsync<ErrorResponse>();
-
-                if (error != null)
-                {
-                    return ApiResult<bool>.Failure(error.Message);
-                }
-
-                return ApiResult<bool>.Failure(
-                    $"HTTP {(int)response.StatusCode}");
-            }
-
-            return ApiResult<bool>.Success(true);
-        }
-        catch (HttpRequestException)
-        {
-            return ApiResult<bool>.Failure("Unable to connect to the server");
-        }
-        catch (TaskCanceledException)
-        {
-            return ApiResult<bool>.Failure("The request timed out");
-        }
-        catch (Exception ex)
-        {
-            return ApiResult<bool>.Failure($"Unexpected error: {ex.Message}");
-        }
+            });
     }
 
     protected static string AppendQueryString(
