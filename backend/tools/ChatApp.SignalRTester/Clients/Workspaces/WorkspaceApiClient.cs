@@ -77,4 +77,13 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
             $"api/workspaces/{workspaceId}/members",
             request);
     }
+
+    public Task<ApiResult<bool>> ChangeMemberRoleAsync(
+        Guid workspaceId,
+        ChangeWorkspaceMemberRoleRequestDto request)
+    {
+        return PutWithoutResponseAsync(
+            $"api/workspaces/{workspaceId}/members/role",
+            request);
+    }
 }

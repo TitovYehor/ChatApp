@@ -30,4 +30,8 @@ public interface IWorkspaceApiClient
     Task<ApiResult<bool>> RemoveMemberAsync(
         Guid workspaceId,
         RemoveWorkspaceMemberRequestDto request);
+
+    Task<ApiResult<bool>> ChangeMemberRoleAsync(
+        Guid workspaceId,
+        ChangeWorkspaceMemberRoleRequestDto request);
 }
