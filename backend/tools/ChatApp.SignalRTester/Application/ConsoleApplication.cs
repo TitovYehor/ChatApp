@@ -79,6 +79,9 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.RemoveWorkspaceMember:
                     await _workspaceWorkflow.RemoveMemberAsync();
                     break;
+                case MenuOption.ChangeWorkspaceMemberRole:
+                    await _workspaceWorkflow.ChangeMemberRoleAsync();
+                    break;
                 case MenuOption.JoinWorkspace:
                     await _workspaceWorkflow.JoinWorkspaceAsync();
                     break;
