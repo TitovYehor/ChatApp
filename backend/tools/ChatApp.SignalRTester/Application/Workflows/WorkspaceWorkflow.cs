@@ -1,4 +1,5 @@
-﻿using ChatApp.Contracts.Workspaces.Requests;
+﻿using ChatApp.Contracts.Workspaces.Enums;
+using ChatApp.Contracts.Workspaces.Requests;
 using ChatApp.SignalRTester.Application.Services;
 using ChatApp.SignalRTester.Clients.Workspaces;
 using ChatApp.SignalRTester.Session;
@@ -303,6 +304,52 @@ public class WorkspaceWorkflow
         }
 
         _consoleOutput.WriteSuccess("Member removed successfully");
+    }
+
+    public async Task ChangeMemberRoleAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("No workspace selected");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Change member role");
+
+        var user = _consoleInput.ReadRequiredString(
+            "Username or email");
+
+        Console.WriteLine();
+        Console.WriteLine("1. Member");
+        Console.WriteLine("2. Admin");
+
+        var option = _consoleInput.ReadInt(
+            "Role",
+            1,
+            2);
+
+        var role = option == 2
+            ? WorkspaceRoleDto.Admin
+            : WorkspaceRoleDto.Member;
+
+        var request = new ChangeWorkspaceMemberRoleRequestDto
+        {
+            UsernameOrEmail = user,
+            Role = role
+        };
+
+        var result = await _workspaceApiClient
+            .ChangeMemberRoleAsync(
+                _userSession.CurrentWorkspace.Id,
+                request);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSuccess("Member role updated");
     }
 
     private async Task RefreshWorkspaceRoleAsync()
