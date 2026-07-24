@@ -236,6 +236,12 @@ public class WorkspaceWorkflow
             return;
         }
 
+        if (_userSession.CurrentWorkspaceRole == WorkspaceRoleDto.Owner)
+        {
+            _consoleOutput.WriteError("Transfer workspace ownership before leaving");
+            return;
+        }
+
         var confirmed = _consoleInput.ReadConfirmation(
             $"Leave workspace '{_userSession.CurrentWorkspace.Name}'?");
 
@@ -350,6 +356,46 @@ public class WorkspaceWorkflow
         }
 
         _consoleOutput.WriteSuccess("Member role updated");
+    }
+
+    public async Task TransferOwnershipAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("No workspace selected");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Transfer Workspace Ownership");
+
+        var usernameOrEmail = _consoleInput.ReadRequiredString(
+            "Username or email");
+
+        var confirm = _consoleInput.ReadRequiredString(
+            "Type TRANSFER to confirm");
+
+        if (!confirm.Equals(
+                "TRANSFER",
+                StringComparison.Ordinal))
+        {
+            _consoleOutput.WriteInfo("Operation cancelled");
+            return;
+        }
+
+        var result = await _workspaceApiClient.TransferOwnershipAsync(
+            _userSession.CurrentWorkspace.Id,
+            new TransferWorkspaceOwnershipRequestDto
+            {
+                UsernameOrEmail = usernameOrEmail
+            });
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSuccess("Workspace ownership transferred");
     }
 
     private async Task RefreshWorkspaceRoleAsync()
