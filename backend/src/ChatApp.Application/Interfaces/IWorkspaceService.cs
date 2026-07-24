@@ -42,4 +42,9 @@ public interface IWorkspaceService
         Guid workspaceId,
         Guid currentUserId,
         ChangeWorkspaceMemberRoleRequestDto request);
+
+    Task TransferOwnershipAsync(
+        Guid workspaceId,
+        Guid currentUserId,
+        TransferWorkspaceOwnershipRequestDto request);
 }

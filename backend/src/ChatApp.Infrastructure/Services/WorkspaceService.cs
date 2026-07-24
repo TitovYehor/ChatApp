@@ -230,10 +230,9 @@ public class WorkspaceService : IWorkspaceService
             throw new ForbiddenException("User is not a workspace member");
         }
 
-        if (membership.Role == WorkspaceRole.Owner &&
-            workspace.Members.Count(x => x.Role == WorkspaceRole.Owner) == 1)
+        if (membership.Role == WorkspaceRole.Owner)
         {
-            throw new ConflictException("Workspace owner cannot leave while being the only owner");
+            throw new ConflictException("Transfer workspace ownership before leaving the workspace");
         }
 
         _dbContext.WorkspaceMembers.Remove(membership);
@@ -352,6 +351,56 @@ public class WorkspaceService : IWorkspaceService
             WorkspaceRoleDto.Admin => WorkspaceRole.Admin,
             _ => WorkspaceRole.Member
         };
+
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task TransferOwnershipAsync(
+        Guid workspaceId,
+        Guid currentUserId,
+        TransferWorkspaceOwnershipRequestDto request)
+    {
+        var workspace = await _dbContext.Workspaces
+            .Include(x => x.Members)
+            .ThenInclude(x => x.User)
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var owner = workspace.Members
+            .FirstOrDefault(x => x.UserId == currentUserId);
+
+        if (owner == null)
+        {
+            throw new ForbiddenException("Not a workspace member");
+        }
+
+        if (owner.Role != WorkspaceRole.Owner)
+        {
+            throw new ForbiddenException("Only workspace owner can transfer ownership");
+        }
+
+        var newOwner = workspace.Members
+            .FirstOrDefault(x =>
+                x.User.Email == request.UsernameOrEmail ||
+                x.User.Username == request.UsernameOrEmail);
+
+        if (newOwner == null)
+        {
+            throw new NotFoundException("User not found");
+        }
+
+        if (newOwner.UserId == currentUserId)
+        {
+            throw new ConflictException("You already own this workspace");
+        }
+
+        owner.Role = WorkspaceRole.Admin;
+
+        newOwner.Role = WorkspaceRole.Owner;
 
         await _dbContext.SaveChangesAsync();
     }
