@@ -24,25 +24,27 @@ public enum MenuOption
 
     ChangeWorkspaceMemberRole = 10,
 
-    JoinWorkspace = 11,
+    TransferWorkspaceOwnership = 11,
 
-    CreateChannel = 12,
+    JoinWorkspace = 12,
 
-    ListChannels = 13,
+    CreateChannel = 13,
 
-    SelectChannel = 14,
+    ListChannels = 14,
 
-    LoadMessages = 15,
+    SelectChannel = 15,
 
-    SendMessage = 16,
+    LoadMessages = 16,
 
-    UpdateMessage = 17,
+    SendMessage = 17,
 
-    DeleteMessage = 18,
+    UpdateMessage = 18,
 
-    ConnectSignalR = 19,
+    DeleteMessage = 19,
 
-    DisconnectSignalR = 20,
+    ConnectSignalR = 20,
 
-    Logout = 21,
+    DisconnectSignalR = 21,
+
+    Logout = 22,
 }
