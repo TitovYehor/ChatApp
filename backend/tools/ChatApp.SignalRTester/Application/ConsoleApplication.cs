@@ -82,6 +82,9 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.ChangeWorkspaceMemberRole:
                     await _workspaceWorkflow.ChangeMemberRoleAsync();
                     break;
+                case MenuOption.TransferWorkspaceOwnership:
+                    await _workspaceWorkflow.TransferOwnershipAsync();
+                    break;
                 case MenuOption.JoinWorkspace:
                     await _workspaceWorkflow.JoinWorkspaceAsync();
                     break;
