@@ -146,4 +146,19 @@ public class WorkspacesController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPut("{workspaceId:guid}/ownership")]
+    public async Task<IActionResult> TransferOwnership(
+        Guid workspaceId,
+        TransferWorkspaceOwnershipRequestDto request)
+    {
+        var currentUserId = _currentUserService.GetUserId();
+
+        await _workspaceService.TransferOwnershipAsync(
+            workspaceId,
+            currentUserId,
+            request);
+
+        return NoContent();
+    }
 }
