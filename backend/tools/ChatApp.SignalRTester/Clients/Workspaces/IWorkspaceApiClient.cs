@@ -34,4 +34,8 @@ public interface IWorkspaceApiClient
     Task<ApiResult<bool>> ChangeMemberRoleAsync(
         Guid workspaceId,
         ChangeWorkspaceMemberRoleRequestDto request);
+
+    Task<ApiResult<bool>> TransferOwnershipAsync(
+        Guid workspaceId,
+        TransferWorkspaceOwnershipRequestDto request);
 }

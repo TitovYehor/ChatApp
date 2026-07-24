@@ -86,4 +86,13 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
             $"api/workspaces/{workspaceId}/members/role",
             request);
     }
+
+    public Task<ApiResult<bool>> TransferOwnershipAsync(
+        Guid workspaceId,
+        TransferWorkspaceOwnershipRequestDto request)
+    {
+        return PutWithoutResponseAsync(
+            $"api/workspaces/{workspaceId}/ownership",
+            request);
+    }
 }
