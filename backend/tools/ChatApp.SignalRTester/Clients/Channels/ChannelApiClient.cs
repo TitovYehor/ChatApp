@@ -40,4 +40,20 @@ public class ChannelApiClient: ApiClientBase, IChannelApiClient
         return GetAsync<ChannelResponseDto>(
             $"api/channels/{channelId}");
     }
+
+    public Task<ApiResult<ChannelResponseDto>> UpdateAsync(
+        Guid channelId,
+        UpdateChannelRequestDto request)
+    {
+        return PutAsync<UpdateChannelRequestDto, ChannelResponseDto>(
+            $"api/channels/{channelId}",
+            request);
+    }
+
+    public Task<ApiResult<bool>> DeleteAsync(
+        Guid channelId)
+    {
+        return DeleteRequestAsync(
+            $"api/channels/{channelId}");
+    }
 }

@@ -15,4 +15,11 @@ public interface IChannelApiClient
 
     Task<ApiResult<ChannelResponseDto>> GetByIdAsync(
         Guid channelId);
+
+    Task<ApiResult<ChannelResponseDto>> UpdateAsync(
+        Guid channelId,
+        UpdateChannelRequestDto request);
+
+    Task<ApiResult<bool>> DeleteAsync(
+        Guid channelId);
 }
