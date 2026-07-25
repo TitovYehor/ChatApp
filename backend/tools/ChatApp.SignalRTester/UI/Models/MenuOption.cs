@@ -34,17 +34,21 @@ public enum MenuOption
 
     SelectChannel = 15,
 
-    LoadMessages = 16,
+    RenameChannel = 16,
 
-    SendMessage = 17,
+    DeleteChannel = 17,
 
-    UpdateMessage = 18,
+    LoadMessages = 18,
 
-    DeleteMessage = 19,
+    SendMessage = 19,
 
-    ConnectSignalR = 20,
+    UpdateMessage = 20,
 
-    DisconnectSignalR = 21,
+    DeleteMessage = 21,
 
-    Logout = 22,
+    ConnectSignalR = 22,
+
+    DisconnectSignalR = 23,
+
+    Logout = 24,
 }
