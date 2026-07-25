@@ -170,7 +170,8 @@ public class ConsoleMenu : IConsoleMenu
                 Text = "Create channel",
                 Option = MenuOption.CreateChannel,
                 Visible = _session.IsAuthenticated &&
-                          _session.CurrentWorkspace != null
+                          _session.CurrentWorkspace != null &&
+                          _session.CanManageWorkspace
             },
             new MenuItem
             {
@@ -196,7 +197,8 @@ public class ConsoleMenu : IConsoleMenu
                 Text = "Rename channel",
                 Option = MenuOption.RenameChannel,
                 Visible = _session.IsAuthenticated &&
-                          _session.CurrentWorkspace != null
+                          _session.CurrentWorkspace != null &&
+                          _session.CanManageWorkspace
             },
             new MenuItem
             {
@@ -204,7 +206,8 @@ public class ConsoleMenu : IConsoleMenu
                 Text = "Delete channel",
                 Option = MenuOption.DeleteChannel,
                 Visible = _session.IsAuthenticated &&
-                          _session.CurrentWorkspace != null
+                          _session.CurrentWorkspace != null &&
+                          _session.CanManageWorkspace
             },
 
             new MenuItem
