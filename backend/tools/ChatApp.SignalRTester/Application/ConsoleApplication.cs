@@ -99,6 +99,12 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.SelectChannel:
                     await _channelWorkflow.SelectChannelAsync();
                     break;
+                case MenuOption.RenameChannel:
+                    await _channelWorkflow.RenameChannelAsync();
+                    break;
+                case MenuOption.DeleteChannel:
+                    await _channelWorkflow.DeleteChannelAsync();
+                    break;
 
                 case MenuOption.LoadMessages:
                     await _messageWorkflow.LoadMessagesAsync();
