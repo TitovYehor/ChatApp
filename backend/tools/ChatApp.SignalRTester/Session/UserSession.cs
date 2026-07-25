@@ -72,6 +72,11 @@ public class UserSession
         CurrentWorkspaceRole = null;
     }
 
+    public void ClearChannel()
+    {
+        CurrentChannel = null;
+    }
+
     public Guid? SelectChannel(
         ChannelResponseDto channel)
     {
