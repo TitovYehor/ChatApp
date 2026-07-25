@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Channels.Requests;
 using ChatApp.SignalRTester.Application.Services;
+using ChatApp.SignalRTester.Application.State;
 using ChatApp.SignalRTester.Clients.Channels;
 using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI.Input;
@@ -17,6 +18,8 @@ public class ChannelWorkflow
 
     private readonly MessageWorkflow _messageWorkflow;
 
+    private readonly MessageCache _messageCache;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly IConsoleOutput _consoleOutput;
@@ -26,6 +29,7 @@ public class ChannelWorkflow
         RealtimeSessionManager realtimeSessionManager,
         UserSession userSession,
         MessageWorkflow messageWorkflow,
+        MessageCache messageCache,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     {
@@ -33,6 +37,7 @@ public class ChannelWorkflow
         _realtimeSessionManager = realtimeSessionManager;
         _userSession = userSession;
         _messageWorkflow = messageWorkflow;
+        _messageCache = messageCache;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
     }
@@ -172,5 +177,134 @@ public class ChannelWorkflow
         await _messageWorkflow.LoadMessagesAsync();
 
         _consoleOutput.WriteSuccess($"Channel '{channel.Name}' selected");
+    }
+
+    public async Task RenameChannelAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("Please select a workspace first");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Rename Channel");
+
+        var result = await _channelApiClient
+            .GetByWorkspaceIdAsync(
+                _userSession.CurrentWorkspace.Id);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        var channels = result.Data!;
+
+        if (channels.Count == 0)
+        {
+            _consoleOutput.WriteInfo("No channels found");
+            return;
+        }
+
+        _consoleOutput.WriteChannelSelection(channels);
+
+        var selection = _consoleInput.ReadInt(
+            "Select channel",
+            1,
+            channels.Count);
+
+        var channel = channels[selection - 1];
+
+        var newName = _consoleInput.ReadRequiredString(
+            "New channel name");
+
+        var updateResult = await _channelApiClient.UpdateAsync(
+            channel.Id,
+            new UpdateChannelRequestDto
+            {
+                Name = newName
+            });
+
+        if (!updateResult.IsSuccess)
+        {
+            _consoleOutput.WriteError(updateResult.ErrorMessage!);
+            return;
+        }
+
+        if (_userSession.CurrentChannel?.Id == channel.Id)
+        {
+            _userSession.SelectChannel(updateResult.Data!);
+        }
+
+        _consoleOutput.WriteSuccess("Channel renamed successfully");
+    }
+
+    public async Task DeleteChannelAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("Please select a workspace first");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Delete Channel");
+
+        var result = await _channelApiClient.GetByWorkspaceIdAsync(
+            _userSession.CurrentWorkspace.Id);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        var channels = result.Data!;
+
+        if (channels.Count == 0)
+        {
+            _consoleOutput.WriteInfo("No channels found");
+            return;
+        }
+
+        _consoleOutput.WriteChannelSelection(channels);
+
+        var selection = _consoleInput.ReadInt(
+            "Select channel",
+            1,
+            channels.Count);
+
+        var channel = channels[selection - 1];
+
+        var confirm = _consoleInput.ReadRequiredString(
+            $"Type DELETE to remove '{channel.Name}'");
+
+        if (!confirm.Equals(
+                "DELETE",
+                StringComparison.Ordinal))
+        {
+            _consoleOutput.WriteInfo("Operation cancelled");
+            return;
+        }
+
+        var deleteResult = await _channelApiClient.DeleteAsync(
+            channel.Id);
+
+        if (!deleteResult.IsSuccess)
+        {
+            _consoleOutput.WriteError(deleteResult.ErrorMessage!);
+            return;
+        }
+
+        if (_userSession.CurrentChannel?.Id == channel.Id)
+        {
+            await _realtimeSessionManager.LeaveChannelAsync(channel.Id);
+
+            _userSession.ClearChannel();
+
+            _messageCache.Clear();
+        }
+
+        _consoleOutput.WriteSuccess("Channel deleted successfully");
     }
 }
