@@ -44,46 +44,44 @@ public class WorkspaceService : IWorkspaceService
 
         await _dbContext.SaveChangesAsync();
 
-        return workspace.ToDto();
+        return workspace.ToDto(WorkspaceRole.Owner);
     }
 
     public async Task<WorkspaceResponseDto> GetByIdAsync(
         Guid workspaceId,
         Guid userId)
     {
-        var isMember = await _dbContext.WorkspaceMembers
-            .AnyAsync(x =>
-                x.WorkspaceId == workspaceId &&
-                x.UserId == userId);
-
-        if (!isMember)
-        {
-            throw new ForbiddenException("Workspace is forbidden for non members");
-        }
-
         var workspace = await _dbContext.Workspaces
-            .FirstOrDefaultAsync(x =>
-                x.Id == workspaceId);
+            .Include(x => x.Members)
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
 
         if (workspace == null)
         {
             throw new NotFoundException("Workspace not found");
         }
 
-        return workspace.ToDto();
+        var membership = workspace.Members
+            .FirstOrDefault(x => x.UserId == userId);
+
+        if (membership == null)
+        {
+            throw new ForbiddenException("Workspace is forbidden for non members");
+        }
+
+        return workspace.ToDto(membership.Role);
     }
 
     public async Task<IReadOnlyCollection<WorkspaceResponseDto>> GetAllAsync(
         Guid userId)
     {
-        var workspaces = await _dbContext.Workspaces
+        var memberships = await _dbContext.WorkspaceMembers
             .AsNoTracking()
-            .Where(x =>
-                x.Members.Any(m => m.UserId == userId))
+            .Include(x => x.Workspace)
+            .Where(x => x.UserId == userId)
             .ToListAsync();
 
-        return workspaces
-            .Select(x => x.ToDto())
+        return memberships
+            .Select(x => x.Workspace.ToDto(x.Role))
             .ToList();
     }
 
@@ -346,11 +344,7 @@ public class WorkspaceService : IWorkspaceService
             throw new ConflictException("Cannot modify workspace owner");
         }
 
-        member.Role = request.Role switch
-        {
-            WorkspaceRoleDto.Admin => WorkspaceRole.Admin,
-            _ => WorkspaceRole.Member
-        };
+        member.Role = request.Role.ToDomain();
 
         await _dbContext.SaveChangesAsync();
     }
