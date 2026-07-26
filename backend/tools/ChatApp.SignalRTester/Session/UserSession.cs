@@ -56,13 +56,7 @@ public class UserSession
         CurrentWorkspace = workspace;
         CurrentChannel = null;
 
-        CurrentWorkspaceRole = null;
-    }
-
-    public void SetWorkspaceRole(
-        WorkspaceRoleDto role)
-    {
-        CurrentWorkspaceRole = role;
+        CurrentWorkspaceRole = workspace.CurrentUserRole;
     }
 
     public void ClearWorkspace()
