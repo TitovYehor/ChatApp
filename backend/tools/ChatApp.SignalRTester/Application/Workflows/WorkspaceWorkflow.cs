@@ -141,8 +141,6 @@ public class WorkspaceWorkflow
 
         _userSession.SelectWorkspace(workspace);
 
-        await RefreshWorkspaceRoleAsync();
-
         _consoleOutput.WriteInfo($"Role: {_userSession.CurrentWorkspaceRole}");
 
         _consoleOutput.WriteSuccess($"Workspace '{workspace.Name}' selected");
@@ -395,30 +393,14 @@ public class WorkspaceWorkflow
             return;
         }
 
+        var workspace = await _workspaceApiClient.GetByIdAsync(
+            _userSession.CurrentWorkspace!.Id);
+
+        if (workspace.IsSuccess)
+        {
+            _userSession.SelectWorkspace(workspace.Data!);
+        }
+
         _consoleOutput.WriteSuccess("Workspace ownership transferred");
-    }
-
-    private async Task RefreshWorkspaceRoleAsync()
-    {
-        if (_userSession.CurrentWorkspace == null)
-        {
-            return;
-        }
-
-        var result = await _workspaceApiClient
-            .GetMembersAsync(_userSession.CurrentWorkspace.Id);
-
-        if (!result.IsSuccess)
-        {
-            return;
-        }
-
-        var me = result.Data!
-            .FirstOrDefault(x => x.UserId == _userSession.UserId);
-
-        if (me != null)
-        {
-            _userSession.SetWorkspaceRole(me.Role);
-        }
     }
 }
