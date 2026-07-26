@@ -1,4 +1,6 @@
-﻿namespace ChatApp.Contracts.Workspaces.Responses;
+﻿using ChatApp.Contracts.Workspaces.Enums;
+
+namespace ChatApp.Contracts.Workspaces.Responses;
 
 public class WorkspaceResponseDto
 {
@@ -9,4 +11,6 @@ public class WorkspaceResponseDto
     public string Description { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
+
+    public WorkspaceRoleDto? CurrentUserRole { get; set; }
 }
