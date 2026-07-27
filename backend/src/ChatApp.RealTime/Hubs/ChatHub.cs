@@ -12,18 +12,28 @@ public sealed class ChatHub : Hub
 {
     private readonly IChannelAccessService _channelAccessService;
 
+    private readonly IPresenceService _presenceService;
+
     private readonly ILogger<ChatHub> _logger;
 
     public ChatHub(
         IChannelAccessService channelAccessService,
+        IPresenceService presenceService,
         ILogger<ChatHub> logger)
     {
         _channelAccessService = channelAccessService;
+        _presenceService = presenceService;
         _logger = logger;
     }
 
     public override async Task OnConnectedAsync()
     {
+        var userId = GetCurrentUserId();
+
+        await _presenceService.UserConnectedAsync(
+            userId,
+            Context.ConnectionId);
+
         _logger.LogInformation(
             "Connection established. ConnectionId: {ConnectionId}. UserId: {UserId}",
             Context.ConnectionId,
@@ -35,6 +45,12 @@ public sealed class ChatHub : Hub
     public override async Task OnDisconnectedAsync(
         Exception? exception)
     {
+        var userId = GetCurrentUserId();
+
+        await _presenceService.UserDisconnectedAsync(
+            userId,
+            Context.ConnectionId);
+
         _logger.LogInformation(
             "Connection closed. ConnectionId: {ConnectionId}. UserId: {UserId}",
             Context.ConnectionId,
