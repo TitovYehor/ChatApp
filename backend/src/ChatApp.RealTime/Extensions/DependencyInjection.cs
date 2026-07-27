@@ -19,6 +19,8 @@ public static class DependencyInjection
 
         services.AddSingleton<IOnlineUserTracker, OnlineUserTracker>();
 
+        services.AddScoped<IPresenceService, PresenceService>();
+
         return services;
     }
 }
