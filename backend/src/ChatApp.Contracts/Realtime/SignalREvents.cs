@@ -10,4 +10,7 @@ public static class SignalREvents
 
     public const string MessageDeleted =
         nameof(MessageDeleted);
+
+    public const string UserPresenceChanged =
+        nameof(UserPresenceChanged);
 }
