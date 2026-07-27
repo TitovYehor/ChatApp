@@ -17,6 +17,8 @@ public static class DependencyInjection
 
         services.AddScoped<IChatNotifier, SignalRChatNotifier>();
 
+        services.AddSingleton<IOnlineUserTracker, OnlineUserTracker>();
+
         return services;
     }
 }
