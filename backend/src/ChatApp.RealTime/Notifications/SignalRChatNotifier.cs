@@ -52,4 +52,15 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 SignalREvents.MessageDeleted,
                 response);
     }
+
+    public async Task UserPresenceChangedAsync(
+        IEnumerable<Guid> userIds,
+        UserPresenceChangedResponseDto response)
+    {
+        await _hubContext.Clients
+            .Users(userIds.Select(x => x.ToString()))
+            .SendAsync(
+                SignalREvents.UserPresenceChanged,
+                response);
+    }
 }
