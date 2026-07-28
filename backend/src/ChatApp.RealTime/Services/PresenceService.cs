@@ -1,23 +1,32 @@
 ﻿using ChatApp.Application.Interfaces;
+using ChatApp.Contracts.Realtime;
 using Microsoft.Extensions.Logging;
 
 namespace ChatApp.RealTime.Services;
 
 public class PresenceService : IPresenceService
 {
+    private readonly IWorkspaceMemberLookupService _lookupService;
+
     private readonly IOnlineUserTracker _onlineUserTracker;
+
+    private readonly IChatNotifier _chatNotifier;
 
     private readonly ILogger<PresenceService> _logger;
 
     public PresenceService(
+        IWorkspaceMemberLookupService lookupService,
         IOnlineUserTracker onlineUserTracker,
+        IChatNotifier chatNotifier,
         ILogger<PresenceService> logger)
     {
+        _lookupService = lookupService;
         _onlineUserTracker = onlineUserTracker;
+        _chatNotifier = chatNotifier;
         _logger = logger;
     }
 
-    public Task UserConnectedAsync(
+    public async Task UserConnectedAsync(
         Guid userId,
         string connectionId)
     {
@@ -25,16 +34,34 @@ public class PresenceService : IPresenceService
             userId,
             connectionId);
 
-        if (becameOnline)
+        if (!becameOnline)
         {
-            _logger.LogInformation("User {UserId} is now online",
-                userId);
+            return;
         }
 
-        return Task.CompletedTask;
+        var lookup = await _lookupService
+            .GetPresenceLookupAsync(userId);
+
+        var recipients = lookup.RecipientUserIds
+            .Where(_onlineUserTracker.IsOnline)
+            .ToList();
+
+        if (recipients.Count == 0)
+        {
+            return;
+        }
+
+        await _chatNotifier.UserPresenceChangedAsync(
+            recipients,
+            new UserPresenceChangedResponseDto
+            {
+                UserId = lookup.UserId,
+                Username = lookup.Username,
+                IsOnline = true
+            });
     }
 
-    public Task UserDisconnectedAsync(
+    public async Task UserDisconnectedAsync(
         Guid userId,
         string connectionId)
     {
@@ -42,12 +69,30 @@ public class PresenceService : IPresenceService
             userId,
             connectionId);
 
-        if (becameOffline)
+        if (!becameOffline)
         {
-            _logger.LogInformation("User {UserId} went offline",
-                userId);
+            return;
         }
 
-        return Task.CompletedTask;
+        var lookup = await _lookupService
+            .GetPresenceLookupAsync(userId);
+
+        var recipients = lookup.RecipientUserIds
+            .Where(_onlineUserTracker.IsOnline)
+            .ToList();
+
+        if (recipients.Count == 0)
+        {
+            return;
+        }
+
+        await _chatNotifier.UserPresenceChangedAsync(
+            recipients,
+            new UserPresenceChangedResponseDto
+            {
+                UserId = lookup.UserId,
+                Username = lookup.Username,
+                IsOnline = false
+            });
     }
 }
