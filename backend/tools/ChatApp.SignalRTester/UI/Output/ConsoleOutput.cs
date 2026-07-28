@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Channels.Responses;
 using ChatApp.Contracts.Messages.Responses;
+using ChatApp.Contracts.Realtime;
 using ChatApp.Contracts.Workspaces.Responses;
 
 namespace ChatApp.SignalRTester.UI.Output;
@@ -230,6 +231,23 @@ public class ConsoleOutput : IConsoleOutput
         WriteSeparator();
 
         WriteInfo($"Message deleted: {messageId}");
+
+        WriteSeparator();
+    }
+
+    public void WriteUserPresenceChanged(
+        UserPresenceChangedResponseDto response)
+    {
+        WriteSeparator();
+
+        if (response.IsOnline)
+        {
+            WriteSuccess($"{response.Username} is now online");
+        }
+        else
+        {
+            WriteInfo($"{response.Username} went offline");
+        }
 
         WriteSeparator();
     }

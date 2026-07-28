@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Channels.Responses;
 using ChatApp.Contracts.Messages.Responses;
+using ChatApp.Contracts.Realtime;
 using ChatApp.Contracts.Workspaces.Responses;
 
 namespace ChatApp.SignalRTester.UI.Output;
@@ -45,4 +46,7 @@ public interface IConsoleOutput
 
     void WriteRealtimeMessageDeleted(
         Guid messageId);
+
+    void WriteUserPresenceChanged(
+        UserPresenceChangedResponseDto response);
 }
