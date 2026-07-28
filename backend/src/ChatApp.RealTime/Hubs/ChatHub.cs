@@ -45,11 +45,12 @@ public sealed class ChatHub : Hub
     public override async Task OnDisconnectedAsync(
         Exception? exception)
     {
-        var userId = GetCurrentUserId();
-
-        await _presenceService.UserDisconnectedAsync(
-            userId,
-            Context.ConnectionId);
+        if (Context.UserIdentifier != null)
+        {
+            await _presenceService.UserDisconnectedAsync(
+                Guid.Parse(Context.UserIdentifier),
+                Context.ConnectionId);
+        }
 
         _logger.LogInformation(
             "Connection closed. ConnectionId: {ConnectionId}. UserId: {UserId}",
