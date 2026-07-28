@@ -44,6 +44,8 @@ public class SignalRClient : ISignalRClient
 
     public event Action<MessageDeletedResponseDto>? MessageDeleted;
 
+    public event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
+
     public event Action? Connected;
 
     public event Action? Disconnected;
@@ -138,6 +140,10 @@ public class SignalRClient : ISignalRClient
         _connection.On<MessageDeletedResponseDto>(
             SignalREvents.MessageDeleted,
             RaiseMessageDeleted);
+
+        _connection.On<UserPresenceChangedResponseDto>(
+            SignalREvents.UserPresenceChanged,
+            RaiseUserPresenceChanged);
     }
 
     private void RaiseMessageCreated(
@@ -156,5 +162,11 @@ public class SignalRClient : ISignalRClient
         MessageDeletedResponseDto response)
     {
         MessageDeleted?.Invoke(response);
+    }
+
+    private void RaiseUserPresenceChanged(
+        UserPresenceChangedResponseDto response)
+    {
+        UserPresenceChanged?.Invoke(response);
     }
 }

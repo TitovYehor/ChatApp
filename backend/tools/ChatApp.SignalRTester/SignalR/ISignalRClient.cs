@@ -1,4 +1,5 @@
 ﻿using ChatApp.Contracts.Messages.Responses;
+using ChatApp.Contracts.Realtime;
 
 namespace ChatApp.SignalRTester.SignalR;
 
@@ -21,6 +22,8 @@ public interface ISignalRClient
     event Action<MessageResponseDto>? MessageUpdated;
 
     event Action<MessageDeletedResponseDto>? MessageDeleted;
+
+    event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
 
     event Action? Connected;
 
