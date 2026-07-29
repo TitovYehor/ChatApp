@@ -40,6 +40,7 @@ builder.Services.AddSingleton<MessageCache>();
 
 builder.Services.AddSingleton<MessageRealtimeHandler>();
 
+builder.Services.AddSingleton<IApplicationInitializer,PresenceRealtimeHandler>();
 builder.Services.AddSingleton<IApplicationInitializer>(serviceProvider =>
         serviceProvider.GetRequiredService<MessageRealtimeHandler>());
 
