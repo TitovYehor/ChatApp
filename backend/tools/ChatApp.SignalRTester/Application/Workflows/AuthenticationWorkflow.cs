@@ -18,6 +18,8 @@ public class AuthenticationWorkflow
 
     private readonly MessageCache _messageCache;
 
+    private readonly OnlineUsersCache _onlineUsersCache;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly IConsoleOutput _consoleOutput;
@@ -27,6 +29,7 @@ public class AuthenticationWorkflow
         UserSession userSession,
         RealtimeSessionManager realtimeSessionManager,
         MessageCache messageCache,
+        OnlineUsersCache onlineUsersCache,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     { 
@@ -34,6 +37,7 @@ public class AuthenticationWorkflow
         _userSession = userSession;
         _realtimeSessionManager = realtimeSessionManager;
         _messageCache = messageCache;
+        _onlineUsersCache = onlineUsersCache;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
     }
@@ -120,6 +124,8 @@ public class AuthenticationWorkflow
         await _realtimeSessionManager.DisconnectAsync();
 
         _messageCache.Clear();
+
+        _onlineUsersCache.Clear();
 
         _userSession.SignOut();
 
