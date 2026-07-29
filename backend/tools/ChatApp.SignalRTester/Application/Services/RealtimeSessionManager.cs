@@ -1,4 +1,5 @@
-﻿using ChatApp.SignalRTester.Session;
+﻿using ChatApp.SignalRTester.Application.State;
+using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.SignalR;
 
 namespace ChatApp.SignalRTester.Application.Services;
@@ -11,14 +12,18 @@ public class RealtimeSessionManager
 
     private readonly UserSession _userSession;
 
+    private readonly OnlineUsersCache _onlineUsersCache;
+
     public RealtimeSessionManager(
         ISignalRClient signalRClient,
         RealtimeSession realtimeSession,
-        UserSession userSession)
+        UserSession userSession,
+        OnlineUsersCache onlineUsersCache)
     {
         _signalRClient = signalRClient;
         _realtimeSession = realtimeSession;
         _userSession = userSession;
+        _onlineUsersCache = onlineUsersCache;
 
         _signalRClient.Connected += OnConnected;
 
@@ -51,6 +56,8 @@ public class RealtimeSessionManager
         {
             await _signalRClient.DisconnectAsync();
         }
+
+        _onlineUsersCache.Clear();
 
         _realtimeSession.MarkDisconnected();
     }
