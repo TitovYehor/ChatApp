@@ -37,6 +37,7 @@ builder.Services.AddSingleton<RealtimeSession>();
 builder.Services.AddSingleton<IAccessTokenProvider, AccessTokenProvider>();
 
 builder.Services.AddSingleton<MessageCache>();
+builder.Services.AddSingleton<OnlineUsersCache>();
 
 builder.Services.AddSingleton<MessageRealtimeHandler>();
 
