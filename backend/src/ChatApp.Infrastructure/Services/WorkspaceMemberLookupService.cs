@@ -1,5 +1,6 @@
 ﻿using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
+using ChatApp.Contracts.Realtime;
 using ChatApp.Contracts.Workspaces.Responses;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -45,5 +46,26 @@ public class WorkspaceMemberLookupService
             Username = user.Username,
             RecipientUserIds = recipients
         };
+    }
+
+    public async Task<IReadOnlyCollection<OnlineUserResponseDto>> GetOnlineUsersAsync(
+        Guid userId,
+        IReadOnlyCollection<Guid> onlineUsers)
+    {
+        return await _dbContext.WorkspaceMembers
+            .Where(m => m.UserId != userId)
+            .Where(m =>
+                onlineUsers.Contains(m.UserId))
+            .Where(m =>
+                _dbContext.WorkspaceMembers.Any(x =>
+                    x.UserId == userId &&
+                    x.WorkspaceId == m.WorkspaceId))
+            .Select(m => new OnlineUserResponseDto
+            {
+                UserId = m.User.Id,
+                Username = m.User.Username
+            })
+            .Distinct()
+            .ToListAsync();
     }
 }
