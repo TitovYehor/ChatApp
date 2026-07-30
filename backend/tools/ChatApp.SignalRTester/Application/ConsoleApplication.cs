@@ -88,6 +88,9 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.JoinWorkspace:
                     await _workspaceWorkflow.JoinWorkspaceAsync();
                     break;
+                case MenuOption.ListOnlineUsers:
+                    await _workspaceWorkflow.ListOnlineUsersAsync();
+                    break;
 
                 case MenuOption.CreateChannel:
                     await _channelWorkflow.CreateChannelAsync();
