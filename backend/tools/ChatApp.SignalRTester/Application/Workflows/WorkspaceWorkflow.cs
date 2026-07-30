@@ -1,6 +1,7 @@
 ﻿using ChatApp.Contracts.Workspaces.Enums;
 using ChatApp.Contracts.Workspaces.Requests;
 using ChatApp.SignalRTester.Application.Services;
+using ChatApp.SignalRTester.Application.State;
 using ChatApp.SignalRTester.Clients.Workspaces;
 using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.UI.Input;
@@ -16,6 +17,8 @@ public class WorkspaceWorkflow
 
     private readonly RealtimeSessionManager _realtimeSessionManager;
 
+    private readonly OnlineUsersCache _onlineUsersCache;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly IConsoleOutput _consoleOutput;
@@ -24,12 +27,14 @@ public class WorkspaceWorkflow
         IWorkspaceApiClient workspaceApiClient,
         UserSession userSession,
         RealtimeSessionManager realtimeSessionManager,
+        OnlineUsersCache onlineUsersCache,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     { 
         _workspaceApiClient = workspaceApiClient;
         _userSession = userSession;
         _realtimeSessionManager = realtimeSessionManager;
+        _onlineUsersCache = onlineUsersCache;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
     }
@@ -402,5 +407,32 @@ public class WorkspaceWorkflow
         }
 
         _consoleOutput.WriteSuccess("Workspace ownership transferred");
+    }
+
+    public Task ListOnlineUsersAsync()
+    {
+        _consoleOutput.WriteHeader("Online users");
+
+        var users = _onlineUsersCache.GetAll();
+
+        if (users.Count == 0)
+        {
+            _consoleOutput.WriteInfo("No users are currently online.");
+            return Task.CompletedTask;
+        }
+
+        foreach (var user in users)
+        {
+            if (user.UserId == _userSession.UserId)
+            {
+                _consoleOutput.WriteInfo($"{user.Username} (You)");
+            }
+            else
+            {
+                _consoleOutput.WriteInfo(user.Username);
+            }
+        }
+
+        return Task.CompletedTask;
     }
 }
