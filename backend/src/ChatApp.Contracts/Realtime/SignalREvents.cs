@@ -13,4 +13,7 @@ public static class SignalREvents
 
     public const string UserPresenceChanged =
         nameof(UserPresenceChanged);
+
+    public const string OnlineUsersSnapshot =
+        nameof(OnlineUsersSnapshot);
 }
