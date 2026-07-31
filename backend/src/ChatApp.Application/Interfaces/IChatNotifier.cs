@@ -20,4 +20,8 @@ public interface IChatNotifier
     Task UserPresenceChangedAsync(
         IEnumerable<Guid> userIds,
         UserPresenceChangedResponseDto response);
+
+    Task OnlineUsersSnapshotAsync(
+        Guid userId,
+        IReadOnlyCollection<OnlineUserResponseDto> users);
 }

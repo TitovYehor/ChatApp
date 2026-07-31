@@ -63,4 +63,15 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 SignalREvents.UserPresenceChanged,
                 response);
     }
+
+    public async Task OnlineUsersSnapshotAsync(
+        Guid userId,
+        IReadOnlyCollection<OnlineUserResponseDto> users)
+    {
+        await _hubContext.Clients
+            .User(userId.ToString())
+            .SendAsync(
+                SignalREvents.OnlineUsersSnapshot,
+                users);
+    }
 }
