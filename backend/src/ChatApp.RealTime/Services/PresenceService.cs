@@ -34,6 +34,16 @@ public class PresenceService : IPresenceService
             userId,
             connectionId);
 
+        var onlineUserIds = _onlineUserTracker.GetOnlineUserIds();
+
+        var snapshot = await _lookupService.GetOnlineUsersAsync(
+            userId,
+            onlineUserIds);
+            
+        await _chatNotifier.OnlineUsersSnapshotAsync(
+            userId,
+            snapshot);
+
         if (!becameOnline)
         {
             return;
