@@ -67,8 +67,11 @@ public class OnlineUserTracker : IOnlineUserTracker
         return _connections.ContainsKey(userId);
     }
 
-    public IReadOnlyCollection<Guid> GetOnlineUsers()
+    public IReadOnlyCollection<Guid> GetOnlineUserIds()
     {
-        return _connections.Keys.ToList();
+        lock (_syncRoot)
+        {
+            return _connections.Keys.ToList();
+        }
     }
 }

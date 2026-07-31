@@ -13,5 +13,5 @@ public interface IOnlineUserTracker
     bool IsOnline(
         Guid userId);
 
-    IReadOnlyCollection<Guid> GetOnlineUsers();
+    IReadOnlyCollection<Guid> GetOnlineUserIds();
 }
