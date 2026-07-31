@@ -29,6 +29,9 @@ public class PresenceRealtimeHandler : IApplicationInitializer
         _signalRClient.UserPresenceChanged +=
             OnUserPresenceChanged;
 
+        _signalRClient.OnlineUsersSnapshot +=
+            OnSnapshotReceived;
+
         return Task.CompletedTask;
     }
 
@@ -39,5 +42,11 @@ public class PresenceRealtimeHandler : IApplicationInitializer
 
         _consoleOutput.WriteUserPresenceChanged(
             response);
+    }
+
+    private void OnSnapshotReceived(
+        IReadOnlyCollection<OnlineUserResponseDto> users)
+    {
+        _onlineUsersCache.SetUsers(users);
     }
 }
