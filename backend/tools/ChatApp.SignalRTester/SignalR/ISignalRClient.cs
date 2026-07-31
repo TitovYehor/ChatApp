@@ -25,6 +25,8 @@ public interface ISignalRClient
 
     event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
 
+    event Action<IReadOnlyCollection<OnlineUserResponseDto>>? OnlineUsersSnapshot;
+
     event Action? Connected;
 
     event Action? Disconnected;

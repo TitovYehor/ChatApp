@@ -46,6 +46,8 @@ public class SignalRClient : ISignalRClient
 
     public event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
 
+    public event Action<IReadOnlyCollection<OnlineUserResponseDto>>? OnlineUsersSnapshot;
+
     public event Action? Connected;
 
     public event Action? Disconnected;
@@ -144,6 +146,10 @@ public class SignalRClient : ISignalRClient
         _connection.On<UserPresenceChangedResponseDto>(
             SignalREvents.UserPresenceChanged,
             RaiseUserPresenceChanged);
+
+        _connection.On<IReadOnlyCollection<OnlineUserResponseDto>>(
+            SignalREvents.OnlineUsersSnapshot,
+            RaiseOnlineUsersSnapshot);
     }
 
     private void RaiseMessageCreated(
@@ -168,5 +174,11 @@ public class SignalRClient : ISignalRClient
         UserPresenceChangedResponseDto response)
     {
         UserPresenceChanged?.Invoke(response);
+    }
+
+    private void RaiseOnlineUsersSnapshot(
+        IReadOnlyCollection<OnlineUserResponseDto> users)
+    {
+        OnlineUsersSnapshot?.Invoke(users);
     }
 }
