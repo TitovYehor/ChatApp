@@ -25,6 +25,23 @@ public class OnlineUsersCache
             .ToList();
     }
 
+    public void SetUsers(
+        IEnumerable<OnlineUserResponseDto> users)
+    {
+        _users.Clear();
+
+        foreach (var user in users)
+        {
+            _users[user.UserId] =
+                new UserPresenceChangedResponseDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    IsOnline = true
+                };
+        }
+    }
+
     public void Clear()
     {
         _users.Clear();
