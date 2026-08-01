@@ -16,4 +16,7 @@ public static class SignalREvents
 
     public const string OnlineUsersSnapshot =
         nameof(OnlineUsersSnapshot);
+
+    public const string UserTyping =
+        nameof(UserTyping);
 }
