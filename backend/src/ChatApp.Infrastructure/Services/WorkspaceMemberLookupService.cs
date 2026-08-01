@@ -1,6 +1,6 @@
 ﻿using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
-using ChatApp.Contracts.Realtime;
+using ChatApp.Contracts.Realtime.Responses;
 using ChatApp.Contracts.Workspaces.Responses;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

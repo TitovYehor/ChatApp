@@ -1,5 +1,5 @@
 ﻿using ChatApp.Contracts.Messages.Responses;
-using ChatApp.Contracts.Realtime;
+using ChatApp.Contracts.Realtime.Responses;
 
 namespace ChatApp.Application.Interfaces;
 

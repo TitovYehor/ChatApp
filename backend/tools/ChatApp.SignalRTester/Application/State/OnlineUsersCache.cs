@@ -1,4 +1,4 @@
-﻿using ChatApp.Contracts.Realtime;
+﻿using ChatApp.Contracts.Realtime.Responses;
 
 namespace ChatApp.SignalRTester.Application.State;
 

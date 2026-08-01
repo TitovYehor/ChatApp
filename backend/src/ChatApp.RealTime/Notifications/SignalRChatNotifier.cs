@@ -1,7 +1,8 @@
 ﻿using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.Realtime;
-using ChatApp.Contracts.Realtime;
+using ChatApp.Contracts.Realtime.Responses;
+using ChatApp.Contracts.Realtime.SignalRNamings;
 using ChatApp.RealTime.Hubs;
 using Microsoft.AspNetCore.SignalR;
 

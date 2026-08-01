@@ -1,4 +1,4 @@
-﻿using ChatApp.Contracts.Realtime;
+﻿using ChatApp.Contracts.Realtime.Responses;
 using ChatApp.Contracts.Workspaces.Responses;
 
 namespace ChatApp.Application.Interfaces;

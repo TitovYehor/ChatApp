@@ -1,4 +1,5 @@
 ﻿using ChatApp.Contracts.Realtime;
+using ChatApp.Contracts.Realtime.Responses;
 using ChatApp.SignalRTester.Application.Startup;
 using ChatApp.SignalRTester.Application.State;
 using ChatApp.SignalRTester.SignalR;

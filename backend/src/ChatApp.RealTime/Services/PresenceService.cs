@@ -1,5 +1,5 @@
 ﻿using ChatApp.Application.Interfaces;
-using ChatApp.Contracts.Realtime;
+using ChatApp.Contracts.Realtime.Responses;
 using Microsoft.Extensions.Logging;
 
 namespace ChatApp.RealTime.Services;

@@ -1,5 +1,7 @@
 ﻿using ChatApp.Contracts.Messages.Responses;
-using ChatApp.Contracts.Realtime;
+using ChatApp.Contracts.Realtime.Requests;
+using ChatApp.Contracts.Realtime.Responses;
+using ChatApp.Contracts.Realtime.SignalRNamings;
 using ChatApp.SignalRTester.Configuration;
 using ChatApp.SignalRTester.Session.AuthenticationState;
 using Microsoft.AspNetCore.SignalR.Client;
