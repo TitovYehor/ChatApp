@@ -2,9 +2,14 @@
 
 public static class SignalRGroups
 {
-    public static string Channel(
+    public static string ChannelGroup(
         Guid channelId)
     {
         return $"channel-{channelId}";
+    }
+
+    public static string UserGroup(Guid userId)
+    {
+        return $"user-{userId}";
     }
 }
