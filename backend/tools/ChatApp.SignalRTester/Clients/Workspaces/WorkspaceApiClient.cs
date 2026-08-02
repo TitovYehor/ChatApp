@@ -39,6 +39,16 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
             $"api/workspaces/{workspaceId}");
     }
 
+    public Task<ApiResult<WorkspaceResponseDto>> UpdateAsync(
+        Guid workspaceId,
+        UpdateWorkspaceRequestDto request)
+    {
+        return PutAsync<UpdateWorkspaceRequestDto,
+            WorkspaceResponseDto>(
+                $"api/workspaces/{workspaceId}",
+                request);
+    }
+
     public Task<ApiResult<bool>> AddMemberAsync(
         Guid workspaceId,
         AddWorkspaceMemberRequestDto request)
