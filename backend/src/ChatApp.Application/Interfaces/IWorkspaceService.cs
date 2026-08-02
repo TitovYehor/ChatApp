@@ -16,6 +16,11 @@ public interface IWorkspaceService
     Task<IReadOnlyCollection<WorkspaceResponseDto>> GetAllAsync(
         Guid userId);
 
+    Task<WorkspaceResponseDto> UpdateAsync(
+        Guid workspaceId,
+        Guid userId,
+        UpdateWorkspaceRequestDto request);
+
     Task AddMemberAsync(
         Guid workspaceId,
         Guid currentUserId,

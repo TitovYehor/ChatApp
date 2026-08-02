@@ -85,6 +85,41 @@ public class WorkspaceService : IWorkspaceService
             .ToList();
     }
 
+    public async Task<WorkspaceResponseDto> UpdateAsync(
+        Guid workspaceId,
+        Guid userId,
+        UpdateWorkspaceRequestDto request)
+    {
+        var workspace = await _dbContext.Workspaces
+            .Include(x => x.Members)
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var member = workspace.Members
+            .FirstOrDefault(x => x.UserId == userId);
+
+        if (member == null)
+        {
+            throw new ForbiddenException("Not a workspace member");
+        }
+
+        if (member.Role != WorkspaceRole.Owner)
+        {
+            throw new ForbiddenException("Only workspace owner can edit workspace");
+        }
+
+        workspace.Name = request.Name.Trim();
+        workspace.Description = request.Description.Trim();
+
+        await _dbContext.SaveChangesAsync();
+
+        return workspace.ToDto(member.Role);
+    }
+
     public async Task AddMemberAsync(
         Guid workspaceId,
         Guid currentUserId,
