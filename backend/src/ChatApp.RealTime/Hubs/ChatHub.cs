@@ -30,6 +30,10 @@ public sealed class ChatHub : Hub
     {
         var userId = GetCurrentUserId();
 
+        await Groups.AddToGroupAsync(
+            Context.ConnectionId,
+            SignalRGroups.UserGroup(userId));
+
         await _presenceService.UserConnectedAsync(
             userId,
             Context.ConnectionId);
@@ -47,6 +51,10 @@ public sealed class ChatHub : Hub
     {
         if (Context.UserIdentifier != null)
         {
+            await Groups.RemoveFromGroupAsync(
+                Context.ConnectionId,
+                SignalRGroups.UserGroup(GetCurrentUserId()));
+
             await _presenceService.UserDisconnectedAsync(
                 Guid.Parse(Context.UserIdentifier),
                 Context.ConnectionId);
@@ -77,7 +85,7 @@ public sealed class ChatHub : Hub
 
         await Groups.AddToGroupAsync(
             Context.ConnectionId,
-            SignalRGroups.Channel(
+            SignalRGroups.ChannelGroup(
                 request.ChannelId));
 
         _logger.LogInformation(
@@ -91,7 +99,7 @@ public sealed class ChatHub : Hub
     {
         await Groups.RemoveFromGroupAsync(
             Context.ConnectionId,
-            SignalRGroups.Channel(
+            SignalRGroups.ChannelGroup(
                 request.ChannelId));
 
         _logger.LogInformation(
