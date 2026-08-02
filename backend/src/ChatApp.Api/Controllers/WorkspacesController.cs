@@ -63,6 +63,19 @@ public class WorkspacesController : ControllerBase
         return Ok(workspaces);
     }
 
+    [HttpPut("workspaces/{workspaceId:guid}")]
+    public async Task<ActionResult<WorkspaceResponseDto>> Update(
+        Guid workspaceId,
+        UpdateWorkspaceRequestDto request)
+    {
+        var workspace = await _workspaceService.UpdateAsync(
+            workspaceId,
+            _currentUserService.GetUserId(),
+            request);
+
+        return Ok(workspace);
+    }
+
     [HttpPost("{workspaceId:guid}/members")]
     public async Task<ActionResult> AddMember(
         Guid workspaceId,
