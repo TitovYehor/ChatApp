@@ -24,7 +24,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
     {
         await _hubContext.Clients
             .Group(
-                SignalRGroups.Channel(channelId))
+                SignalRGroups.ChannelGroup(channelId))
             .SendAsync(
                 SignalREvents.MessageCreated,
                 message);
@@ -36,7 +36,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
     {
         await _hubContext.Clients
             .Group(
-                SignalRGroups.Channel(channelId))
+                SignalRGroups.ChannelGroup(channelId))
             .SendAsync(
                 SignalREvents.MessageUpdated,
                 message);
@@ -48,7 +48,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
     {
         await _hubContext.Clients
             .Group(
-                SignalRGroups.Channel(channelId))
+                SignalRGroups.ChannelGroup(channelId))
             .SendAsync(
                 SignalREvents.MessageDeleted,
                 response);
@@ -59,7 +59,8 @@ public sealed class SignalRChatNotifier : IChatNotifier
         UserPresenceChangedResponseDto response)
     {
         await _hubContext.Clients
-            .Users(userIds.Select(x => x.ToString()))
+            .Groups(
+                userIds.Select(SignalRGroups.UserGroup))
             .SendAsync(
                 SignalREvents.UserPresenceChanged,
                 response);
@@ -70,7 +71,8 @@ public sealed class SignalRChatNotifier : IChatNotifier
         IReadOnlyCollection<OnlineUserResponseDto> users)
     {
         await _hubContext.Clients
-            .User(userId.ToString())
+            .Group(
+                SignalRGroups.UserGroup(userId))
             .SendAsync(
                 SignalREvents.OnlineUsersSnapshot,
                 users);
