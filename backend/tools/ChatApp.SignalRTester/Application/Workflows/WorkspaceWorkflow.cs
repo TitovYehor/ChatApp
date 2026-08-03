@@ -151,6 +151,39 @@ public class WorkspaceWorkflow
         _consoleOutput.WriteSuccess($"Workspace '{workspace.Name}' selected");
     }
 
+    public async Task EditWorkspaceAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("No workspace selected");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Edit Workspace");
+
+        var name = _consoleInput.ReadRequiredString("Name");
+
+        var description = _consoleInput.ReadRequiredString("Description");
+
+        var result = await _workspaceApiClient.UpdateAsync(
+            _userSession.CurrentWorkspace.Id,
+            new UpdateWorkspaceRequestDto
+            {
+                Name = name,
+                Description = description
+            });
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _userSession.SelectWorkspace(result.Data!);
+
+        _consoleOutput.WriteSuccess("Workspace updated successfully");
+    }
+
     public async Task AddMemberAsync()
     {
         if (_userSession.CurrentWorkspace == null)
