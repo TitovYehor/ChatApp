@@ -14,43 +14,45 @@ public enum MenuOption
 
     SelectWorkspace = 5,
 
-    AddWorkspaceMember = 6,
+    EditWorkspace = 6,
 
-    ListWorkspaceMembers = 7,
+    AddWorkspaceMember = 7,
 
-    LeaveWorkspace = 8,
+    ListWorkspaceMembers = 8,
 
-    RemoveWorkspaceMember = 9,
+    LeaveWorkspace = 9,
 
-    ChangeWorkspaceMemberRole = 10,
+    RemoveWorkspaceMember = 10,
 
-    TransferWorkspaceOwnership = 11,
+    ChangeWorkspaceMemberRole = 11,
 
-    JoinWorkspace = 12,
+    TransferWorkspaceOwnership = 12,
 
-    ListOnlineUsers = 13,
+    JoinWorkspace = 13,
 
-    CreateChannel = 14,
+    ListOnlineUsers = 14,
 
-    ListChannels = 15,
+    CreateChannel = 15,
 
-    SelectChannel = 16,
+    ListChannels = 16,
 
-    RenameChannel = 17,
+    SelectChannel = 17,
 
-    DeleteChannel = 18,
+    RenameChannel = 18,
 
-    LoadMessages = 19,
+    DeleteChannel = 19,
 
-    SendMessage = 20,
+    LoadMessages = 20,
 
-    UpdateMessage = 21,
+    SendMessage = 21,
 
-    DeleteMessage = 22,
+    UpdateMessage = 22,
 
-    ConnectSignalR = 23,
+    DeleteMessage = 23,
 
-    DisconnectSignalR = 24,
+    ConnectSignalR = 24,
 
-    Logout = 25,
+    DisconnectSignalR = 25,
+
+    Logout = 26,
 }
