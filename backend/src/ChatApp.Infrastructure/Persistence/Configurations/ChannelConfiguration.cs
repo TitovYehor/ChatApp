@@ -19,7 +19,8 @@ public class ChannelConfiguration
         builder
             .HasOne(x => x.Workspace)
             .WithMany(x => x.Channels)
-            .HasForeignKey(x => x.WorkspaceId);
+            .HasForeignKey(x => x.WorkspaceId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasIndex(x => new
