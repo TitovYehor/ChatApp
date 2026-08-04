@@ -49,6 +49,13 @@ public class WorkspaceApiClient : ApiClientBase, IWorkspaceApiClient
                 request);
     }
 
+    public Task<ApiResult<bool>> DeleteAsync(
+        Guid workspaceId)
+    {
+        return DeleteRequestAsync(
+            $"api/workspaces/{workspaceId}");
+    }
+
     public Task<ApiResult<bool>> AddMemberAsync(
         Guid workspaceId,
         AddWorkspaceMemberRequestDto request)

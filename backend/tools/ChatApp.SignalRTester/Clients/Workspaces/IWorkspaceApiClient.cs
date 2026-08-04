@@ -18,6 +18,9 @@ public interface IWorkspaceApiClient
         Guid workspaceId,
         UpdateWorkspaceRequestDto request);
 
+    Task<ApiResult<bool>> DeleteAsync(
+        Guid workspaceId);
+
     Task<ApiResult<bool>> AddMemberAsync(
         Guid workspaceId,
         AddWorkspaceMemberRequestDto request);
