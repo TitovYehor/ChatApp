@@ -21,6 +21,8 @@ public static class DependencyInjection
 
         services.AddScoped<IPresenceService, PresenceService>();
 
+        services.AddScoped<IWorkspaceNotifier, SignalRWorkspaceNotifier>();
+
         return services;
     }
 }
