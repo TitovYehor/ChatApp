@@ -120,6 +120,38 @@ public class WorkspaceService : IWorkspaceService
         return workspace.ToDto(member.Role);
     }
 
+    public async Task DeleteAsync(
+        Guid workspaceId,
+        Guid currentUserId)
+    {
+        var workspace = await _dbContext.Workspaces
+            .Include(x => x.Members)
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        if (workspace == null)
+        {
+            throw new NotFoundException("Workspace not found");
+        }
+
+        var member = workspace.Members
+            .FirstOrDefault(x => x.UserId == currentUserId);
+
+        if (member == null)
+        {
+            throw new ForbiddenException("Not a workspace member");
+        }
+
+        if (member.Role != WorkspaceRole.Owner)
+        {
+            throw new ForbiddenException(
+                "Only workspace owner can delete workspace");
+        }
+
+        _dbContext.Workspaces.Remove(workspace);
+
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task AddMemberAsync(
         Guid workspaceId,
         Guid currentUserId,

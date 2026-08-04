@@ -21,6 +21,10 @@ public interface IWorkspaceService
         Guid userId,
         UpdateWorkspaceRequestDto request);
 
+    Task DeleteAsync(
+        Guid workspaceId,
+        Guid currentUserId);
+
     Task AddMemberAsync(
         Guid workspaceId,
         Guid currentUserId,
