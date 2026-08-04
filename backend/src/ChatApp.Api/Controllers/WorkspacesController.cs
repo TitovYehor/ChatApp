@@ -76,6 +76,19 @@ public class WorkspacesController : ControllerBase
         return Ok(workspace);
     }
 
+    [HttpDelete("{workspaceId:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid workspaceId)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        await _workspaceService.DeleteAsync(
+            workspaceId,
+            userId);
+
+        return NoContent();
+    }
+
     [HttpPost("{workspaceId:guid}/members")]
     public async Task<ActionResult> AddMember(
         Guid workspaceId,
