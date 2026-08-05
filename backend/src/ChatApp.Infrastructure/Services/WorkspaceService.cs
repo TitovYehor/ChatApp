@@ -15,10 +15,14 @@ public class WorkspaceService : IWorkspaceService
 {
     private readonly AppDbContext _dbContext;
 
+    private readonly IWorkspaceNotifier _workspaceNotifier;
+
     public WorkspaceService(
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        IWorkspaceNotifier workspaceNotifier)
     {
         _dbContext = dbContext;
+        _workspaceNotifier = workspaceNotifier;
     }
 
     public async Task<WorkspaceResponseDto> CreateAsync(
@@ -147,9 +151,17 @@ public class WorkspaceService : IWorkspaceService
                 "Only workspace owner can delete workspace");
         }
 
+        var memberIds = workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
         _dbContext.Workspaces.Remove(workspace);
 
         await _dbContext.SaveChangesAsync();
+
+        await _workspaceNotifier.WorkspaceDeletedAsync(
+            workspace.Id,
+            memberIds);
     }
 
     public async Task AddMemberAsync(
