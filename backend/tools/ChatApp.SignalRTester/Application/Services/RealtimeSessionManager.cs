@@ -1,6 +1,8 @@
-﻿using ChatApp.SignalRTester.Application.State;
+﻿using ChatApp.Contracts.Workspaces.Responses;
+using ChatApp.SignalRTester.Application.State;
 using ChatApp.SignalRTester.Session;
 using ChatApp.SignalRTester.SignalR;
+using ChatApp.SignalRTester.UI.Output;
 
 namespace ChatApp.SignalRTester.Application.Services;
 
@@ -12,24 +14,34 @@ public class RealtimeSessionManager
 
     private readonly UserSession _userSession;
 
+    private readonly MessageCache _messageCache;
+
     private readonly OnlineUsersCache _onlineUsersCache;
+
+    private readonly IConsoleOutput _consoleOutput;
 
     public RealtimeSessionManager(
         ISignalRClient signalRClient,
         RealtimeSession realtimeSession,
         UserSession userSession,
-        OnlineUsersCache onlineUsersCache)
+        MessageCache messageCache,
+        OnlineUsersCache onlineUsersCache,
+        IConsoleOutput consoleOutput)
     {
         _signalRClient = signalRClient;
         _realtimeSession = realtimeSession;
         _userSession = userSession;
+        _messageCache = messageCache;
         _onlineUsersCache = onlineUsersCache;
+        _consoleOutput = consoleOutput;
 
         _signalRClient.Connected += OnConnected;
 
         _signalRClient.Disconnected += OnDisconnected;
 
         _signalRClient.Reconnected += OnReconnected;
+
+        _signalRClient.WorkspaceDeleted += OnWorkspaceDeleted;
     }
 
     public bool IsConnected => _signalRClient.IsConnected;
@@ -115,7 +127,24 @@ public class RealtimeSessionManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Unable to restore realtime channel: {ex.Message}");
+            _consoleOutput.WriteError($"Unable to restore realtime channel: {ex.Message}");
         }
+    }
+
+    private void OnWorkspaceDeleted(
+        WorkspaceDeletedResponseDto response)
+    {
+        if (_userSession.CurrentWorkspace?.Id != response.WorkspaceId)
+        {
+            return;
+        }
+
+        _userSession.ClearWorkspace();
+
+        _messageCache.Clear();
+
+        _onlineUsersCache.Clear();
+
+        _consoleOutput.WriteInfo("Workspace has been deleted");
     }
 }
