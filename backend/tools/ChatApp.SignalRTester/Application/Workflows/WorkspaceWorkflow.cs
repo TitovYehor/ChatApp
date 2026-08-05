@@ -17,6 +17,8 @@ public class WorkspaceWorkflow
 
     private readonly RealtimeSessionManager _realtimeSessionManager;
 
+    private readonly MessageCache _messageCache;
+
     private readonly OnlineUsersCache _onlineUsersCache;
 
     private readonly IConsoleInput _consoleInput;
@@ -27,6 +29,7 @@ public class WorkspaceWorkflow
         IWorkspaceApiClient workspaceApiClient,
         UserSession userSession,
         RealtimeSessionManager realtimeSessionManager,
+        MessageCache messageCache,
         OnlineUsersCache onlineUsersCache,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
@@ -34,6 +37,7 @@ public class WorkspaceWorkflow
         _workspaceApiClient = workspaceApiClient;
         _userSession = userSession;
         _realtimeSessionManager = realtimeSessionManager;
+        _messageCache = messageCache;
         _onlineUsersCache = onlineUsersCache;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
@@ -182,6 +186,61 @@ public class WorkspaceWorkflow
         _userSession.SelectWorkspace(result.Data!);
 
         _consoleOutput.WriteSuccess("Workspace updated successfully");
+    }
+
+    public async Task DeleteWorkspaceAsync()
+    {
+        if (_userSession.CurrentWorkspace == null)
+        {
+            _consoleOutput.WriteError("Please select a workspace first");
+            return;
+        }
+
+        if (!_userSession.IsWorkspaceOwner)
+        {
+            _consoleOutput.WriteError("Only workspace owner can delete workspace");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Delete Workspace");
+
+        var workspace = _userSession.CurrentWorkspace;
+
+        _consoleOutput.WriteInfo($"Workspace '{workspace.Name}' will be permanently deleted");
+
+        var confirmation = _consoleInput.ReadRequiredString(
+            $"Type DELETE to remove '{workspace.Name}'");
+
+        if (!confirmation.Equals(
+                "DELETE",
+                StringComparison.Ordinal))
+        {
+            _consoleOutput.WriteInfo("Operation cancelled");
+            return;
+        }
+
+        var result = await _workspaceApiClient.DeleteAsync(
+            workspace.Id);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(
+                result.ErrorMessage!);
+
+            return;
+        }
+
+        if (_userSession.CurrentChannel != null)
+        {
+            await _realtimeSessionManager.LeaveChannelAsync(
+                _userSession.CurrentChannel.Id);
+        }
+
+        _userSession.ClearWorkspace();
+
+        _messageCache.Clear();
+
+        _consoleOutput.WriteSuccess("Workspace deleted successfully");
     }
 
     public async Task AddMemberAsync()
