@@ -2,6 +2,7 @@
 using ChatApp.Contracts.Realtime.Requests;
 using ChatApp.Contracts.Realtime.Responses;
 using ChatApp.Contracts.Realtime.SignalRNamings;
+using ChatApp.Contracts.Workspaces.Responses;
 using ChatApp.SignalRTester.Configuration;
 using ChatApp.SignalRTester.Session.AuthenticationState;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -45,6 +46,8 @@ public class SignalRClient : ISignalRClient
     public event Action<MessageResponseDto>? MessageUpdated;
 
     public event Action<MessageDeletedResponseDto>? MessageDeleted;
+
+    public event Action<WorkspaceDeletedResponseDto>? WorkspaceDeleted;
 
     public event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
 
@@ -145,6 +148,10 @@ public class SignalRClient : ISignalRClient
             SignalREvents.MessageDeleted,
             RaiseMessageDeleted);
 
+        _connection.On<WorkspaceDeletedResponseDto>(
+            SignalREvents.WorkspaceDeleted,
+            RaiseWorkspaceDeleted);
+
         _connection.On<UserPresenceChangedResponseDto>(
             SignalREvents.UserPresenceChanged,
             RaiseUserPresenceChanged);
@@ -170,6 +177,12 @@ public class SignalRClient : ISignalRClient
         MessageDeletedResponseDto response)
     {
         MessageDeleted?.Invoke(response);
+    }
+
+    private void RaiseWorkspaceDeleted(
+        WorkspaceDeletedResponseDto response)
+    {
+        WorkspaceDeleted?.Invoke(response);
     }
 
     private void RaiseUserPresenceChanged(
