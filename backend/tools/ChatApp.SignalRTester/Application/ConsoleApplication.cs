@@ -70,6 +70,9 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.EditWorkspace:
                     await _workspaceWorkflow.EditWorkspaceAsync();
                     break;
+                case MenuOption.DeleteWorkspace:
+                    await _workspaceWorkflow.DeleteWorkspaceAsync();
+                    break;
                 case MenuOption.AddWorkspaceMember:
                     await _workspaceWorkflow.AddMemberAsync();
                     break;
