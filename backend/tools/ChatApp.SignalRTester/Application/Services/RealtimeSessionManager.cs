@@ -42,6 +42,8 @@ public class RealtimeSessionManager
         _signalRClient.Reconnected += OnReconnected;
 
         _signalRClient.WorkspaceDeleted += OnWorkspaceDeleted;
+
+        _signalRClient.WorkspaceUpdated += OnWorkspaceUpdated;
     }
 
     public bool IsConnected => _signalRClient.IsConnected;
@@ -146,5 +148,20 @@ public class RealtimeSessionManager
         _onlineUsersCache.Clear();
 
         _consoleOutput.WriteInfo("Workspace has been deleted");
+    }
+
+    private void OnWorkspaceUpdated(
+        WorkspaceUpdatedResponseDto response)
+    {
+        if (_userSession.CurrentWorkspace?.Id != response.WorkspaceId)
+        {
+            return;
+        }
+
+        _userSession.UpdateWorkspace(
+            response.Name,
+            response.Description);
+
+        _consoleOutput.WriteInfo($"Workspace renamed to '{response.Name}'");
     }
 }
