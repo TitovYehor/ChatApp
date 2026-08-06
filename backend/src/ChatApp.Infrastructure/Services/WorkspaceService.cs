@@ -121,6 +121,19 @@ public class WorkspaceService : IWorkspaceService
 
         await _dbContext.SaveChangesAsync();
 
+        var memberIds = workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
+        await _workspaceNotifier.WorkspaceUpdatedAsync(
+            memberIds,
+            new WorkspaceUpdatedResponseDto
+            {
+                WorkspaceId = workspace.Id,
+                Name = workspace.Name,
+                Description = workspace.Description
+            });
+
         return workspace.ToDto(member.Role);
     }
 
