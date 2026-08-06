@@ -59,6 +59,19 @@ public class UserSession
         CurrentWorkspaceRole = workspace.CurrentUserRole;
     }
 
+    public void UpdateWorkspace(
+        string name,
+        string description)
+    {
+        if (CurrentWorkspace == null)
+        {
+            return;
+        }
+
+        CurrentWorkspace.Name = name;
+        CurrentWorkspace.Description = description;
+    }
+
     public void ClearWorkspace()
     {
         CurrentWorkspace = null;
