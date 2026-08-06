@@ -22,4 +22,7 @@ public static class SignalREvents
 
     public const string WorkspaceDeleted =
         nameof(WorkspaceDeleted);
+
+    public const string WorkspaceUpdated = 
+        nameof(WorkspaceUpdated);
 }
