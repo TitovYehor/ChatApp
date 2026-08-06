@@ -29,4 +29,15 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                     WorkspaceId = workspaceId
                 });
     }
+
+    public async Task WorkspaceUpdatedAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        WorkspaceUpdatedResponseDto response)
+    {
+        await _hubContext.Clients
+            .Users(memberIds.Select(x => x.ToString()))
+            .SendAsync(
+                SignalREvents.WorkspaceUpdated,
+                response);
+    }
 }
