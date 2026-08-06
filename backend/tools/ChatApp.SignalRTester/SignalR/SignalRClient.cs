@@ -49,6 +49,8 @@ public class SignalRClient : ISignalRClient
 
     public event Action<WorkspaceDeletedResponseDto>? WorkspaceDeleted;
 
+    public event Action<WorkspaceUpdatedResponseDto>? WorkspaceUpdated;
+
     public event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
 
     public event Action<IReadOnlyCollection<OnlineUserResponseDto>>? OnlineUsersSnapshot;
@@ -152,6 +154,10 @@ public class SignalRClient : ISignalRClient
             SignalREvents.WorkspaceDeleted,
             RaiseWorkspaceDeleted);
 
+        _connection.On<WorkspaceUpdatedResponseDto>(
+            SignalREvents.WorkspaceUpdated,
+            RaiseWorkspaceUpdated);
+
         _connection.On<UserPresenceChangedResponseDto>(
             SignalREvents.UserPresenceChanged,
             RaiseUserPresenceChanged);
@@ -183,6 +189,12 @@ public class SignalRClient : ISignalRClient
         WorkspaceDeletedResponseDto response)
     {
         WorkspaceDeleted?.Invoke(response);
+    }
+
+    private void RaiseWorkspaceUpdated(
+        WorkspaceUpdatedResponseDto response)
+    {
+        WorkspaceUpdated?.Invoke(response);
     }
 
     private void RaiseUserPresenceChanged(

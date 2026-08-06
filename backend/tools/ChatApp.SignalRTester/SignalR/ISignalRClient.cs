@@ -26,6 +26,8 @@ public interface ISignalRClient
 
     event Action<WorkspaceDeletedResponseDto>? WorkspaceDeleted;
 
+    event Action<WorkspaceUpdatedResponseDto>? WorkspaceUpdated;
+
     event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
 
     event Action<IReadOnlyCollection<OnlineUserResponseDto>>? OnlineUsersSnapshot;
