@@ -186,9 +186,8 @@ public class ConsoleMenu : IConsoleMenu
                 Number = 15,
                 Text = "List online users",
                 Option = MenuOption.ListOnlineUsers,
-                Visible =
-                    _session.IsAuthenticated &&
-                    _signalRClient.IsConnected
+                Visible = _session.IsAuthenticated &&
+                          _signalRClient.IsConnected
             },
 
             new MenuItem
@@ -248,6 +247,14 @@ public class ConsoleMenu : IConsoleMenu
             new MenuItem
             {
                 Number = 22,
+                Text = "Search messages",
+                Option = MenuOption.SearchMessages,
+                Visible = _session.IsAuthenticated &&
+                          _session.CurrentChannel != null
+            },
+            new MenuItem
+            {
+                Number = 23,
                 Text = "Send message",
                 Option = MenuOption.SendMessage,
                 Visible = _session.IsAuthenticated &&
@@ -255,7 +262,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 23,
+                Number = 24,
                 Text = "Update message",
                 Option = MenuOption.UpdateMessage,
                 Visible = _session.IsAuthenticated &&
@@ -263,7 +270,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 24,
+                Number = 25,
                 Text = "Delete message",
                 Option = MenuOption.DeleteMessage,
                 Visible = _session.IsAuthenticated &&
@@ -272,7 +279,7 @@ public class ConsoleMenu : IConsoleMenu
 
             new MenuItem
             {
-                Number = 25,
+                Number = 26,
                 Text = "Connect to SignalR",
                 Option = MenuOption.ConnectSignalR,
                 Visible = _session.IsAuthenticated &&
@@ -282,7 +289,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 26,
+                Number = 27,
                 Text = "Disconnect from SignalR",
                 Option = MenuOption.DisconnectSignalR,
                 Visible = _session.IsAuthenticated &&
@@ -291,7 +298,7 @@ public class ConsoleMenu : IConsoleMenu
 
             new MenuItem
             {
-                Number = 27,
+                Number = 28,
                 Text = "Logout",
                 Option = MenuOption.Logout,
                 Visible = _session.IsAuthenticated
