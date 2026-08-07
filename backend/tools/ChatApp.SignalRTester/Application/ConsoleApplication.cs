@@ -118,6 +118,9 @@ public class ConsoleApplication : IConsoleApplication
                 case MenuOption.LoadMessages:
                     await _messageWorkflow.LoadMessagesAsync();
                     break;
+                case MenuOption.SearchMessages:
+                    await _messageWorkflow.SearchMessagesAsync();
+                    break;
                 case MenuOption.SendMessage:
                     await _messageWorkflow.SendMessageAsync();
                     break;
