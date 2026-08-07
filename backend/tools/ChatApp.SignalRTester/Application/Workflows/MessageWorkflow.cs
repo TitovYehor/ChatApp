@@ -75,6 +75,44 @@ public class MessageWorkflow
         _consoleOutput.WriteMessageList(_messageCache.Messages);
     }
 
+    public async Task SearchMessagesAsync()
+    {
+        if (_userSession.CurrentChannel == null)
+        {
+            _consoleOutput.WriteError("No channel selected");
+            return;
+        }
+
+        _consoleOutput.WriteHeader("Search Messages");
+
+        var phrase = _consoleInput.ReadRequiredString("Search");
+
+        var query = new MessageQueryDto
+        {
+            PageNumber = 1,
+            PageSize = 50,
+            Search = phrase
+        };
+
+        var result = await _messageApiClient.GetByChannelAsync(
+            _userSession.CurrentChannel.Id,
+            query);
+
+        if (!result.IsSuccess)
+        {
+            _consoleOutput.WriteError(result.ErrorMessage!);
+            return;
+        }
+
+        _consoleOutput.WriteSeparator();
+
+        _consoleOutput.WriteInfo($"Found {result.Data!.TotalCount} message(s)");
+
+        _consoleOutput.WriteSeparator();
+
+        _consoleOutput.WriteMessageList(result.Data.Items);
+    }
+
     public async Task SendMessageAsync()
     {
         if (_userSession.CurrentChannel == null)
