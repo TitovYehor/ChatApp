@@ -60,7 +60,8 @@ public class MessageApiClient: ApiClientBase, IMessageApiClient
             new Dictionary<string, string?>
             {
                 ["pageNumber"] = query.PageNumber.ToString(),
-                ["pageSize"] = query.PageSize.ToString()
+                ["pageSize"] = query.PageSize.ToString(),
+                ["search"] = query.Search
             });
 
         return GetAsync<PagedResult<MessageResponseDto>>(url);
