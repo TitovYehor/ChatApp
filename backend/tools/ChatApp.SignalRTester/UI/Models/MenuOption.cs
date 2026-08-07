@@ -46,15 +46,17 @@ public enum MenuOption
 
     LoadMessages = 21,
 
-    SendMessage = 22,
+    SearchMessages = 22,
 
-    UpdateMessage = 23,
+    SendMessage = 23,
 
-    DeleteMessage = 24,
+    UpdateMessage = 24,
 
-    ConnectSignalR = 25,
+    DeleteMessage = 25,
 
-    DisconnectSignalR = 26,
+    ConnectSignalR = 26,
 
-    Logout = 27,
+    DisconnectSignalR = 27,
+
+    Logout = 28,
 }
