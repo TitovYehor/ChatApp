@@ -109,17 +109,23 @@ public class MessageService : IMessageService
             throw new NotFoundException("Channel not found");
         }
 
-        var totalCount = await _dbContext.Messages
-            .CountAsync(m =>
-                m.ChannelId == channelId);
-
-        var messages = await _dbContext.Messages
+        var messagesQuery = _dbContext.Messages
             .AsNoTracking()
-            .Where(m => m.ChannelId == channelId)
+            .Where(m => m.ChannelId == channelId);
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var search = query.Search.Trim();
+
+            messagesQuery = messagesQuery.Where(m =>
+                m.Content.Contains(search));
+        }
+
+        var totalCount = await messagesQuery.CountAsync();
+
+        var messages = await messagesQuery
             .OrderBy(m => m.CreatedAt)
-            .Skip(
-                (query.PageNumber - 1)
-                * query.PageSize)
+            .Skip((query.PageNumber - 1) * query.PageSize)
             .Take(query.PageSize)
             .Select(m => new MessageResponseDto
             {
