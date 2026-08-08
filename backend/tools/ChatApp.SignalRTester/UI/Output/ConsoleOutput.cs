@@ -251,4 +251,21 @@ public class ConsoleOutput : IConsoleOutput
 
         WriteSeparator();
     }
+
+    public void WriteUserTyping(
+        UserTypingResponseDto response)
+    {
+        WriteSeparator();
+
+        if (response.IsTyping)
+        {
+            WriteInfo($"{response.Username} is typing...");
+        }
+        else
+        {
+            WriteInfo($"{response.Username} stopped typing");
+        }
+
+        WriteSeparator();
+    }
 }

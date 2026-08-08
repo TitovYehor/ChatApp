@@ -47,6 +47,7 @@ public interface IConsoleOutput
     void WriteRealtimeMessageDeleted(
         Guid messageId);
 
-    void WriteUserPresenceChanged(
-        UserPresenceChangedResponseDto response);
+    void WriteUserPresenceChanged(UserPresenceChangedResponseDto response);
+
+    void WriteUserTyping(UserTypingResponseDto response);
 }
