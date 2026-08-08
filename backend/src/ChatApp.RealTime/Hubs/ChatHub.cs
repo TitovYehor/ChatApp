@@ -108,6 +108,36 @@ public sealed class ChatHub : Hub
             request.ChannelId);
     }
 
+    public async Task TypingStarted(
+        TypingStartedRequest request)
+    {
+        var userId = GetCurrentUserId();
+
+        var hasAccess = await _channelAccessService
+            .CanAccessChannelAsync(
+                userId,
+                request.ChannelId);
+
+        if (!hasAccess)
+        {
+            throw new HubException("Access denied");
+        }
+
+        await _presenceService.TypingStartedAsync(
+            userId,
+            request.ChannelId);
+    }
+
+    public async Task TypingStopped(
+        TypingStoppedRequest request)
+    {
+        var userId = GetCurrentUserId();
+
+        await _presenceService.TypingStoppedAsync(
+            userId,
+            request.ChannelId);
+    }
+
     private Guid GetCurrentUserId()
     {
         if (Context.UserIdentifier is null)
