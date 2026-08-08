@@ -24,4 +24,8 @@ public interface IChatNotifier
     Task OnlineUsersSnapshotAsync(
         Guid userId,
         IReadOnlyCollection<OnlineUserResponseDto> users);
+
+    Task UserTypingAsync(
+        Guid channelId,
+        UserTypingResponseDto response);
 }

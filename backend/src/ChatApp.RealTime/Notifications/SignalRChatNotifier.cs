@@ -77,4 +77,15 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 SignalREvents.OnlineUsersSnapshot,
                 users);
     }
+
+    public Task UserTypingAsync(
+        Guid channelId,
+        UserTypingResponseDto response)
+    {
+        return _hubContext.Clients
+            .Group(SignalRGroups.ChannelGroup(channelId))
+            .SendAsync(
+                SignalREvents.UserTyping,
+                response);
+    }
 }
