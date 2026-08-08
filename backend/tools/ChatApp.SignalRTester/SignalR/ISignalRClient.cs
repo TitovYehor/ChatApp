@@ -18,6 +18,12 @@ public interface ISignalRClient
     Task LeaveChannelAsync(
         Guid channelId);
 
+    Task TypingStartedAsync(
+        Guid channelId);
+
+    Task TypingStoppedAsync(
+        Guid channelId);
+
     event Action<MessageResponseDto>? MessageCreated;
 
     event Action<MessageResponseDto>? MessageUpdated;
@@ -31,6 +37,8 @@ public interface ISignalRClient
     event Action<UserPresenceChangedResponseDto>? UserPresenceChanged;
 
     event Action<IReadOnlyCollection<OnlineUserResponseDto>>? OnlineUsersSnapshot;
+
+    event Action<UserTypingResponseDto>? UserTyping;
 
     event Action? Connected;
 

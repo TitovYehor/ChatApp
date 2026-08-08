@@ -55,6 +55,8 @@ public class SignalRClient : ISignalRClient
 
     public event Action<IReadOnlyCollection<OnlineUserResponseDto>>? OnlineUsersSnapshot;
 
+    public event Action<UserTypingResponseDto>? UserTyping;
+
     public event Action? Connected;
 
     public event Action? Disconnected;
@@ -100,6 +102,28 @@ public class SignalRClient : ISignalRClient
         return _connection.InvokeAsync(
             SignalRMethods.LeaveChannel,
             new LeaveChannelRequest
+            {
+                ChannelId = channelId
+            });
+    }
+
+    public Task TypingStartedAsync(
+        Guid channelId)
+    {
+        return _connection.InvokeAsync(
+            SignalRMethods.TypingStarted,
+            new TypingStartedRequest
+            {
+                ChannelId = channelId
+            });
+    }
+
+    public Task TypingStoppedAsync(
+        Guid channelId)
+    {
+        return _connection.InvokeAsync(
+            SignalRMethods.TypingStopped,
+            new TypingStoppedRequest
             {
                 ChannelId = channelId
             });
@@ -165,6 +189,10 @@ public class SignalRClient : ISignalRClient
         _connection.On<IReadOnlyCollection<OnlineUserResponseDto>>(
             SignalREvents.OnlineUsersSnapshot,
             RaiseOnlineUsersSnapshot);
+
+        _connection.On<UserTypingResponseDto>(
+            SignalREvents.UserTyping,
+            RaiseUserTyping);
     }
 
     private void RaiseMessageCreated(
@@ -207,5 +235,11 @@ public class SignalRClient : ISignalRClient
         IReadOnlyCollection<OnlineUserResponseDto> users)
     {
         OnlineUsersSnapshot?.Invoke(users);
+    }
+
+    private void RaiseUserTyping(
+        UserTypingResponseDto response)
+    {
+        UserTyping?.Invoke(response);
     }
 }
