@@ -105,4 +105,40 @@ public class PresenceService : IPresenceService
                 IsOnline = false
             });
     }
+
+    public async Task TypingStartedAsync(
+        Guid userId,
+        Guid channelId)
+    {
+        var lookup = await _lookupService
+            .GetPresenceLookupAsync(userId);
+
+        await _chatNotifier.UserTypingAsync(
+            channelId,
+            new UserTypingResponseDto
+            {
+                UserId = userId,
+                Username = lookup.Username,
+                ChannelId = channelId,
+                IsTyping = true
+            });
+    }
+
+    public async Task TypingStoppedAsync(
+        Guid userId,
+        Guid channelId)
+    {
+        var lookup = await _lookupService
+            .GetPresenceLookupAsync(userId);
+
+        await _chatNotifier.UserTypingAsync(
+            channelId,
+            new UserTypingResponseDto
+            {
+                UserId = userId,
+                Username = lookup.Username,
+                ChannelId = channelId,
+                IsTyping = false
+            });
+    }
 }
