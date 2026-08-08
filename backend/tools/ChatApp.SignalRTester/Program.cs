@@ -44,6 +44,7 @@ builder.Services.AddSingleton<MessageRealtimeHandler>();
 builder.Services.AddSingleton<IApplicationInitializer,PresenceRealtimeHandler>();
 builder.Services.AddSingleton<IApplicationInitializer>(serviceProvider =>
         serviceProvider.GetRequiredService<MessageRealtimeHandler>());
+builder.Services.AddSingleton<IApplicationInitializer, TypingRealtimeHandler>();
 
 builder.Services.AddSingleton<IAuthenticationApiClient, AuthenticationApiClient>();
 builder.Services.AddSingleton<IWorkspaceApiClient, WorkspaceApiClient>();
