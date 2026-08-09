@@ -54,9 +54,13 @@ public enum MenuOption
 
     DeleteMessage = 25,
 
-    ConnectSignalR = 26,
+    StartTyping = 26,
 
-    DisconnectSignalR = 27,
+    StopTyping = 27,
 
-    Logout = 28,
+    ConnectSignalR = 28,
+
+    DisconnectSignalR = 29,
+
+    Logout = 30,
 }
