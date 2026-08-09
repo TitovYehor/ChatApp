@@ -2,6 +2,7 @@
 using ChatApp.SignalRTester.Application.State;
 using ChatApp.SignalRTester.Clients.Messages;
 using ChatApp.SignalRTester.Session;
+using ChatApp.SignalRTester.SignalR;
 using ChatApp.SignalRTester.UI.Input;
 using ChatApp.SignalRTester.UI.Output;
 
@@ -15,6 +16,8 @@ public class MessageWorkflow
 
     private readonly MessageCache _messageCache;
 
+    private readonly ISignalRClient _signalRClient;
+
     private readonly IConsoleInput _consoleInput;
 
     private readonly IConsoleOutput _consoleOutput;
@@ -23,12 +26,14 @@ public class MessageWorkflow
         IMessageApiClient messageApiClient,
         UserSession userSession,
         MessageCache messageCache,
+        ISignalRClient signalRClient,
         IConsoleInput consoleInput,
         IConsoleOutput consoleOutput)
     {
         _messageApiClient = messageApiClient;
         _userSession = userSession;
         _messageCache = messageCache;
+        _signalRClient = signalRClient;
         _consoleInput = consoleInput;
         _consoleOutput = consoleOutput;
     }
@@ -238,5 +243,45 @@ public class MessageWorkflow
         _consoleOutput.WriteSuccess("Message deleted");
 
         _consoleOutput.WriteInfo("Waiting for realtime notification...");
+    }
+
+    public async Task StartTypingAsync()
+    {
+        if (_userSession.CurrentChannel == null)
+        {
+            _consoleOutput.WriteError("Select a channel first");
+            return;
+        }
+
+        if (!_signalRClient.IsConnected)
+        {
+            _consoleOutput.WriteError("SignalR is not connected");
+            return;
+        }
+
+        await _signalRClient.TypingStartedAsync(
+            _userSession.CurrentChannel.Id);
+
+        _consoleOutput.WriteSuccess("Typing started");
+    }
+
+    public async Task StopTypingAsync()
+    {
+        if (_userSession.CurrentChannel == null)
+        {
+            _consoleOutput.WriteError("Select a channel first");
+            return;
+        }
+
+        if (!_signalRClient.IsConnected)
+        {
+            _consoleOutput.WriteError("SignalR is not connected");
+            return;
+        }
+
+        await _signalRClient.TypingStoppedAsync(
+            _userSession.CurrentChannel.Id);
+
+        _consoleOutput.WriteSuccess("Typing stopped");
     }
 }
