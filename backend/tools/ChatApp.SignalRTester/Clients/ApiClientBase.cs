@@ -52,8 +52,7 @@ public abstract class ApiClientBase
                 HttpMethod.Put,
                 url)
             {
-                Content =
-                    JsonContent.Create(request)
+                Content = JsonContent.Create(request)
             });
     }
 
@@ -73,7 +72,13 @@ public abstract class ApiClientBase
     {
         try
         {
-            var response = await HttpClient.DeleteAsync(url);
+            using var request = new HttpRequestMessage(
+                HttpMethod.Delete,
+                url);
+
+            AddAuthorization(request);
+
+            var response = await HttpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -125,12 +130,7 @@ public abstract class ApiClientBase
     {
         try
         {
-            if (UserSession.IsAuthenticated)
-            {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
-                    "Bearer",
-                    UserSession.AccessToken);
-            }
+            AddAuthorization(request);
 
             var response = await HttpClient.SendAsync(request);
 
@@ -178,17 +178,11 @@ public abstract class ApiClientBase
     }
 
     protected async Task<ApiResult<bool>> SendWithoutResponseAsync(
-    HttpRequestMessage request)
+        HttpRequestMessage request)
     {
         try
         {
-            if (UserSession.IsAuthenticated)
-            {
-                request.Headers.Authorization =
-                    new AuthenticationHeaderValue(
-                        "Bearer",
-                        UserSession.AccessToken);
-            }
+            AddAuthorization(request);
 
             var response = await HttpClient.SendAsync(request);
 
@@ -257,5 +251,17 @@ public abstract class ApiClientBase
         return string.IsNullOrEmpty(query)
             ? url
             : $"{url}?{query}";
+    }
+
+    private void AddAuthorization(
+        HttpRequestMessage request)
+    {
+        if (UserSession.IsAuthenticated)
+        {
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    UserSession.AccessToken);
+        }
     }
 }
