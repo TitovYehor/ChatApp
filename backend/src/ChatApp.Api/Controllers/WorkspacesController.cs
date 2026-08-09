@@ -63,7 +63,7 @@ public class WorkspacesController : ControllerBase
         return Ok(workspaces);
     }
 
-    [HttpPut("workspaces/{workspaceId:guid}")]
+    [HttpPut("{workspaceId:guid}")]
     public async Task<ActionResult<WorkspaceResponseDto>> Update(
         Guid workspaceId,
         UpdateWorkspaceRequestDto request)
