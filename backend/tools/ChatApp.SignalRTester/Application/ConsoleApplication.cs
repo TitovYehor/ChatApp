@@ -131,6 +131,13 @@ public class ConsoleApplication : IConsoleApplication
                     await _messageWorkflow.DeleteMessageAsync();
                     break;
 
+                case MenuOption.StartTyping:
+                    await _messageWorkflow.StartTypingAsync();
+                    break;
+                case MenuOption.StopTyping:
+                    await _messageWorkflow.StopTypingAsync();
+                    break;
+
                 case MenuOption.ConnectSignalR:
                     await _signalRWorkflow.ConnectAsync();
                     break;
