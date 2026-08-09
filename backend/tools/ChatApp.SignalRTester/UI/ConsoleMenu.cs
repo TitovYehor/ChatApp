@@ -280,6 +280,26 @@ public class ConsoleMenu : IConsoleMenu
             new MenuItem
             {
                 Number = 26,
+                Text = "Start typing",
+                Option = MenuOption.StartTyping,
+                Visible = _session.IsAuthenticated &&
+                          _session.CurrentChannel != null &&
+                          _signalRClient.IsConnected
+            },
+
+            new MenuItem
+            {
+                Number = 27,
+                Text = "Stop typing",
+                Option = MenuOption.StopTyping,
+                Visible = _session.IsAuthenticated &&
+                          _session.CurrentChannel != null &&
+                          _signalRClient.IsConnected
+            },
+
+            new MenuItem
+            {
+                Number = 28,
                 Text = "Connect to SignalR",
                 Option = MenuOption.ConnectSignalR,
                 Visible = _session.IsAuthenticated &&
@@ -289,7 +309,7 @@ public class ConsoleMenu : IConsoleMenu
             },
             new MenuItem
             {
-                Number = 27,
+                Number = 29,
                 Text = "Disconnect from SignalR",
                 Option = MenuOption.DisconnectSignalR,
                 Visible = _session.IsAuthenticated &&
@@ -298,7 +318,7 @@ public class ConsoleMenu : IConsoleMenu
 
             new MenuItem
             {
-                Number = 28,
+                Number = 30,
                 Text = "Logout",
                 Option = MenuOption.Logout,
                 Visible = _session.IsAuthenticated
