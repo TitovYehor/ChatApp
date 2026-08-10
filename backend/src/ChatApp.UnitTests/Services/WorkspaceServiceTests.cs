@@ -658,6 +658,214 @@ public class WorkspaceServiceTests
             Times.Once);
     }
 
+    [Fact]
+    public async Task DeleteAsync_OwnerDeletesWorkspace_AndNotifiesMembers()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = adminId,
+                    Role = WorkspaceRole.Admin
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        await sut.DeleteAsync(
+            workspaceId,
+            ownerId);
+
+        var deletedWorkspace = await dbContext.Workspaces
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        Assert.Null(deletedWorkspace);
+
+        _workspaceNotifierMock.Verify(
+            x => x.WorkspaceDeletedAsync(
+                workspaceId,
+                It.Is<IReadOnlyCollection<Guid>>(ids =>
+                    ids.Count == 3 &&
+                    ids.Contains(ownerId) &&
+                    ids.Contains(adminId) &&
+                    ids.Contains(memberId))),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldThrowForbidden_WhenUserIsNotMember()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var nonMemberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                }
+            ]
+        };
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => sut.DeleteAsync(
+                workspaceId,
+                nonMemberId));
+
+        Assert.Equal(
+            "Not a workspace member",
+            exception.Message);
+
+        var existingWorkspace = await dbContext.Workspaces
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        Assert.NotNull(existingWorkspace);
+
+        _workspaceNotifierMock.Verify(
+            x => x.WorkspaceDeletedAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<IReadOnlyCollection<Guid>>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldThrowForbidden_WhenUserIsAdmin()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var adminId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = adminId,
+                    Role = WorkspaceRole.Admin
+                }
+            ]
+        };
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => sut.DeleteAsync(
+                workspaceId,
+                adminId));
+
+        Assert.Equal(
+            "Only workspace owner can delete workspace",
+            exception.Message);
+
+        var existingWorkspace = await dbContext.Workspaces
+            .FirstOrDefaultAsync(x => x.Id == workspaceId);
+
+        Assert.NotNull(existingWorkspace);
+
+        _workspaceNotifierMock.Verify(
+            x => x.WorkspaceDeletedAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<IReadOnlyCollection<Guid>>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldThrowNotFound_WhenWorkspaceDoesNotExist()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => sut.DeleteAsync(
+                workspaceId,
+                userId));
+
+        Assert.Equal(
+            "Workspace not found",
+            exception.Message);
+
+        _workspaceNotifierMock.Verify(
+            x => x.WorkspaceDeletedAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<IReadOnlyCollection<Guid>>()),
+            Times.Never);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
