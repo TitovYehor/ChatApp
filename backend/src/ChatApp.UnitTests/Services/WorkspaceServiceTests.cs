@@ -2,6 +2,7 @@
 using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Workspaces.Enums;
 using ChatApp.Contracts.Workspaces.Requests;
+using ChatApp.Contracts.Workspaces.Responses;
 using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
@@ -363,7 +364,299 @@ public class WorkspaceServiceTests
         Assert.Empty(result);
     }
 
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdateWorkspace_WhenUserIsOwner()
+    {
+        await using var dbContext = CreateDbContext();
 
+        var service = CreateService(dbContext);
+
+        var ownerId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Old Name",
+            Description = "Old Description"
+        };
+
+        workspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspace.Id,
+                UserId = ownerId,
+                Role = WorkspaceRole.Owner
+            });
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateWorkspaceRequestDto
+        {
+            Name = "  New Name  ",
+            Description = "  New Description  "
+        };
+
+        var result = await service.UpdateAsync(
+            workspace.Id,
+            ownerId,
+            request);
+
+        Assert.Equal(workspace.Id, result.Id);
+        Assert.Equal("New Name", result.Name);
+        Assert.Equal("New Description", result.Description);
+        Assert.Equal(
+            WorkspaceRoleDto.Owner,
+            result.CurrentUserRole);
+
+        var updatedWorkspace = await dbContext.Workspaces
+            .SingleAsync(x => x.Id == workspace.Id);
+
+        Assert.Equal(
+            "New Name",
+            updatedWorkspace.Name);
+
+        Assert.Equal(
+            "New Description",
+            updatedWorkspace.Description);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowNotFound_WhenWorkspaceDoesNotExist()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var request = new UpdateWorkspaceRequestDto
+        {
+            Name = "New Name",
+            Description = "New Description"
+        };
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.UpdateAsync(
+                workspaceId,
+                userId,
+                request));
+
+        Assert.Equal(
+            "Workspace not found",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowForbidden_WhenUserIsNotMember()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var memberId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Old Name",
+            Description = "Old Description"
+        };
+
+        workspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspace.Id,
+                UserId = memberId,
+                Role = WorkspaceRole.Member
+            });
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateWorkspaceRequestDto
+        {
+            Name = "New Name",
+            Description = "New Description"
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => service.UpdateAsync(
+                workspace.Id,
+                otherUserId,
+                request));
+
+        Assert.Equal(
+            "Not a workspace member",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowForbidden_WhenUserIsMember()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Old Name",
+            Description = "Old Description"
+        };
+
+        workspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspace.Id,
+                UserId = userId,
+                Role = WorkspaceRole.Member
+            });
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateWorkspaceRequestDto
+        {
+            Name = "New Name",
+            Description = "New Description"
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => service.UpdateAsync(
+                workspace.Id,
+                userId,
+                request));
+
+        Assert.Equal(
+            "Only workspace owner can edit workspace",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowForbidden_WhenUserIsAdmin()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var adminId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Old Name",
+            Description = "Old Description"
+        };
+
+        workspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspace.Id,
+                UserId = adminId,
+                Role = WorkspaceRole.Admin
+            });
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateWorkspaceRequestDto
+        {
+            Name = "New Name",
+            Description = "New Description"
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => service.UpdateAsync(
+                workspace.Id,
+                adminId,
+                request));
+
+        Assert.Equal(
+            "Only workspace owner can edit workspace",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_OwnerUpdatesWorkspace_AndNotifiesMembers()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Old name",
+            Description = "Old description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateWorkspaceRequestDto
+        {
+            Name = "New name",
+            Description = "New description"
+        };
+
+        var result = await sut.UpdateAsync(
+            workspaceId,
+            ownerId,
+            request);
+
+        Assert.Equal("New name", result.Name);
+        Assert.Equal("New description", result.Description);
+        Assert.Equal(WorkspaceRoleDto.Owner, result.CurrentUserRole);
+
+        var savedWorkspace = await dbContext.Workspaces
+            .FirstAsync(x => x.Id == workspaceId);
+
+        Assert.Equal("New name", savedWorkspace.Name);
+        Assert.Equal("New description", savedWorkspace.Description);
+
+        _workspaceNotifierMock.Verify(
+            x => x.WorkspaceUpdatedAsync(
+                It.Is<IReadOnlyCollection<Guid>>(ids =>
+                    ids.Count == 2 &&
+                    ids.Contains(ownerId) &&
+                    ids.Contains(memberId)),
+                It.Is<WorkspaceUpdatedResponseDto>(response =>
+                    response.WorkspaceId == workspaceId &&
+                    response.Name == "New name" &&
+                    response.Description == "New description")),
+            Times.Once);
+    }
 
     private static AppDbContext CreateDbContext()
     {
