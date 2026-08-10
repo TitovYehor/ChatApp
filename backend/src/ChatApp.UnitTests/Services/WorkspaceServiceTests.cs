@@ -1277,6 +1277,158 @@ public class WorkspaceServiceTests
             exception.Message);
     }
 
+    [Fact]
+    public async Task GetMembersAsync_MemberGetsWorkspaceMembers_OrderedByRoleThenUsername()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var currentUserId = Guid.NewGuid();
+
+        var ownerId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+        var memberZId = Guid.NewGuid();
+        var memberAId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = currentUserId,
+                    Role = WorkspaceRole.Member,
+                    User = new User
+                    {
+                        Id = currentUserId,
+                        Username = "currentuser",
+                        Email = "current@example.com"
+                    }
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner,
+                    User = new User
+                    {
+                        Id = ownerId,
+                        Username = "owner",
+                        Email = "owner@example.com"
+                    }
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = adminId,
+                    Role = WorkspaceRole.Admin,
+                    User = new User
+                    {
+                        Id = adminId,
+                        Username = "admin",
+                        Email = "admin@example.com"
+                    }
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberZId,
+                    Role = WorkspaceRole.Member,
+                    User = new User
+                    {
+                        Id = memberZId,
+                        Username = "zuser",
+                        Email = "z@example.com"
+                    }
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberAId,
+                    Role = WorkspaceRole.Member,
+                    User = new User
+                    {
+                        Id = memberAId,
+                        Username = "auser",
+                        Email = "a@example.com"
+                    }
+                }
+            ]
+        };
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var result = await sut.GetMembersAsync(
+            workspaceId,
+            currentUserId);
+
+        Assert.Equal(5, result.Count);
+
+        Assert.Equal(ownerId, result.ElementAt(0).UserId);
+        Assert.Equal(WorkspaceRoleDto.Owner, result.ElementAt(0).Role);
+
+        Assert.Equal(adminId, result.ElementAt(1).UserId);
+        Assert.Equal(WorkspaceRoleDto.Admin, result.ElementAt(1).Role);
+
+        Assert.Equal(memberAId, result.ElementAt(2).UserId);
+        Assert.Equal(WorkspaceRoleDto.Member, result.ElementAt(2).Role);
+
+        Assert.Equal(currentUserId, result.ElementAt(3).UserId);
+        Assert.Equal(WorkspaceRoleDto.Member, result.ElementAt(3).Role);
+
+        Assert.Equal(memberZId, result.ElementAt(4).UserId);
+        Assert.Equal(WorkspaceRoleDto.Member, result.ElementAt(4).Role);
+    }
+
+    [Fact]
+    public async Task GetMembersAsync_NonMember_ThrowsForbiddenException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var nonMemberId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Owner
+                }
+            ]
+        };
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            sut.GetMembersAsync(
+                workspaceId,
+                nonMemberId));
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
