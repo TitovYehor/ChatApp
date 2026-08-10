@@ -866,6 +866,417 @@ public class WorkspaceServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task AddMemberAsync_OwnerAddsUser_ShouldCreateMembership()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var invitedUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com",
+            PasswordHash = "hash"
+        };
+
+        var invitedUser = new User
+        {
+            Id = invitedUserId,
+            Username = "newuser",
+            Email = "newuser@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(owner, invitedUser);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = invitedUser.Username
+        };
+
+        await sut.AddMemberAsync(
+            workspaceId,
+            ownerId,
+            request);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == invitedUserId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Member, membership.Role);
+    }
+
+    [Fact]
+    public async Task AddMemberAsync_AdminAddsUser_ShouldCreateMembership()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var adminId = Guid.NewGuid();
+        var invitedUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var admin = new User
+        {
+            Id = adminId,
+            Username = "admin",
+            Email = "admin@test.com",
+            PasswordHash = "hash"
+        };
+
+        var invitedUser = new User
+        {
+            Id = invitedUserId,
+            Username = "newuser",
+            Email = "newuser@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = adminId,
+                    Role = WorkspaceRole.Admin
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(admin, invitedUser);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = invitedUser.Email
+        };
+
+        await sut.AddMemberAsync(
+            workspaceId,
+            adminId,
+            request);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == invitedUserId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Member, membership.Role);
+    }
+
+    [Fact]
+    public async Task AddMemberAsync_NonMember_ShouldThrowForbidden()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var nonMemberId = Guid.NewGuid();
+        var invitedUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var invitedUser = new User
+        {
+            Id = invitedUserId,
+            Username = "newuser",
+            Email = "newuser@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                }
+            ]
+        };
+
+        dbContext.Users.Add(invitedUser);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = invitedUser.Username
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => sut.AddMemberAsync(
+                workspaceId,
+                nonMemberId,
+                request));
+
+        Assert.Equal(
+            "Inviting user are not a member of this workspace",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task AddMemberAsync_Member_ShouldThrowForbidden()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var memberId = Guid.NewGuid();
+        var invitedUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var invitedUser = new User
+        {
+            Id = invitedUserId,
+            Username = "newuser",
+            Email = "newuser@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.Add(invitedUser);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = invitedUser.Username
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => sut.AddMemberAsync(
+                workspaceId,
+                memberId,
+                request));
+
+        Assert.Equal(
+            "Users with 'Member' role are not allowed to invite",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task AddMemberAsync_UserDoesNotExist_ShouldThrowNotFound()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                }
+            ]
+        };
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = "does-not-exist"
+        };
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => sut.AddMemberAsync(
+                workspaceId,
+                ownerId,
+                request));
+
+        Assert.Equal(
+            "Invited user not found",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task AddMemberAsync_UserAlreadyMember_ShouldThrowConflict()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var ownerId = Guid.NewGuid();
+        var existingMemberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com",
+            PasswordHash = "hash"
+        };
+
+        var existingMember = new User
+        {
+            Id = existingMemberId,
+            Username = "existing",
+            Email = "existing@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = existingMemberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(owner, existingMember);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = existingMember.Username
+        };
+
+        var exception = await Assert.ThrowsAsync<ConflictException>(
+            () => sut.AddMemberAsync(
+                workspaceId,
+                ownerId,
+                request));
+
+        Assert.Equal(
+            "User is already a workspace member",
+            exception.Message);
+
+        var memberships = await dbContext.WorkspaceMembers
+            .Where(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == existingMemberId)
+            .ToListAsync();
+
+        Assert.Single(memberships);
+    }
+
+    [Fact]
+    public async Task AddMemberAsync_WorkspaceDoesNotExist_ShouldThrowNotFound()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var request = new AddWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = "someone"
+        };
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => sut.AddMemberAsync(
+                workspaceId,
+                userId,
+                request));
+
+        Assert.Equal(
+            "Workspace not found",
+            exception.Message);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
