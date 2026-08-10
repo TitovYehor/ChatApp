@@ -153,6 +153,218 @@ public class WorkspaceServiceTests
         Assert.Equal("Workspace is forbidden for non members", exception.Message);
     }
 
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnAllUserWorkspaces()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+
+        var workspace1 = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Workspace 1",
+            Description = "Description 1"
+        };
+
+        var workspace2 = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Workspace 2",
+            Description = "Description 2"
+        };
+
+        workspace1.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspace1.Id,
+                UserId = userId,
+                Role = WorkspaceRole.Owner
+            });
+
+        workspace2.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspace2.Id,
+                UserId = userId,
+                Role = WorkspaceRole.Member
+            });
+
+        dbContext.Workspaces.AddRange(
+            workspace1,
+            workspace2);
+
+        await dbContext.SaveChangesAsync();
+
+        var result = await service.GetAllAsync(userId);
+
+        Assert.Equal(2, result.Count);
+
+        Assert.Contains(
+            result,
+            x =>
+                x.Id == workspace1.Id &&
+                x.Name == "Workspace 1");
+
+        Assert.Contains(
+            result,
+            x =>
+                x.Id == workspace2.Id &&
+                x.Name == "Workspace 2");
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldNotReturnWorkspacesUserIsNotMemberOf()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+
+        var userWorkspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "User Workspace",
+            Description = "User workspace"
+        };
+
+        var otherWorkspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Other Workspace",
+            Description = "Other workspace"
+        };
+
+        userWorkspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = userWorkspace.Id,
+                UserId = userId,
+                Role = WorkspaceRole.Member
+            });
+
+        otherWorkspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = otherWorkspace.Id,
+                UserId = otherUserId,
+                Role = WorkspaceRole.Owner
+            });
+
+        dbContext.Workspaces.AddRange(
+            userWorkspace,
+            otherWorkspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var result = await service.GetAllAsync(userId);
+
+        var workspace = Assert.Single(result);
+
+        Assert.Equal(
+            userWorkspace.Id,
+            workspace.Id);
+
+        Assert.Equal(
+            "User Workspace",
+            workspace.Name);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnCorrectWorkspaceRoles()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+
+        var ownerWorkspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Owner Workspace"
+        };
+
+        var adminWorkspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Admin Workspace"
+        };
+
+        var memberWorkspace = new Workspace
+        {
+            Id = Guid.NewGuid(),
+            Name = "Member Workspace"
+        };
+
+        ownerWorkspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = ownerWorkspace.Id,
+                UserId = userId,
+                Role = WorkspaceRole.Owner
+            });
+
+        adminWorkspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = adminWorkspace.Id,
+                UserId = userId,
+                Role = WorkspaceRole.Admin
+            });
+
+        memberWorkspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = memberWorkspace.Id,
+                UserId = userId,
+                Role = WorkspaceRole.Member
+            });
+
+        dbContext.Workspaces.AddRange(
+            ownerWorkspace,
+            adminWorkspace,
+            memberWorkspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var result = await service.GetAllAsync(userId);
+
+        Assert.Equal(3, result.Count);
+
+        Assert.Equal(
+            WorkspaceRoleDto.Owner,
+            result.Single(x => x.Id == ownerWorkspace.Id).CurrentUserRole);
+
+        Assert.Equal(
+            WorkspaceRoleDto.Admin,
+            result.Single(x => x.Id == adminWorkspace.Id).CurrentUserRole);
+
+        Assert.Equal(
+            WorkspaceRoleDto.Member,
+            result.Single(x => x.Id == memberWorkspace.Id).CurrentUserRole);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnEmptyCollection_WhenUserHasNoWorkspaces()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+
+        var result = await service.GetAllAsync(userId);
+
+        Assert.Empty(result);
+    }
+
+
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
