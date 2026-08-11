@@ -2097,6 +2097,228 @@ public class WorkspaceServiceTests
         Assert.Equal(WorkspaceRole.Owner, membership.Role);
     }
 
+    [Fact]
+    public async Task TransferOwnershipAsync_OwnerTransfersOwnership_SavesNewRoles()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com"
+        };
+
+        var member = new User
+        {
+            Id = memberId,
+            Username = "member",
+            Email = "member@test.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    User = owner,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    User = member,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(owner, member);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new TransferWorkspaceOwnershipRequestDto
+        {
+            UsernameOrEmail = member.Username
+        };
+
+        await sut.TransferOwnershipAsync(
+            workspaceId,
+            ownerId,
+            request);
+
+        var memberships = await dbContext.WorkspaceMembers
+            .Where(x => x.WorkspaceId == workspaceId)
+            .ToListAsync();
+
+        var savedOwner = memberships
+            .First(x => x.UserId == ownerId);
+
+        var savedNewOwner = memberships
+            .First(x => x.UserId == memberId);
+
+        Assert.Equal(
+            WorkspaceRole.Admin,
+            savedOwner.Role);
+
+        Assert.Equal(
+            WorkspaceRole.Owner,
+            savedNewOwner.Role);
+    }
+
+    [Fact]
+    public async Task TransferOwnershipAsync_NonOwner_ThrowsForbiddenException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com"
+        };
+
+        var member = new User
+        {
+            Id = memberId,
+            Username = "member",
+            Email = "member@test.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    User = owner,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    User = member,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(owner, member);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new TransferWorkspaceOwnershipRequestDto
+        {
+            UsernameOrEmail = owner.Username
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => sut.TransferOwnershipAsync(
+                workspaceId,
+                memberId,
+                request));
+
+        Assert.Equal(
+            "Only workspace owner can transfer ownership",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task TransferOwnershipAsync_TargetIsNotMember_ThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var ownerId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com"
+        };
+
+        var otherUser = new User
+        {
+            Id = otherUserId,
+            Username = "outsider",
+            Email = "outsider@test.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    User = owner,
+                    Role = WorkspaceRole.Owner
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(owner, otherUser);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new TransferWorkspaceOwnershipRequestDto
+        {
+            UsernameOrEmail = otherUser.Username
+        };
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => sut.TransferOwnershipAsync(
+                workspaceId,
+                ownerId,
+                request));
+
+        Assert.Equal(
+            "User not found",
+            exception.Message);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
