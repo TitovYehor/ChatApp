@@ -1534,6 +1534,113 @@ public class WorkspaceServiceTests
         Assert.Equal(1, memberCount);
     }
 
+    [Fact]
+    public async Task LeaveAsync_MemberLeavesWorkspace_RemovesMembership()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+
+        dbContext.Workspaces.Add(
+            new Workspace
+            {
+                Id = workspaceId,
+                Name = "Test workspace",
+                Description = "Test description",
+                Members =
+                [
+                    new WorkspaceMember
+                    {
+                        WorkspaceId = workspaceId,
+                        UserId = ownerId,
+                        Role = WorkspaceRole.Owner
+                    },
+                    new WorkspaceMember
+                    {
+                        WorkspaceId = workspaceId,
+                        UserId = memberId,
+                        Role = WorkspaceRole.Member
+                    }
+                ]
+            });
+
+        await dbContext.SaveChangesAsync();
+
+        await sut.LeaveAsync(
+            workspaceId,
+            memberId);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == memberId);
+
+        Assert.Null(membership);
+
+        var ownerMembership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == ownerId);
+
+        Assert.NotNull(ownerMembership);
+        Assert.Equal(WorkspaceRole.Owner, ownerMembership.Role);
+    }
+
+    [Fact]
+    public async Task LeaveAsync_OwnerLeavesWorkspace_ThrowsConflictException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+
+        dbContext.Workspaces.Add(
+            new Workspace
+            {
+                Id = workspaceId,
+                Name = "Test workspace",
+                Description = "Test description",
+                Members =
+                [
+                    new WorkspaceMember
+                    {
+                        WorkspaceId = workspaceId,
+                        UserId = ownerId,
+                        Role = WorkspaceRole.Owner
+                    }
+                ]
+            });
+
+        await dbContext.SaveChangesAsync();
+
+        var exception = await Assert.ThrowsAsync<ConflictException>(
+            () => sut.LeaveAsync(
+                workspaceId,
+                ownerId));
+
+        Assert.Equal(
+            "Transfer workspace ownership before leaving the workspace",
+            exception.Message);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == ownerId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Owner, membership.Role);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
