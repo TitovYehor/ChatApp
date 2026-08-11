@@ -590,9 +590,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
@@ -630,7 +628,7 @@ public class WorkspaceServiceTests
             Description = "New description"
         };
 
-        var result = await sut.UpdateAsync(
+        var result = await service.UpdateAsync(
             workspaceId,
             ownerId,
             request);
@@ -663,9 +661,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
@@ -704,7 +700,7 @@ public class WorkspaceServiceTests
 
         await dbContext.SaveChangesAsync();
 
-        await sut.DeleteAsync(
+        await service.DeleteAsync(
             workspaceId,
             ownerId);
 
@@ -729,9 +725,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var nonMemberId = Guid.NewGuid();
@@ -758,7 +752,7 @@ public class WorkspaceServiceTests
         await dbContext.SaveChangesAsync();
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.DeleteAsync(
+            () => service.DeleteAsync(
                 workspaceId,
                 nonMemberId));
 
@@ -783,9 +777,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var adminId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
@@ -818,7 +810,7 @@ public class WorkspaceServiceTests
         await dbContext.SaveChangesAsync();
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.DeleteAsync(
+            () => service.DeleteAsync(
                 workspaceId,
                 adminId));
 
@@ -843,15 +835,13 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => sut.DeleteAsync(
+            () => service.DeleteAsync(
                 workspaceId,
                 userId));
 
@@ -871,9 +861,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var invitedUserId = Guid.NewGuid();
@@ -921,7 +909,7 @@ public class WorkspaceServiceTests
             UsernameOrEmail = invitedUser.Username
         };
 
-        await sut.AddMemberAsync(
+        await service.AddMemberAsync(
             workspaceId,
             ownerId,
             request);
@@ -940,9 +928,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var adminId = Guid.NewGuid();
         var invitedUserId = Guid.NewGuid();
@@ -990,7 +976,7 @@ public class WorkspaceServiceTests
             UsernameOrEmail = invitedUser.Email
         };
 
-        await sut.AddMemberAsync(
+        await service.AddMemberAsync(
             workspaceId,
             adminId,
             request);
@@ -1009,9 +995,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var nonMemberId = Guid.NewGuid();
@@ -1053,7 +1037,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.AddMemberAsync(
+            () => service.AddMemberAsync(
                 workspaceId,
                 nonMemberId,
                 request));
@@ -1072,9 +1056,7 @@ public class WorkspaceServiceTests
         var invitedUserId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var invitedUser = new User
         {
@@ -1111,7 +1093,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.AddMemberAsync(
+            () => service.AddMemberAsync(
                 workspaceId,
                 memberId,
                 request));
@@ -1126,9 +1108,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
@@ -1159,7 +1139,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => sut.AddMemberAsync(
+            () => service.AddMemberAsync(
                 workspaceId,
                 ownerId,
                 request));
@@ -1178,9 +1158,7 @@ public class WorkspaceServiceTests
         var existingMemberId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var owner = new User
         {
@@ -1231,7 +1209,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ConflictException>(
-            () => sut.AddMemberAsync(
+            () => service.AddMemberAsync(
                 workspaceId,
                 ownerId,
                 request));
@@ -1254,9 +1232,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -1267,7 +1243,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => sut.AddMemberAsync(
+            () => service.AddMemberAsync(
                 workspaceId,
                 userId,
                 request));
@@ -1282,9 +1258,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var currentUserId = Guid.NewGuid();
@@ -1368,7 +1342,7 @@ public class WorkspaceServiceTests
 
         await dbContext.SaveChangesAsync();
 
-        var result = await sut.GetMembersAsync(
+        var result = await service.GetMembersAsync(
             workspaceId,
             currentUserId);
 
@@ -1395,9 +1369,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
@@ -1424,7 +1396,7 @@ public class WorkspaceServiceTests
         await dbContext.SaveChangesAsync();
 
         await Assert.ThrowsAsync<ForbiddenException>(() =>
-            sut.GetMembersAsync(
+            service.GetMembersAsync(
                 workspaceId,
                 nonMemberId));
     }
@@ -1434,9 +1406,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -1451,7 +1421,7 @@ public class WorkspaceServiceTests
 
         await dbContext.SaveChangesAsync();
 
-        await sut.JoinAsync(
+        await service.JoinAsync(
             workspaceId,
             userId);
 
@@ -1469,15 +1439,13 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => sut.JoinAsync(
+            () => service.JoinAsync(
                 workspaceId,
                 userId));
 
@@ -1491,9 +1459,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -1518,7 +1484,7 @@ public class WorkspaceServiceTests
         await dbContext.SaveChangesAsync();
 
         var exception = await Assert.ThrowsAsync<ConflictException>(
-            () => sut.JoinAsync(
+            () => service.JoinAsync(
                 workspaceId,
                 userId));
 
@@ -1539,9 +1505,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
@@ -1572,7 +1536,7 @@ public class WorkspaceServiceTests
 
         await dbContext.SaveChangesAsync();
 
-        await sut.LeaveAsync(
+        await service.LeaveAsync(
             workspaceId,
             memberId);
 
@@ -1597,9 +1561,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
@@ -1624,7 +1586,7 @@ public class WorkspaceServiceTests
         await dbContext.SaveChangesAsync();
 
         var exception = await Assert.ThrowsAsync<ConflictException>(
-            () => sut.LeaveAsync(
+            () => service.LeaveAsync(
                 workspaceId,
                 ownerId));
 
@@ -1646,9 +1608,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
@@ -1702,7 +1662,7 @@ public class WorkspaceServiceTests
             UsernameOrEmail = member.Username
         };
 
-        await sut.RemoveMemberAsync(
+        await service.RemoveMemberAsync(
             workspaceId,
             adminId,
             request);
@@ -1728,9 +1688,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var currentUserId = Guid.NewGuid();
@@ -1777,7 +1735,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.RemoveMemberAsync(
+            () => service.RemoveMemberAsync(
                 workspaceId,
                 currentUserId,
                 request));
@@ -1799,9 +1757,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
@@ -1856,7 +1812,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ConflictException>(
-            () => sut.RemoveMemberAsync(
+            () => service.RemoveMemberAsync(
                 workspaceId,
                 adminId,
                 request));
@@ -1879,9 +1835,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
@@ -1936,7 +1890,7 @@ public class WorkspaceServiceTests
             Role = WorkspaceRoleDto.Admin
         };
 
-        await sut.ChangeMemberRoleAsync(
+        await service.ChangeMemberRoleAsync(
             workspaceId,
             ownerId,
             request);
@@ -1955,9 +1909,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
@@ -2013,7 +1965,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.ChangeMemberRoleAsync(
+            () => service.ChangeMemberRoleAsync(
                 workspaceId,
                 adminId,
                 request));
@@ -2036,9 +1988,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
@@ -2079,7 +2029,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ConflictException>(
-            () => sut.ChangeMemberRoleAsync(
+            () => service.ChangeMemberRoleAsync(
                 workspaceId,
                 ownerId,
                 request));
@@ -2102,9 +2052,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
@@ -2158,7 +2106,7 @@ public class WorkspaceServiceTests
             UsernameOrEmail = member.Username
         };
 
-        await sut.TransferOwnershipAsync(
+        await service.TransferOwnershipAsync(
             workspaceId,
             ownerId,
             request);
@@ -2187,9 +2135,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
@@ -2244,7 +2190,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.TransferOwnershipAsync(
+            () => service.TransferOwnershipAsync(
                 workspaceId,
                 memberId,
                 request));
@@ -2259,9 +2205,7 @@ public class WorkspaceServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var sut = new WorkspaceService(
-            dbContext,
-            _workspaceNotifierMock.Object);
+        var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var otherUserId = Guid.NewGuid();
@@ -2309,7 +2253,7 @@ public class WorkspaceServiceTests
         };
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(
-            () => sut.TransferOwnershipAsync(
+            () => service.TransferOwnershipAsync(
                 workspaceId,
                 ownerId,
                 request));
