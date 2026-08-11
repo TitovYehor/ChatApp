@@ -1874,6 +1874,229 @@ public class WorkspaceServiceTests
         Assert.Equal(WorkspaceRole.Owner, membership.Role);
     }
 
+    [Fact]
+    public async Task ChangeMemberRoleAsync_OwnerChangesMemberRole_ShouldUpdateRole()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com",
+            PasswordHash = "hash"
+        };
+
+        var member = new User
+        {
+            Id = memberId,
+            Username = "member",
+            Email = "member@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(owner, member);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new ChangeWorkspaceMemberRoleRequestDto
+        {
+            UsernameOrEmail = member.Username,
+            Role = WorkspaceRoleDto.Admin
+        };
+
+        await sut.ChangeMemberRoleAsync(
+            workspaceId,
+            ownerId,
+            request);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == memberId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Admin, membership.Role);
+    }
+
+    [Fact]
+    public async Task ChangeMemberRoleAsync_NonOwnerTriesToChangeRole_ShouldThrowForbidden()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+
+        var admin = new User
+        {
+            Id = adminId,
+            Username = "admin",
+            Email = "admin@test.com",
+            PasswordHash = "hash"
+        };
+
+        var member = new User
+        {
+            Id = memberId,
+            Username = "member",
+            Email = "member@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = adminId,
+                    Role = WorkspaceRole.Admin
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(admin, member);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new ChangeWorkspaceMemberRoleRequestDto
+        {
+            UsernameOrEmail = member.Username,
+            Role = WorkspaceRoleDto.Admin
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => sut.ChangeMemberRoleAsync(
+                workspaceId,
+                adminId,
+                request));
+
+        Assert.Equal(
+            "Only owner can change roles",
+            exception.Message);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == memberId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Member, membership.Role);
+    }
+
+    [Fact]
+    public async Task ChangeMemberRoleAsync_OwnerChangesOwnRole_ShouldThrowConflict()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                }
+            ]
+        };
+
+        dbContext.Users.Add(owner);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new ChangeWorkspaceMemberRoleRequestDto
+        {
+            UsernameOrEmail = owner.Username,
+            Role = WorkspaceRoleDto.Admin
+        };
+
+        var exception = await Assert.ThrowsAsync<ConflictException>(
+            () => sut.ChangeMemberRoleAsync(
+                workspaceId,
+                ownerId,
+                request));
+
+        Assert.Equal(
+            "Owner cannot change own role",
+            exception.Message);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == ownerId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Owner, membership.Role);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
