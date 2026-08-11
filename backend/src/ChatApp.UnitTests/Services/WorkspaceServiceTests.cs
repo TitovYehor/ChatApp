@@ -1641,6 +1641,239 @@ public class WorkspaceServiceTests
         Assert.Equal(WorkspaceRole.Owner, membership.Role);
     }
 
+    [Fact]
+    public async Task RemoveMemberAsync_AdminRemovesMember_ShouldRemoveMembership()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+
+        var admin = new User
+        {
+            Id = adminId,
+            Username = "admin",
+            Email = "admin@test.com",
+            PasswordHash = "hash"
+        };
+
+        var member = new User
+        {
+            Id = memberId,
+            Username = "member",
+            Email = "member@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = adminId,
+                    Role = WorkspaceRole.Admin
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(admin, member);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new RemoveWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = member.Username
+        };
+
+        await sut.RemoveMemberAsync(
+            workspaceId,
+            adminId,
+            request);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == memberId);
+
+        Assert.Null(membership);
+
+        var adminMembership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == adminId);
+
+        Assert.NotNull(adminMembership);
+        Assert.Equal(WorkspaceRole.Admin, adminMembership.Role);
+    }
+
+    [Fact]
+    public async Task RemoveMemberAsync_MemberTriesToRemoveUser_ShouldThrowForbidden()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var currentUserId = Guid.NewGuid();
+        var targetUserId = Guid.NewGuid();
+
+        var targetUser = new User
+        {
+            Id = targetUserId,
+            Username = "target",
+            Email = "target@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = currentUserId,
+                    Role = WorkspaceRole.Member
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = targetUserId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        dbContext.Users.Add(targetUser);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new RemoveWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = targetUser.Username
+        };
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
+            () => sut.RemoveMemberAsync(
+                workspaceId,
+                currentUserId,
+                request));
+
+        Assert.Equal(
+            "Only Owner or Admin can remove members",
+            exception.Message);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == targetUserId);
+
+        Assert.NotNull(membership);
+    }
+
+    [Fact]
+    public async Task RemoveMemberAsync_TargetIsOwner_ShouldThrowConflict()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var adminId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+
+        var owner = new User
+        {
+            Id = ownerId,
+            Username = "owner",
+            Email = "owner@test.com",
+            PasswordHash = "hash"
+        };
+
+        var admin = new User
+        {
+            Id = adminId,
+            Username = "admin",
+            Email = "admin@test.com",
+            PasswordHash = "hash"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = ownerId,
+                    Role = WorkspaceRole.Owner
+                },
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = adminId,
+                    Role = WorkspaceRole.Admin
+                }
+            ]
+        };
+
+        dbContext.Users.AddRange(owner, admin);
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new RemoveWorkspaceMemberRequestDto
+        {
+            UsernameOrEmail = owner.Username
+        };
+
+        var exception = await Assert.ThrowsAsync<ConflictException>(
+            () => sut.RemoveMemberAsync(
+                workspaceId,
+                adminId,
+                request));
+
+        Assert.Equal(
+            "Workspace owner cannot be removed",
+            exception.Message);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == ownerId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Owner, membership.Role);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
