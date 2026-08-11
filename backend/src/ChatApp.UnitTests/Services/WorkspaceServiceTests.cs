@@ -1429,6 +1429,111 @@ public class WorkspaceServiceTests
                 nonMemberId));
     }
 
+    [Fact]
+    public async Task JoinAsync_UserJoinsWorkspace_AddsMember()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        dbContext.Workspaces.Add(
+            new Workspace
+            {
+                Id = workspaceId,
+                Name = "Test workspace",
+                Description = "Test description"
+            });
+
+        await dbContext.SaveChangesAsync();
+
+        await sut.JoinAsync(
+            workspaceId,
+            userId);
+
+        var membership = await dbContext.WorkspaceMembers
+            .FirstOrDefaultAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == userId);
+
+        Assert.NotNull(membership);
+        Assert.Equal(WorkspaceRole.Member, membership.Role);
+    }
+
+    [Fact]
+    public async Task JoinAsync_WorkspaceDoesNotExist_ThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => sut.JoinAsync(
+                workspaceId,
+                userId));
+
+        Assert.Equal(
+            "Workspace not found",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task JoinAsync_UserAlreadyMember_ThrowsConflictException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var sut = new WorkspaceService(
+            dbContext,
+            _workspaceNotifierMock.Object);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        dbContext.Workspaces.Add(
+            new Workspace
+            {
+                Id = workspaceId,
+                Name = "Test workspace",
+                Description = "Test description",
+                Members =
+                [
+                    new WorkspaceMember
+                    {
+                        WorkspaceId = workspaceId,
+                        UserId = userId,
+                        Role = WorkspaceRole.Member
+                    }
+                ]
+            });
+
+        await dbContext.SaveChangesAsync();
+
+        var exception = await Assert.ThrowsAsync<ConflictException>(
+            () => sut.JoinAsync(
+                workspaceId,
+                userId));
+
+        Assert.Equal(
+            "User is already a member of this workspace",
+            exception.Message);
+
+        var memberCount = await dbContext.WorkspaceMembers
+            .CountAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == userId);
+
+        Assert.Equal(1, memberCount);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
