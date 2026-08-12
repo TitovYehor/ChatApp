@@ -803,6 +803,110 @@ public class MessageServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task DeleteAsync_MessageOwnerDeletesMessage_RemovesMessageAndNotifies()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                userId,
+                workspaceId,
+                channelId);
+
+        var message = new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Message to delete"
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        await service.DeleteAsync(
+            messageId,
+            userId);
+
+        var deletedMessage = await dbContext.Messages
+            .FirstOrDefaultAsync(x => x.Id == messageId);
+
+        Assert.Null(deletedMessage);
+
+        _chatNotifierMock.Verify(
+            x => x.MessageDeletedAsync(
+                channelId,
+                It.Is<MessageDeletedResponseDto>(response =>
+                    response.MessageId == messageId &&
+                    response.ChannelId == channelId)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_UserIsNotMessageOwner_ThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var ownerId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+
+        var (owner, workspace, channel) =
+            CreateMessageContext(
+                ownerId,
+                workspaceId,
+                channelId);
+
+        var message = new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = ownerId,
+            Content = "Original content"
+        };
+
+        dbContext.Users.Add(owner);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.DeleteAsync(
+                messageId,
+                otherUserId));
+
+        Assert.Equal("Message not found", exception.Message);
+
+        var savedMessage = await dbContext.Messages
+            .FirstOrDefaultAsync(x => x.Id == messageId);
+
+        Assert.NotNull(savedMessage);
+
+        _chatNotifierMock.Verify(
+            x => x.MessageDeletedAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<MessageDeletedResponseDto>()),
+            Times.Never);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
