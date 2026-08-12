@@ -199,6 +199,163 @@ public class MessageServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task GetByIdAsync_MemberRetrievesMessage_ReturnsMessage()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+
+        var user = new User
+        {
+            Id = userId,
+            Username = "testuser",
+            Email = "test@example.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = userId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        var channel = new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = "general"
+        };
+
+        var message = new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Hello world",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        var result = await service.GetByIdAsync(
+            messageId,
+            userId);
+
+        Assert.Equal(messageId, result.Id);
+        Assert.Equal(channelId, result.ChannelId);
+        Assert.Equal(userId, result.UserId);
+        Assert.Equal("testuser", result.Username);
+        Assert.Equal("Hello world", result.Content);
+        Assert.Equal(message.CreatedAt, result.CreatedAt);
+        Assert.Null(result.UpdatedAt);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_MessageDoesNotExist_ThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var messageId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.GetByIdAsync(
+                messageId,
+                userId));
+
+        Assert.Equal("Message not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_UserIsNotWorkspaceMember_ThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var memberId = Guid.NewGuid();
+        var nonMemberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+
+        var user = new User
+        {
+            Id = memberId,
+            Username = "member",
+            Email = "member@example.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        var channel = new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = "general"
+        };
+
+        var message = new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = memberId,
+            Content = "Secret message"
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.GetByIdAsync(
+                messageId,
+                nonMemberId));
+
+        Assert.Equal("Message not found", exception.Message);
+    }
+
+
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
