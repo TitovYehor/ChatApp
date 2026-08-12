@@ -38,7 +38,7 @@ public class ChannelService : IChannelService
         var channel = new Channel
         {
             WorkspaceId = workspaceId,
-            Name = request.Name,
+            Name = request.Name.Trim(),
             Type = ChannelType.Text
         };
 
