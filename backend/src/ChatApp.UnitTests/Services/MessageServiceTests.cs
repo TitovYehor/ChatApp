@@ -31,35 +31,11 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var user = new User
-        {
-            Id = userId,
-            Username = "testuser",
-            Email = "test@example.com"
-        };
-
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = userId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                userId,
+                workspaceId,
+                channelId);
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -146,28 +122,11 @@ public class MessageServiceTests
         var memberId = Guid.NewGuid();
         var nonMemberId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
+        var (workspace, channel) =
+            CreateMessageContextWithoutUser(
+                memberId,
+                workspaceId,
+                channelId);
 
         dbContext.Workspaces.Add(workspace);
         dbContext.Channels.Add(channel);
@@ -211,35 +170,11 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var user = new User
-        {
-            Id = userId,
-            Username = "testuser",
-            Email = "test@example.com"
-        };
-
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = userId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                userId,
+                workspaceId,
+                channelId);
 
         var message = new Message
         {
@@ -301,35 +236,11 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var user = new User
-        {
-            Id = memberId,
-            Username = "member",
-            Email = "member@example.com"
-        };
-
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                memberId,
+                workspaceId,
+                channelId);
 
         var message = new Message
         {
@@ -365,35 +276,11 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var user = new User
-        {
-            Id = userId,
-            Username = "testuser",
-            Email = "test@example.com"
-        };
-
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = userId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                userId,
+                workspaceId,
+                channelId);
 
         var firstMessage = new Message
         {
@@ -467,35 +354,11 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var user = new User
-        {
-            Id = userId,
-            Username = "testuser",
-            Email = "test@example.com"
-        };
-
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = userId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                userId,
+                workspaceId,
+                channelId);
 
         var matchingMessage = new Message
         {
@@ -562,35 +425,11 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var user = new User
-        {
-            Id = memberId,
-            Username = "member",
-            Email = "member@example.com"
-        };
-
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                memberId,
+                workspaceId,
+                channelId);
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -922,9 +761,9 @@ public class MessageServiceTests
     }
 
     private static (User User, Workspace Workspace, Channel Channel) CreateMessageContext(
-    Guid userId,
-    Guid workspaceId,
-    Guid channelId)
+        Guid userId,
+        Guid workspaceId,
+        Guid channelId)
     {
         var user = new User
         {
@@ -957,5 +796,36 @@ public class MessageServiceTests
         };
 
         return (user, workspace, channel);
+    }
+
+    private static (Workspace Workspace, Channel Channel) CreateMessageContextWithoutUser(
+        Guid userId,
+        Guid workspaceId,
+        Guid channelId)
+    {
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = userId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        var channel = new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = "general"
+        };
+
+        return (workspace, channel);
     }
 }
