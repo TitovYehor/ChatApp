@@ -609,6 +609,200 @@ public class MessageServiceTests
         Assert.Equal("Channel not found", exception.Message);
     }
 
+    [Fact]
+    public async Task UpdateAsync_MessageOwnerUpdatesMessage_ReturnsUpdatedMessageAndNotifies()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                userId,
+                workspaceId,
+                channelId);
+
+        var originalCreatedAt = DateTime.UtcNow.AddMinutes(-5);
+
+        var message = new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Old content",
+            CreatedAt = originalCreatedAt
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateMessageRequestDto
+        {
+            Content = "  New content  "
+        };
+
+        var result = await service.UpdateAsync(
+            messageId,
+            userId,
+            request);
+
+        Assert.Equal(messageId, result.Id);
+        Assert.Equal(channelId, result.ChannelId);
+        Assert.Equal(userId, result.UserId);
+        Assert.Equal("New content", result.Content);
+        Assert.Equal("testuser", result.Username);
+        Assert.Equal(originalCreatedAt, result.CreatedAt);
+        Assert.NotNull(result.UpdatedAt);
+
+        var savedMessage = await dbContext.Messages
+            .FirstAsync(x => x.Id == messageId);
+
+        Assert.Equal("New content", savedMessage.Content);
+        Assert.NotNull(savedMessage.UpdatedAt);
+
+        _chatNotifierMock.Verify(
+            x => x.MessageUpdatedAsync(
+                channelId,
+                It.Is<MessageResponseDto>(response =>
+                    response.Id == messageId &&
+                    response.ChannelId == channelId &&
+                    response.UserId == userId &&
+                    response.Username == "testuser" &&
+                    response.Content == "New content" &&
+                    response.UpdatedAt != null)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_UserIsNotMessageOwner_ThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var ownerId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+
+        var (owner, workspace, channel) =
+            CreateMessageContext(
+                ownerId,
+                workspaceId,
+                channelId);
+
+        var message = new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = ownerId,
+            Content = "Original content"
+        };
+
+        dbContext.Users.Add(owner);
+
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateMessageRequestDto
+        {
+            Content = "Changed content"
+        };
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.UpdateAsync(
+                messageId,
+                otherUserId,
+                request));
+
+        Assert.Equal("Message not found", exception.Message);
+
+        _chatNotifierMock.Verify(
+            x => x.MessageUpdatedAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<MessageResponseDto>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ContentIsUnchanged_ReturnsMessageWithoutUpdatingOrNotifying()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+
+        var (user, workspace, channel) =
+            CreateMessageContext(
+                userId,
+                workspaceId,
+                channelId);
+
+        var createdAt = DateTime.UtcNow.AddMinutes(-5);
+        var updatedAt = DateTime.UtcNow.AddMinutes(-2);
+
+        var message = new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Same content",
+            CreatedAt = createdAt,
+            UpdatedAt = updatedAt
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.Add(message);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new UpdateMessageRequestDto
+        {
+            Content = "  Same content  "
+        };
+
+        var result = await service.UpdateAsync(
+            messageId,
+            userId,
+            request);
+
+        Assert.Equal(messageId, result.Id);
+        Assert.Equal("Same content", result.Content);
+        Assert.Equal(createdAt, result.CreatedAt);
+        Assert.Equal(updatedAt, result.UpdatedAt);
+
+        var savedMessage = await dbContext.Messages
+            .FirstAsync(x => x.Id == messageId);
+
+        Assert.Equal("Same content", savedMessage.Content);
+        Assert.Equal(updatedAt, savedMessage.UpdatedAt);
+
+        _chatNotifierMock.Verify(
+            x => x.MessageUpdatedAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<MessageResponseDto>()),
+            Times.Never);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -621,5 +815,43 @@ public class MessageServiceTests
     private MessageService CreateMessageService(AppDbContext dbContext)
     {
         return new MessageService(dbContext, _chatNotifierMock.Object);
+    }
+
+    private static (User User, Workspace Workspace, Channel Channel) CreateMessageContext(
+    Guid userId,
+    Guid workspaceId,
+    Guid channelId)
+    {
+        var user = new User
+        {
+            Id = userId,
+            Username = "testuser",
+            Email = "test@example.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = userId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        var channel = new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = "general"
+        };
+
+        return (user, workspace, channel);
     }
 }
