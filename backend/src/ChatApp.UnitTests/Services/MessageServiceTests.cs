@@ -354,7 +354,260 @@ public class MessageServiceTests
         Assert.Equal("Message not found", exception.Message);
     }
 
+    [Fact]
+    public async Task GetByChannelIdAsync_MemberGetsMessages_ReturnsPagedResult()
+    {
+        await using var dbContext = CreateDbContext();
 
+        var service = CreateMessageService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+
+        var user = new User
+        {
+            Id = userId,
+            Username = "testuser",
+            Email = "test@example.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = userId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        var channel = new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = "general"
+        };
+
+        var firstMessage = new Message
+        {
+            Id = Guid.NewGuid(),
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "First message",
+            CreatedAt = DateTime.UtcNow.AddMinutes(-3)
+        };
+
+        var secondMessage = new Message
+        {
+            Id = Guid.NewGuid(),
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Second message",
+            CreatedAt = DateTime.UtcNow.AddMinutes(-2)
+        };
+
+        var thirdMessage = new Message
+        {
+            Id = Guid.NewGuid(),
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Third message",
+            CreatedAt = DateTime.UtcNow.AddMinutes(-1)
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.AddRange(
+            firstMessage,
+            secondMessage,
+            thirdMessage);
+
+        await dbContext.SaveChangesAsync();
+
+        var query = new MessageQueryDto
+        {
+            PageNumber = 2,
+            PageSize = 2
+        };
+
+        var result = await service.GetByChannelIdAsync(
+            channelId,
+            userId,
+            query);
+
+        Assert.Equal(2, result.PageNumber);
+        Assert.Equal(2, result.PageSize);
+        Assert.Equal(3, result.TotalCount);
+
+        Assert.Single(result.Items);
+
+        var returnedMessage = result.Items.Single();
+
+        Assert.Equal(thirdMessage.Id, returnedMessage.Id);
+        Assert.Equal("Third message", returnedMessage.Content);
+        Assert.Equal("testuser", returnedMessage.Username);
+    }
+
+    [Fact]
+    public async Task GetByChannelIdAsync_WithSearch_ReturnsMatchingMessages()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+
+        var user = new User
+        {
+            Id = userId,
+            Username = "testuser",
+            Email = "test@example.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = userId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        var channel = new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = "general"
+        };
+
+        var matchingMessage = new Message
+        {
+            Id = Guid.NewGuid(),
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Hello from the backend",
+            CreatedAt = DateTime.UtcNow.AddMinutes(-2)
+        };
+
+        var nonMatchingMessage = new Message
+        {
+            Id = Guid.NewGuid(),
+            ChannelId = channelId,
+            UserId = userId,
+            Content = "Something completely different",
+            CreatedAt = DateTime.UtcNow.AddMinutes(-1)
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+        dbContext.Messages.AddRange(
+            matchingMessage,
+            nonMatchingMessage);
+
+        await dbContext.SaveChangesAsync();
+
+        var query = new MessageQueryDto
+        {
+            PageNumber = 1,
+            PageSize = 50,
+            Search = "backend"
+        };
+
+        var result = await service.GetByChannelIdAsync(
+            channelId,
+            userId,
+            query);
+
+        Assert.Equal(1, result.TotalCount);
+        Assert.Single(result.Items);
+
+        var returnedMessage = result.Items.Single();
+
+        Assert.Equal(
+            matchingMessage.Id,
+            returnedMessage.Id);
+
+        Assert.Equal(
+            "Hello from the backend",
+            returnedMessage.Content);
+    }
+
+    [Fact]
+    public async Task GetByChannelIdAsync_UserIsNotWorkspaceMember_ThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateMessageService(dbContext);
+
+        var memberId = Guid.NewGuid();
+        var nonMemberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+
+        var user = new User
+        {
+            Id = memberId,
+            Username = "member",
+            Email = "member@example.com"
+        };
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Test workspace",
+            Description = "Test description",
+            Members =
+            [
+                new WorkspaceMember
+                {
+                    WorkspaceId = workspaceId,
+                    UserId = memberId,
+                    Role = WorkspaceRole.Member
+                }
+            ]
+        };
+
+        var channel = new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = "general"
+        };
+
+        dbContext.Users.Add(user);
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+
+        await dbContext.SaveChangesAsync();
+
+        var query = new MessageQueryDto();
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.GetByChannelIdAsync(
+                channelId,
+                nonMemberId,
+                query));
+
+        Assert.Equal("Channel not found", exception.Message);
+    }
 
     private static AppDbContext CreateDbContext()
     {
