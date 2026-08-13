@@ -114,6 +114,77 @@ public class ChannelServiceTests
             Times.Once);
     }
 
+    [Fact]
+    public async Task GetByIdAsync_MemberGetsChannel()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateChannelService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+
+        var workspace = CreateWorkspace(
+            workspaceId,
+            userId,
+            WorkspaceRole.Member);
+
+        var channel = CreateChannel(
+            channelId,
+            workspaceId,
+            "general",
+            ChannelType.Text);
+
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+
+        await dbContext.SaveChangesAsync();
+
+        var result = await service.GetByIdAsync(
+            channelId,
+            userId);
+
+        Assert.Equal(channelId, result.Id);
+        Assert.Equal(workspaceId, result.WorkspaceId);
+        Assert.Equal("general", result.Name);
+        Assert.Equal((int)ChannelType.Text, result.Type);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_NonMemberThrowsNotFoundException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateChannelService(dbContext);
+
+        var memberId = Guid.NewGuid();
+        var nonMemberId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+
+        var workspace = CreateWorkspace(
+            workspaceId,
+            memberId,
+            WorkspaceRole.Member);
+
+        var channel = CreateChannel(
+            channelId,
+            workspaceId,
+            "general",
+            ChannelType.Text);
+
+        dbContext.Workspaces.Add(workspace);
+        dbContext.Channels.Add(channel);
+
+        await dbContext.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            service.GetByIdAsync(
+                channelId,
+                nonMemberId));
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -150,6 +221,21 @@ public class ChannelServiceTests
                     Role = role
                 }
             ]
+        };
+    }
+
+    private static Channel CreateChannel(
+        Guid channelId,
+        Guid workspaceId,
+        string name = "general",
+        ChannelType type = ChannelType.Text)
+    {
+        return new Channel
+        {
+            Id = channelId,
+            WorkspaceId = workspaceId,
+            Name = name,
+            Type = type
         };
     }
 }
