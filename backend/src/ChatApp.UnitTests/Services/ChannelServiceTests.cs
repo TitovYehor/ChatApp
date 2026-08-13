@@ -185,6 +185,100 @@ public class ChannelServiceTests
                 nonMemberId));
     }
 
+    [Fact]
+    public async Task GetByWorkspaceIdAsync_MemberGetsChannelsOrderedByName()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateChannelService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        var workspace = CreateWorkspace(
+            workspaceId,
+            userId,
+            WorkspaceRole.Member);
+
+        dbContext.Workspaces.Add(workspace);
+
+        dbContext.Channels.AddRange(
+            CreateChannel(
+                Guid.NewGuid(),
+                workspaceId,
+                "random",
+                ChannelType.Text),
+            CreateChannel(
+                Guid.NewGuid(),
+                workspaceId,
+                "general",
+                ChannelType.Text),
+            CreateChannel(
+                Guid.NewGuid(),
+                workspaceId,
+                "announcements",
+                ChannelType.Text));
+
+        await dbContext.SaveChangesAsync();
+
+        _workspaceAuthorizationMock
+            .Setup(x =>
+                x.EnsureCanAccessWorkspaceAsync(
+                    workspaceId,
+                    userId))
+            .Returns(Task.CompletedTask);
+
+        var result = await service.GetByWorkspaceIdAsync(
+            workspaceId,
+            userId);
+
+        var channels = result.ToList();
+
+        Assert.Equal(3, channels.Count);
+        Assert.Equal("announcements", channels[0].Name);
+        Assert.Equal("general", channels[1].Name);
+        Assert.Equal("random", channels[2].Name);
+
+        _workspaceAuthorizationMock.Verify(
+            x =>
+                x.EnsureCanAccessWorkspaceAsync(
+                    workspaceId,
+                    userId),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetByWorkspaceIdAsync_WhenUserCannotAccessWorkspace_ThrowsForbiddenException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var service = CreateChannelService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
+
+        _workspaceAuthorizationMock
+            .Setup(x =>
+                x.EnsureCanAccessWorkspaceAsync(
+                    workspaceId,
+                    userId))
+            .ThrowsAsync(
+                new ForbiddenException(
+                    "User is not a member of this workspace"));
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            service.GetByWorkspaceIdAsync(
+                workspaceId,
+                userId));
+
+        _workspaceAuthorizationMock.Verify(
+            x =>
+                x.EnsureCanAccessWorkspaceAsync(
+                    workspaceId,
+                    userId),
+            Times.Once);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
