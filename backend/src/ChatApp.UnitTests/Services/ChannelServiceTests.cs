@@ -387,6 +387,98 @@ public class ChannelServiceTests
         Assert.Equal("general", savedChannel.Name);
     }
 
+    [Fact]
+    public async Task DeleteAsync_ManageableUserDeletesChannel()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var workspace = CreateWorkspace(
+            workspaceId,
+            userId);
+
+        var channel = CreateChannel(
+            channelId,
+            workspaceId);
+
+        workspace.Channels.Add(channel);
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateChannelService(dbContext);
+
+        _workspaceAuthorizationMock
+            .Setup(x => x.GetManageableChannelAsync(
+                channelId,
+                userId))
+            .ReturnsAsync(channel);
+
+        await service.DeleteAsync(
+            channelId,
+            userId);
+
+        var deletedChannel = await dbContext.Channels
+            .FirstOrDefaultAsync(x => x.Id == channelId);
+
+        Assert.Null(deletedChannel);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_NonManager_ThrowsForbiddenException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+
+        var workspace = CreateWorkspace(
+            workspaceId,
+            ownerId);
+
+        workspace.Members.Add(
+            new WorkspaceMember
+            {
+                WorkspaceId = workspaceId,
+                UserId = memberId,
+                Role = WorkspaceRole.Member
+            });
+
+        var channel = CreateChannel(
+            channelId,
+            workspaceId);
+
+        workspace.Channels.Add(channel);
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateChannelService(dbContext);
+
+        _workspaceAuthorizationMock
+            .Setup(x => x.GetManageableChannelAsync(
+                channelId,
+                memberId))
+            .ThrowsAsync(new ForbiddenException("Only workspace administrators can manage channels"));
+
+        await Assert.ThrowsAsync<ForbiddenException>(() =>
+            service.DeleteAsync(
+                channelId,
+                memberId));
+
+        var existingChannel = await dbContext.Channels
+            .FirstOrDefaultAsync(x => x.Id == channelId);
+
+        Assert.NotNull(existingChannel);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
