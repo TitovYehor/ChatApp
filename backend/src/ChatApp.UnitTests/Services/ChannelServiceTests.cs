@@ -12,8 +12,12 @@ namespace ChatApp.UnitTests.Services;
 
 public class ChannelServiceTests
 {
-    private readonly Mock<IWorkspaceAuthorizationService>
-        _workspaceAuthorizationMock = new();
+    private readonly Mock<IWorkspaceAuthorizationService> _workspaceAuthorizationMock;
+
+    public ChannelServiceTests()
+    {
+        _workspaceAuthorizationMock = new Mock<IWorkspaceAuthorizationService>();
+    }
 
     [Fact]
     public async Task CreateAsync_AuthorizedUser_CreatesChannel()
@@ -277,6 +281,110 @@ public class ChannelServiceTests
                     workspaceId,
                     userId),
             Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ManageableUserUpdatesChannelName()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var workspace = CreateWorkspace(
+            workspaceId,
+            userId,
+            WorkspaceRole.Owner);
+
+        var channel = CreateChannel(
+            channelId,
+            workspaceId,
+            "old-name",
+            ChannelType.Text);
+
+        workspace.Channels.Add(channel);
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateChannelService(dbContext);
+
+        var request = new UpdateChannelRequestDto
+        {
+            Name = "  new-name  "
+        };
+
+        _workspaceAuthorizationMock
+            .Setup(x => x.GetManageableChannelAsync(
+                channelId,
+                userId))
+            .ReturnsAsync(channel);
+
+        var result = await service.UpdateAsync(
+            channelId,
+            userId,
+            request);
+
+        Assert.Equal(channelId, result.Id);
+        Assert.Equal(workspaceId, result.WorkspaceId);
+        Assert.Equal("new-name", result.Name);
+
+        var savedChannel = await dbContext.Channels
+            .FirstAsync(x => x.Id == channelId);
+
+        Assert.Equal("new-name", savedChannel.Name);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_SameName_ReturnsChannelWithoutChangingIt()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var workspaceId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var workspace = CreateWorkspace(
+            workspaceId,
+            userId);
+
+        var channel = CreateChannel(
+            channelId,
+            workspaceId,
+            "general");
+
+        workspace.Channels.Add(channel);
+
+        dbContext.Workspaces.Add(workspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateChannelService(dbContext);
+
+        var request = new UpdateChannelRequestDto
+        {
+            Name = "  general  "
+        };
+
+        _workspaceAuthorizationMock
+            .Setup(x => x.GetManageableChannelAsync(
+                channelId,
+                userId))
+            .ReturnsAsync(channel);
+
+        var result = await service.UpdateAsync(
+            channelId,
+            userId,
+            request);
+
+        Assert.Equal("general", result.Name);
+
+        var savedChannel = await dbContext.Channels
+            .FirstAsync(x => x.Id == channelId);
+
+        Assert.Equal("general", savedChannel.Name);
     }
 
     private static AppDbContext CreateDbContext()
