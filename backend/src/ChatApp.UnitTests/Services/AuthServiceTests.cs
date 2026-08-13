@@ -137,6 +137,112 @@ public class AuthServiceTests
         Assert.Single(await dbContext.Users.ToListAsync());
     }
 
+    [Fact]
+    public async Task LoginAsync_ValidCredentials_ReturnsAuthenticationData()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var user = CreateUser(
+            username: "testuser",
+            email: "test@example.com",
+            password: "Password123");
+
+        dbContext.Users.Add(user);
+
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateAuthService(dbContext);
+
+        var request = new LoginRequestDto
+        {
+            Email = "test@example.com",
+            Password = "Password123"
+        };
+
+        var result = await service.LoginAsync(request);
+
+        Assert.Equal(user.Id, result.User.Id);
+        Assert.Equal(user.Username, result.User.Username);
+        Assert.Equal(user.Email, result.User.Email);
+        Assert.False(string.IsNullOrWhiteSpace(result.AccessToken));
+
+        var jwtSettings = CreateJwtSettings();
+
+        var principal = ValidateToken(
+            result.AccessToken,
+            jwtSettings);
+
+        Assert.Equal(
+            user.Id.ToString(),
+            principal.FindFirstValue(
+                ClaimTypes.NameIdentifier));
+
+        Assert.Equal(
+            user.Username,
+            principal.FindFirstValue(
+                ClaimTypes.Name));
+
+        Assert.Equal(
+            user.Email,
+            principal.FindFirstValue(
+                ClaimTypes.Email));
+    }
+
+    [Fact]
+    public async Task LoginAsync_UnknownEmail_ThrowsInvalidCredentialsException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var user = CreateUser();
+
+        dbContext.Users.Add(user);
+
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateAuthService(dbContext);
+
+        var request = new LoginRequestDto
+        {
+            Email = "unknown@example.com",
+            Password = "Password123"
+        };
+
+        var exception = await Assert.ThrowsAsync<InvalidCredentialsException>(
+            () => service.LoginAsync(request));
+
+        Assert.Equal(
+            "Invalid credentials",
+            exception.Message);
+    }
+
+    [Fact]
+    public async Task LoginAsync_InvalidPassword_ThrowsInvalidCredentialsException()
+    {
+        await using var dbContext = CreateDbContext();
+
+        var user = CreateUser(
+            password: "CorrectPassword123");
+
+        dbContext.Users.Add(user);
+
+        await dbContext.SaveChangesAsync();
+
+        var service = CreateAuthService(dbContext);
+
+        var request = new LoginRequestDto
+        {
+            Email = user.Email,
+            Password = "WrongPassword123"
+        };
+
+        var exception = await Assert.ThrowsAsync<InvalidCredentialsException>(
+            () => service.LoginAsync(request));
+
+        Assert.Equal(
+            "Invalid credentials",
+            exception.Message);
+    }
+
     private static AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
