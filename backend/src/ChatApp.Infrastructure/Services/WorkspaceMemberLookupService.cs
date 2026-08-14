@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
-public class WorkspaceMemberLookupService
-    : IWorkspaceMemberLookupService
+public class WorkspaceMemberLookupService : IWorkspaceMemberLookupService
 {
     private readonly AppDbContext _dbContext;
 
