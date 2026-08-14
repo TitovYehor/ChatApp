@@ -133,4 +133,179 @@ public class WorkspaceMemberLookupServiceTests
             [recipient1Id, recipient2Id],
             result.RecipientUserIds);
     }
+
+    [Fact]
+    public async Task GetOnlineUsersAsync_ReturnsOnlyOnlineUsersWhoShareWorkspace()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = new WorkspaceMemberLookupService(dbContext);
+
+        var currentUserId = Guid.NewGuid();
+        var onlineSharedUserId = Guid.NewGuid();
+        var offlineSharedUserId = Guid.NewGuid();
+        var onlineUnrelatedUserId = Guid.NewGuid();
+
+        var workspaceId = Guid.NewGuid();
+        var unrelatedWorkspaceId = Guid.NewGuid();
+
+        dbContext.Users.AddRange(
+            TestDataFactory.CreateUser(
+                currentUserId,
+                "current-user",
+                "current@example.com"),
+
+            TestDataFactory.CreateUser(
+                onlineSharedUserId,
+                "online-shared",
+                "online-shared@example.com"),
+
+            TestDataFactory.CreateUser(
+                offlineSharedUserId,
+                "offline-shared",
+                "offline-shared@example.com"),
+
+            TestDataFactory.CreateUser(
+                onlineUnrelatedUserId,
+                "online-unrelated",
+                "online-unrelated@example.com"));
+
+        var workspace = new Workspace
+        {
+            Id = workspaceId,
+            Name = "Shared workspace",
+            Members =
+            [
+                TestDataFactory.CreateWorkspaceMember(
+                    workspaceId,
+                    currentUserId,
+                    WorkspaceRole.Owner),
+                TestDataFactory.CreateWorkspaceMember(
+                    workspaceId,
+                    onlineSharedUserId,
+                    WorkspaceRole.Member),
+                TestDataFactory.CreateWorkspaceMember(
+                    workspaceId,
+                    offlineSharedUserId,
+                    WorkspaceRole.Member)
+            ]
+        };
+
+        var unrelatedWorkspace = new Workspace
+        {
+            Id = unrelatedWorkspaceId,
+            Name = "Unrelated workspace",
+            Members =
+            [
+                TestDataFactory.CreateWorkspaceMember(
+                    unrelatedWorkspaceId,
+                    onlineUnrelatedUserId,
+                    WorkspaceRole.Owner)
+            ]
+        };
+
+        dbContext.Workspaces.AddRange(
+            workspace,
+            unrelatedWorkspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var onlineUsers = new[]
+        {
+            currentUserId,
+            onlineSharedUserId,
+            onlineUnrelatedUserId
+        };
+
+        var result = await service.GetOnlineUsersAsync(
+            currentUserId,
+            onlineUsers);
+
+        var users = result.ToList();
+
+        Assert.Single(users);
+
+        Assert.Equal(
+            onlineSharedUserId,
+            users[0].UserId);
+
+        Assert.Equal(
+            "online-shared",
+            users[0].Username);
+    }
+
+    [Fact]
+    public async Task GetOnlineUsersAsync_DoesNotReturnDuplicateUserWhenUsersShareMultipleWorkspaces()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = new WorkspaceMemberLookupService(dbContext);
+
+        var currentUserId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+
+        var workspace1Id = Guid.NewGuid();
+        var workspace2Id = Guid.NewGuid();
+
+        dbContext.Users.AddRange(
+            TestDataFactory.CreateUser(
+                currentUserId,
+                "current-user",
+                "current@example.com"),
+
+            TestDataFactory.CreateUser(
+                otherUserId,
+                "other-user",
+                "other@example.com"));
+
+        var workspace1 = new Workspace
+        {
+            Id = workspace1Id,
+            Name = "Workspace 1",
+            Members =
+            [
+                TestDataFactory.CreateWorkspaceMember(
+                    workspace1Id,
+                    currentUserId,
+                    WorkspaceRole.Owner),
+                TestDataFactory.CreateWorkspaceMember(
+                    workspace1Id,
+                    otherUserId,
+                    WorkspaceRole.Member)
+            ]
+        };
+
+        var workspace2 = new Workspace
+        {
+            Id = workspace2Id,
+            Name = "Workspace 2",
+            Members =
+            [
+                TestDataFactory.CreateWorkspaceMember(
+                    workspace2Id,
+                    currentUserId,
+                    WorkspaceRole.Owner),
+                TestDataFactory.CreateWorkspaceMember(
+                    workspace2Id,
+                    otherUserId,
+                    WorkspaceRole.Member)
+            ]
+        };
+
+        dbContext.Workspaces.AddRange(
+            workspace1,
+            workspace2);
+
+        await dbContext.SaveChangesAsync();
+
+        var result = await service.GetOnlineUsersAsync(
+            currentUserId,
+            [otherUserId]);
+
+        var users = result.ToList();
+
+        Assert.Single(users);
+        Assert.Equal(otherUserId, users[0].UserId);
+        Assert.Equal("other-user", users[0].Username);
+    }
 }
