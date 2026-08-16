@@ -1,6 +1,5 @@
 ﻿using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Realtime.Responses;
-using Microsoft.Extensions.Logging;
 
 namespace ChatApp.RealTime.Services;
 
@@ -15,8 +14,7 @@ public class PresenceService : IPresenceService
     public PresenceService(
         IWorkspaceMemberLookupService lookupService,
         IOnlineUserTracker onlineUserTracker,
-        IChatNotifier chatNotifier,
-        ILogger<PresenceService> logger)
+        IChatNotifier chatNotifier)
     {
         _lookupService = lookupService;
         _onlineUserTracker = onlineUserTracker;
