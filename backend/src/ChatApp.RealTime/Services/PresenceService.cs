@@ -12,8 +12,6 @@ public class PresenceService : IPresenceService
 
     private readonly IChatNotifier _chatNotifier;
 
-    private readonly ILogger<PresenceService> _logger;
-
     public PresenceService(
         IWorkspaceMemberLookupService lookupService,
         IOnlineUserTracker onlineUserTracker,
@@ -23,7 +21,6 @@ public class PresenceService : IPresenceService
         _lookupService = lookupService;
         _onlineUserTracker = onlineUserTracker;
         _chatNotifier = chatNotifier;
-        _logger = logger;
     }
 
     public async Task UserConnectedAsync(
