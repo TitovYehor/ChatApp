@@ -58,31 +58,6 @@ public class WorkspaceAuthorizationService: IWorkspaceAuthorizationService
         }
     }
 
-    public async Task EnsureCanManageChannelAsync(
-        Guid channelId,
-        Guid userId)
-    {
-        var role = await _dbContext.Channels
-            .Where(c => c.Id == channelId)
-            .SelectMany(c => c.Workspace.Members)
-            .Where(m => m.UserId == userId)
-            .Select(m => (WorkspaceRole?)m.Role)
-            .FirstOrDefaultAsync();
-
-        if (role == null)
-        {
-            throw new ForbiddenException(
-                "User does not have access to this channel");
-        }
-
-        if (role != WorkspaceRole.Owner &&
-            role != WorkspaceRole.Admin)
-        {
-            throw new ForbiddenException(
-                "Only workspace administrators can manage channels");
-        }
-    }
-
     public async Task<Channel> GetManageableChannelAsync(
         Guid channelId,
         Guid userId)

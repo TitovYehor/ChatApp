@@ -12,10 +12,6 @@ public interface IWorkspaceAuthorizationService
         Guid workspaceId,
         Guid userId);
 
-    Task EnsureCanManageChannelAsync(
-        Guid channelId,
-        Guid userId);
-
     Task<Channel> GetManageableChannelAsync(
         Guid channelId,
         Guid userId);
