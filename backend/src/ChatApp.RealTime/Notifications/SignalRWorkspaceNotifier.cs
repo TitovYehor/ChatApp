@@ -4,7 +4,7 @@ using ChatApp.Contracts.Workspaces.Responses;
 using ChatApp.RealTime.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ChatApp.RealTime.Services;
+namespace ChatApp.RealTime.Notifications;
 
 public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
 {
