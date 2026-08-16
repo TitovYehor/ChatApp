@@ -147,6 +147,82 @@ public class PresenceServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task UserDisconnectedAsync_LastConnection_NotifiesPresenceChange()
+    {
+        var userId = Guid.NewGuid();
+        var connectionId = "connection-1";
+        var recipientId = Guid.NewGuid();
+
+        _onlineUserTrackerMock
+            .Setup(x => x.UserDisconnected(
+                userId,
+                connectionId))
+            .Returns(true);
+
+        _lookupServiceMock
+            .Setup(x => x.GetPresenceLookupAsync(userId))
+            .ReturnsAsync(new PresenceLookupResponseDto
+            {
+                UserId = userId,
+                Username = "testuser",
+                RecipientUserIds = new List<Guid>
+                {
+                recipientId
+                }
+            });
+
+        _onlineUserTrackerMock
+            .Setup(x => x.IsOnline(recipientId))
+            .Returns(true);
+
+        var service = CreatePresenceService();
+
+        await service.UserDisconnectedAsync(
+            userId,
+            connectionId);
+
+        _chatNotifierMock.Verify(
+            x => x.UserPresenceChangedAsync(
+                It.Is<IEnumerable<Guid>>(ids =>
+                    ids.Count() == 1 &&
+                    ids.Contains(recipientId)),
+                It.Is<UserPresenceChangedResponseDto>(response =>
+                    response.UserId == userId &&
+                    response.Username == "testuser" &&
+                    !response.IsOnline)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task UserDisconnectedAsync_UserStillHasConnection_DoesNotNotifyPresenceChange()
+    {
+        var userId = Guid.NewGuid();
+        var connectionId = "connection-1";
+
+        _onlineUserTrackerMock
+            .Setup(x => x.UserDisconnected(
+                userId,
+                connectionId))
+            .Returns(false);
+
+        var service = CreatePresenceService();
+
+        await service.UserDisconnectedAsync(
+            userId,
+            connectionId);
+
+        _lookupServiceMock.Verify(
+            x => x.GetPresenceLookupAsync(userId),
+            Times.Never);
+
+        _chatNotifierMock.Verify(
+            x => x.UserPresenceChangedAsync(
+                It.IsAny<IEnumerable<Guid>>(),
+                It.IsAny<UserPresenceChangedResponseDto>()),
+            Times.Never);
+    }
+
     private PresenceService CreatePresenceService()
     {
         return new PresenceService(
