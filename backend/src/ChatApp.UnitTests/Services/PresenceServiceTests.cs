@@ -223,6 +223,76 @@ public class PresenceServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task TypingStartedAsync_NotifiesChannelUserStartedTyping()
+    {
+        var userId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+
+        _lookupServiceMock
+            .Setup(x => x.GetPresenceLookupAsync(userId))
+            .ReturnsAsync(new PresenceLookupResponseDto
+            {
+                UserId = userId,
+                Username = "testuser"
+            });
+
+        var service = CreatePresenceService();
+
+        await service.TypingStartedAsync(
+            userId,
+            channelId);
+
+        _lookupServiceMock.Verify(
+            x => x.GetPresenceLookupAsync(userId),
+            Times.Once);
+
+        _chatNotifierMock.Verify(
+            x => x.UserTypingAsync(
+                channelId,
+                It.Is<UserTypingResponseDto>(response =>
+                    response.UserId == userId &&
+                    response.Username == "testuser" &&
+                    response.ChannelId == channelId &&
+                    response.IsTyping)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task TypingStoppedAsync_NotifiesChannelUserStoppedTyping()
+    {
+        var userId = Guid.NewGuid();
+        var channelId = Guid.NewGuid();
+
+        _lookupServiceMock
+            .Setup(x => x.GetPresenceLookupAsync(userId))
+            .ReturnsAsync(new PresenceLookupResponseDto
+            {
+                UserId = userId,
+                Username = "testuser"
+            });
+
+        var service = CreatePresenceService();
+
+        await service.TypingStoppedAsync(
+            userId,
+            channelId);
+
+        _lookupServiceMock.Verify(
+            x => x.GetPresenceLookupAsync(userId),
+            Times.Once);
+
+        _chatNotifierMock.Verify(
+            x => x.UserTypingAsync(
+                channelId,
+                It.Is<UserTypingResponseDto>(response =>
+                    response.UserId == userId &&
+                    response.Username == "testuser" &&
+                    response.ChannelId == channelId &&
+                    !response.IsTyping)),
+            Times.Once);
+    }
+
     private PresenceService CreatePresenceService()
     {
         return new PresenceService(
