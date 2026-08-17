@@ -1,10 +1,10 @@
 ﻿using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Channels.Requests;
-using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
 using ChatApp.Infrastructure.Services;
+using ChatApp.UnitTests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -22,14 +22,14 @@ public class ChannelServiceTests
     [Fact]
     public async Task CreateAsync_AuthorizedUser_CreatesChannel()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateChannelService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             userId,
             WorkspaceRole.Admin);
@@ -78,7 +78,7 @@ public class ChannelServiceTests
     [Fact]
     public async Task CreateAsync_UnauthorizedUser_ThrowsForbiddenException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateChannelService(dbContext);
 
@@ -121,7 +121,7 @@ public class ChannelServiceTests
     [Fact]
     public async Task GetByIdAsync_MemberGetsChannel()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateChannelService(dbContext);
 
@@ -129,12 +129,12 @@ public class ChannelServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             userId,
             WorkspaceRole.Member);
 
-        var channel = CreateChannel(
+        var channel = TestDataFactory.CreateChannel(
             channelId,
             workspaceId,
             "general",
@@ -158,7 +158,7 @@ public class ChannelServiceTests
     [Fact]
     public async Task GetByIdAsync_NonMemberThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateChannelService(dbContext);
 
@@ -167,12 +167,12 @@ public class ChannelServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             memberId,
             WorkspaceRole.Member);
 
-        var channel = CreateChannel(
+        var channel = TestDataFactory.CreateChannel(
             channelId,
             workspaceId,
             "general",
@@ -192,14 +192,14 @@ public class ChannelServiceTests
     [Fact]
     public async Task GetByWorkspaceIdAsync_MemberGetsChannelsOrderedByName()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateChannelService(dbContext);
 
         var userId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             userId,
             WorkspaceRole.Member);
@@ -207,17 +207,17 @@ public class ChannelServiceTests
         dbContext.Workspaces.Add(workspace);
 
         dbContext.Channels.AddRange(
-            CreateChannel(
+            TestDataFactory.CreateChannel(
                 Guid.NewGuid(),
                 workspaceId,
                 "random",
                 ChannelType.Text),
-            CreateChannel(
+            TestDataFactory.CreateChannel(
                 Guid.NewGuid(),
                 workspaceId,
                 "general",
                 ChannelType.Text),
-            CreateChannel(
+            TestDataFactory.CreateChannel(
                 Guid.NewGuid(),
                 workspaceId,
                 "announcements",
@@ -254,7 +254,7 @@ public class ChannelServiceTests
     [Fact]
     public async Task GetByWorkspaceIdAsync_WhenUserCannotAccessWorkspace_ThrowsForbiddenException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateChannelService(dbContext);
 
@@ -286,18 +286,18 @@ public class ChannelServiceTests
     [Fact]
     public async Task UpdateAsync_ManageableUserUpdatesChannelName()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             userId,
             WorkspaceRole.Owner);
 
-        var channel = CreateChannel(
+        var channel = TestDataFactory.CreateChannel(
             channelId,
             workspaceId,
             "old-name",
@@ -340,17 +340,17 @@ public class ChannelServiceTests
     [Fact]
     public async Task UpdateAsync_SameName_ReturnsChannelWithoutChangingIt()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             userId);
 
-        var channel = CreateChannel(
+        var channel = TestDataFactory.CreateChannel(
             channelId,
             workspaceId,
             "general");
@@ -390,17 +390,17 @@ public class ChannelServiceTests
     [Fact]
     public async Task DeleteAsync_ManageableUserDeletesChannel()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             userId);
 
-        var channel = CreateChannel(
+        var channel = TestDataFactory.CreateChannel(
             channelId,
             workspaceId);
 
@@ -431,26 +431,24 @@ public class ChannelServiceTests
     [Fact]
     public async Task DeleteAsync_NonManager_ThrowsForbiddenException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
 
-        var workspace = CreateWorkspace(
+        var workspace = TestDataFactory.CreateWorkspace(
             workspaceId,
             ownerId);
 
         workspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspaceId,
-                UserId = memberId,
-                Role = WorkspaceRole.Member
-            });
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member));
 
-        var channel = CreateChannel(
+        var channel = TestDataFactory.CreateChannel(
             channelId,
             workspaceId);
 
@@ -479,57 +477,11 @@ public class ChannelServiceTests
         Assert.NotNull(existingChannel);
     }
 
-    private static AppDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        return new AppDbContext(options);
-    }
-
     private ChannelService CreateChannelService(
         AppDbContext dbContext)
     {
         return new ChannelService(
             dbContext,
             _workspaceAuthorizationMock.Object);
-    }
-
-    private static Workspace CreateWorkspace(
-        Guid workspaceId,
-        Guid userId,
-        WorkspaceRole role = WorkspaceRole.Owner)
-    {
-        return new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = userId,
-                    Role = role
-                }
-            ]
-        };
-    }
-
-    private static Channel CreateChannel(
-        Guid channelId,
-        Guid workspaceId,
-        string name = "general",
-        ChannelType type = ChannelType.Text)
-    {
-        return new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = name,
-            Type = type
-        };
     }
 }

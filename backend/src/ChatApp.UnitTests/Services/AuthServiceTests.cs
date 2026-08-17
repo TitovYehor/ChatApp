@@ -1,6 +1,5 @@
 ﻿using ChatApp.Application.Exceptions;
 using ChatApp.Contracts.Authentication.Requests;
-using ChatApp.Domain.Entities;
 using ChatApp.Infrastructure.Authentication;
 using ChatApp.Infrastructure.Persistence;
 using ChatApp.Infrastructure.Services;
