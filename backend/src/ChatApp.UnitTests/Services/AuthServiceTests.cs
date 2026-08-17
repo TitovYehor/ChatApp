@@ -19,7 +19,7 @@ public class AuthServiceTests
     [Fact]
     public async Task RegisterAsync_NewUser_CreatesUserAndReturnsAuthenticationData()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateAuthService(dbContext);
 
@@ -77,7 +77,7 @@ public class AuthServiceTests
     [Fact]
     public async Task RegisterAsync_ExistingEmail_ThrowsUserAlreadyExistsException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var userId = Guid.NewGuid();
 
@@ -112,7 +112,7 @@ public class AuthServiceTests
     [Fact]
     public async Task RegisterAsync_ExistingUsername_ThrowsUserAlreadyExistsException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var userId = Guid.NewGuid();
 
@@ -147,7 +147,7 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_ValidCredentials_ReturnsAuthenticationData()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var userId = Guid.NewGuid();
 
@@ -200,7 +200,7 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_UnknownEmail_ThrowsInvalidCredentialsException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var userId = Guid.NewGuid();
 
@@ -230,7 +230,7 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_InvalidPassword_ThrowsInvalidCredentialsException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var userId = Guid.NewGuid();
 
@@ -255,15 +255,6 @@ public class AuthServiceTests
         Assert.Equal(
             "Invalid credentials",
             exception.Message);
-    }
-
-    private static AppDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        return new AppDbContext(options);
     }
 
     private static AuthService CreateAuthService(
