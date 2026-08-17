@@ -63,7 +63,7 @@ public static class TestDataFactory
             Id = userId,
             Username = username,
             Email = email,
-            PasswordHash = "test-password-hash"
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("test-password-hash")
         };
     }
 
