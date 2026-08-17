@@ -3,10 +3,10 @@ using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Workspaces.Enums;
 using ChatApp.Contracts.Workspaces.Requests;
 using ChatApp.Contracts.Workspaces.Responses;
-using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
 using ChatApp.Infrastructure.Services;
+using ChatApp.UnitTests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -24,7 +24,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task CreateAsync_ShouldCreateWorkspaceWithOwnerMembership()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -64,26 +64,18 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetByIdAsync_ShouldReturnWorkspaceForMember()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var userId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Workspace",
-            Description = "Test description"
-        };
+        var workspaceId = Guid.NewGuid();
 
-        workspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Member
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            userId,
+            WorkspaceRole.Member);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -94,7 +86,7 @@ public class WorkspaceServiceTests
             userId);
 
         Assert.Equal(workspace.Id, result.Id);
-        Assert.Equal("Test Workspace", result.Name);
+        Assert.Equal("Test workspace", result.Name);
         Assert.Equal("Test description", result.Description);
         Assert.Equal(WorkspaceRoleDto.Member, result.CurrentUserRole);
     }
@@ -102,7 +94,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetByIdAsync_ShouldThrowNotFound_WhenWorkspaceDoesNotExist()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -120,27 +112,19 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetByIdAsync_ShouldThrowForbidden_WhenUserIsNotMember()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var memberUserId = Guid.NewGuid();
         var otherUserId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Workspace",
-            Description = "Test description"
-        };
+        var workspaceId = Guid.NewGuid();
 
-        workspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace.Id,
-                UserId = memberUserId,
-                Role = WorkspaceRole.Member
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            memberUserId,
+            WorkspaceRole.Member);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -157,41 +141,28 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetAllAsync_ShouldReturnAllUserWorkspaces()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var userId = Guid.NewGuid();
 
-        var workspace1 = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Workspace 1",
-            Description = "Description 1"
-        };
+        var workspace1Id = Guid.NewGuid();
+        var workspace2Id = Guid.NewGuid();
 
-        var workspace2 = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Workspace 2",
-            Description = "Description 2"
-        };
+        var workspace1 = TestDataFactory.CreateWorkspace(
+            workspace1Id,
+            userId,
+            WorkspaceRole.Owner);
+        workspace1.Name = "Workspace 1";
+        workspace1.Description = "Description 1";
 
-        workspace1.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace1.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Owner
-            });
-
-        workspace2.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace2.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Member
-            });
+        var workspace2 = TestDataFactory.CreateWorkspace(
+            workspace2Id,
+            userId,
+            WorkspaceRole.Member);
+        workspace2.Name = "Workspace 2";
+        workspace2.Description = "Description 2";
 
         dbContext.Workspaces.AddRange(
             workspace1,
@@ -219,42 +190,25 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetAllAsync_ShouldNotReturnWorkspacesUserIsNotMemberOf()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var userId = Guid.NewGuid();
         var otherUserId = Guid.NewGuid();
 
-        var userWorkspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "User Workspace",
-            Description = "User workspace"
-        };
+        var workspaceId = Guid.NewGuid();
+        var otherWorkspaceId = Guid.NewGuid();
 
-        var otherWorkspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Other Workspace",
-            Description = "Other workspace"
-        };
+        var userWorkspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId,
+            WorkspaceRole.Member);
 
-        userWorkspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = userWorkspace.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Member
-            });
-
-        otherWorkspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = otherWorkspace.Id,
-                UserId = otherUserId,
-                Role = WorkspaceRole.Owner
-            });
+        var otherWorkspace = TestDataFactory.CreateWorkspace(
+            otherWorkspaceId,
+            otherUserId,
+            WorkspaceRole.Owner);
 
         dbContext.Workspaces.AddRange(
             userWorkspace,
@@ -271,60 +225,35 @@ public class WorkspaceServiceTests
             workspace.Id);
 
         Assert.Equal(
-            "User Workspace",
+            "Test workspace",
             workspace.Name);
     }
 
     [Fact]
     public async Task GetAllAsync_ShouldReturnCorrectWorkspaceRoles()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var userId = Guid.NewGuid();
+        var ownerWorkspaceId = Guid.NewGuid();
+        var adminWorkspaceId = Guid.NewGuid();
+        var memberWorkspaceId = Guid.NewGuid();
 
-        var ownerWorkspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Owner Workspace"
-        };
+        var ownerWorkspace = TestDataFactory.CreateWorkspace(
+            ownerWorkspaceId,
+            userId);
 
-        var adminWorkspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Admin Workspace"
-        };
+        var adminWorkspace = TestDataFactory.CreateWorkspace(
+            adminWorkspaceId,
+            userId,
+            WorkspaceRole.Admin);
 
-        var memberWorkspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Member Workspace"
-        };
-
-        ownerWorkspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = ownerWorkspace.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Owner
-            });
-
-        adminWorkspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = adminWorkspace.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Admin
-            });
-
-        memberWorkspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = memberWorkspace.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Member
-            });
+        var memberWorkspace = TestDataFactory.CreateWorkspace(
+            memberWorkspaceId,
+            userId,
+            WorkspaceRole.Member);
 
         dbContext.Workspaces.AddRange(
             ownerWorkspace,
@@ -353,7 +282,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetAllAsync_ShouldReturnEmptyCollection_WhenUserHasNoWorkspaces()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -367,26 +296,17 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldUpdateWorkspace_WhenUserIsOwner()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Old Name",
-            Description = "Old Description"
-        };
-
-        workspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace.Id,
-                UserId = ownerId,
-                Role = WorkspaceRole.Owner
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            ownerId,
+            WorkspaceRole.Owner);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -425,7 +345,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldThrowNotFound_WhenWorkspaceDoesNotExist()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -452,27 +372,18 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldThrowForbidden_WhenUserIsNotMember()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var memberId = Guid.NewGuid();
         var otherUserId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Old Name",
-            Description = "Old Description"
-        };
-
-        workspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace.Id,
-                UserId = memberId,
-                Role = WorkspaceRole.Member
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            memberId,
+            WorkspaceRole.Member);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -498,26 +409,17 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldThrowForbidden_WhenUserIsMember()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var userId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Old Name",
-            Description = "Old Description"
-        };
-
-        workspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace.Id,
-                UserId = userId,
-                Role = WorkspaceRole.Member
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId,
+            WorkspaceRole.Member);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -543,26 +445,17 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldThrowForbidden_WhenUserIsAdmin()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var adminId = Guid.NewGuid();
+        var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = Guid.NewGuid(),
-            Name = "Old Name",
-            Description = "Old Description"
-        };
-
-        workspace.Members.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace.Id,
-                UserId = adminId,
-                Role = WorkspaceRole.Admin
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            adminId,
+            WorkspaceRole.Admin);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -588,7 +481,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task UpdateAsync_OwnerUpdatesWorkspace_AndNotifiesMembers()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -596,27 +489,15 @@ public class WorkspaceServiceTests
         var memberId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Old name",
-            Description = "Old description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Workspaces.Add(workspace);
 
@@ -659,7 +540,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task DeleteAsync_OwnerDeletesWorkspace_AndNotifiesMembers()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -668,33 +549,21 @@ public class WorkspaceServiceTests
         var memberId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = adminId,
-                    Role = WorkspaceRole.Admin
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                adminId,
+                WorkspaceRole.Admin)
+            );
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Workspaces.Add(workspace);
 
@@ -723,7 +592,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task DeleteAsync_ShouldThrowForbidden_WhenUserIsNotMember()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -731,21 +600,9 @@ public class WorkspaceServiceTests
         var nonMemberId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -775,7 +632,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task DeleteAsync_ShouldThrowForbidden_WhenUserIsAdmin()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -783,27 +640,15 @@ public class WorkspaceServiceTests
         var ownerId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = adminId,
-                    Role = WorkspaceRole.Admin
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                adminId,
+                WorkspaceRole.Admin)
+            );
 
         dbContext.Workspaces.Add(workspace);
 
@@ -833,7 +678,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task DeleteAsync_ShouldThrowNotFound_WhenWorkspaceDoesNotExist()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -859,7 +704,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task AddMemberAsync_OwnerAddsUser_ShouldCreateMembership()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -867,37 +712,19 @@ public class WorkspaceServiceTests
         var invitedUserId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com",
-            PasswordHash = "hash"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
 
-        var invitedUser = new User
-        {
-            Id = invitedUserId,
-            Username = "newuser",
-            Email = "newuser@test.com",
-            PasswordHash = "hash"
-        };
+        var invitedUser = TestDataFactory.CreateUser(
+            invitedUserId,
+            "newuser",
+            "newuser@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
 
         dbContext.Users.AddRange(owner, invitedUser);
         dbContext.Workspaces.Add(workspace);
@@ -926,7 +753,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task AddMemberAsync_AdminAddsUser_ShouldCreateMembership()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -934,37 +761,20 @@ public class WorkspaceServiceTests
         var invitedUserId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var admin = new User
-        {
-            Id = adminId,
-            Username = "admin",
-            Email = "admin@test.com",
-            PasswordHash = "hash"
-        };
+        var admin = TestDataFactory.CreateUser(
+            adminId,
+            "admin",
+            "admin@test.com");
 
-        var invitedUser = new User
-        {
-            Id = invitedUserId,
-            Username = "newuser",
-            Email = "newuser@test.com",
-            PasswordHash = "hash"
-        };
+        var invitedUser = TestDataFactory.CreateUser(
+            invitedUserId,
+            "newuser",
+            "newuser@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = adminId,
-                    Role = WorkspaceRole.Admin
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            adminId, 
+            WorkspaceRole.Admin);
 
         dbContext.Users.AddRange(admin, invitedUser);
         dbContext.Workspaces.Add(workspace);
@@ -993,7 +803,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task AddMemberAsync_NonMember_ShouldThrowForbidden()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1002,29 +812,14 @@ public class WorkspaceServiceTests
         var invitedUserId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var invitedUser = new User
-        {
-            Id = invitedUserId,
-            Username = "newuser",
-            Email = "newuser@test.com",
-            PasswordHash = "hash"
-        };
+        var invitedUser = TestDataFactory.CreateUser(
+            invitedUserId,
+            "newuser",
+            "newuser@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
 
         dbContext.Users.Add(invitedUser);
         dbContext.Workspaces.Add(workspace);
@@ -1050,7 +845,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task AddMemberAsync_Member_ShouldThrowForbidden()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var memberId = Guid.NewGuid();
         var invitedUserId = Guid.NewGuid();
@@ -1058,29 +853,15 @@ public class WorkspaceServiceTests
 
         var service = CreateService(dbContext);
 
-        var invitedUser = new User
-        {
-            Id = invitedUserId,
-            Username = "newuser",
-            Email = "newuser@test.com",
-            PasswordHash = "hash"
-        };
+        var invitedUser = TestDataFactory.CreateUser(
+            invitedUserId,
+            "newuser",
+            "newuser@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            memberId,
+            WorkspaceRole.Member);
 
         dbContext.Users.Add(invitedUser);
         dbContext.Workspaces.Add(workspace);
@@ -1106,28 +887,16 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task AddMemberAsync_UserDoesNotExist_ShouldThrowNotFound()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var ownerId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -1152,7 +921,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task AddMemberAsync_UserAlreadyMember_ShouldThrowConflict()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var ownerId = Guid.NewGuid();
         var existingMemberId = Guid.NewGuid();
@@ -1160,43 +929,25 @@ public class WorkspaceServiceTests
 
         var service = CreateService(dbContext);
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com",
-            PasswordHash = "hash"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,    
+            "owner",
+            "owner@test.com");
 
-        var existingMember = new User
-        {
-            Id = existingMemberId,
-            Username = "existing",
-            Email = "existing@test.com",
-            PasswordHash = "hash"
-        };
+        var existingMember = TestDataFactory.CreateUser(
+            existingMemberId,
+            "existing",
+            "existing@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = existingMemberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                existingMemberId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Users.AddRange(owner, existingMember);
         dbContext.Workspaces.Add(workspace);
@@ -1230,7 +981,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task AddMemberAsync_WorkspaceDoesNotExist_ShouldThrowNotFound()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1256,7 +1007,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetMembersAsync_MemberGetsWorkspaceMembers_OrderedByRoleThenUsername()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1268,75 +1019,65 @@ public class WorkspaceServiceTests
         var memberZId = Guid.NewGuid();
         var memberAId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = currentUserId,
-                    Role = WorkspaceRole.Member,
-                    User = new User
-                    {
-                        Id = currentUserId,
-                        Username = "currentuser",
-                        Email = "current@example.com"
-                    }
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner,
-                    User = new User
-                    {
-                        Id = ownerId,
-                        Username = "owner",
-                        Email = "owner@example.com"
-                    }
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = adminId,
-                    Role = WorkspaceRole.Admin,
-                    User = new User
-                    {
-                        Id = adminId,
-                        Username = "admin",
-                        Email = "admin@example.com"
-                    }
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberZId,
-                    Role = WorkspaceRole.Member,
-                    User = new User
-                    {
-                        Id = memberZId,
-                        Username = "zuser",
-                        Email = "z@example.com"
-                    }
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberAId,
-                    Role = WorkspaceRole.Member,
-                    User = new User
-                    {
-                        Id = memberAId,
-                        Username = "auser",
-                        Email = "a@example.com"
-                    }
-                }
-            ]
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
+
+        var admin = TestDataFactory.CreateUser(
+            adminId,
+            "admin",
+            "admin@test.com");
+
+        var currentUser = TestDataFactory.CreateUser(
+            currentUserId,
+            "currentuser",
+            "currentuser@test.com");
+
+        var memberA = TestDataFactory.CreateUser(
+            memberAId,
+            "auser",
+            "auser@test.com");
+
+        var memberZ = TestDataFactory.CreateUser(
+            memberZId,
+            "zuser",
+            "zuser@test.com");
+
+        dbContext.Users.AddRange(
+            owner,
+            admin,
+            currentUser,
+            memberA,
+            memberZ);
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                adminId,
+                WorkspaceRole.Admin)
+            );
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberAId,
+                WorkspaceRole.Member)
+            );
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberZId,
+                WorkspaceRole.Member)
+            );
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                currentUserId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Workspaces.Add(workspace);
 
@@ -1367,7 +1108,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetMembersAsync_NonMember_ThrowsForbiddenException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1375,21 +1116,9 @@ public class WorkspaceServiceTests
         var memberId = Guid.NewGuid();
         var nonMemberId = Guid.NewGuid();
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Owner
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            memberId);
 
         dbContext.Workspaces.Add(workspace);
 
@@ -1404,31 +1133,30 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task JoinAsync_UserJoinsWorkspace_AddsMember()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        var newUserId = Guid.NewGuid();
 
-        dbContext.Workspaces.Add(
-            new Workspace
-            {
-                Id = workspaceId,
-                Name = "Test workspace",
-                Description = "Test description"
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId);
+
+        dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
 
         await service.JoinAsync(
             workspaceId,
-            userId);
+            newUserId);
 
         var membership = await dbContext.WorkspaceMembers
             .FirstOrDefaultAsync(x =>
                 x.WorkspaceId == workspaceId &&
-                x.UserId == userId);
+                x.UserId == newUserId);
 
         Assert.NotNull(membership);
         Assert.Equal(WorkspaceRole.Member, membership.Role);
@@ -1437,7 +1165,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task JoinAsync_WorkspaceDoesNotExist_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1457,29 +1185,18 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task JoinAsync_UserAlreadyMember_ThrowsConflictException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
-        dbContext.Workspaces.Add(
-            new Workspace
-            {
-                Id = workspaceId,
-                Name = "Test workspace",
-                Description = "Test description",
-                Members =
-                [
-                    new WorkspaceMember
-                    {
-                        WorkspaceId = workspaceId,
-                        UserId = userId,
-                        Role = WorkspaceRole.Member
-                    }
-                ]
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId);
+
+        dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
 
@@ -1503,7 +1220,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task LeaveAsync_MemberLeavesWorkspace_RemovesMembership()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1511,28 +1228,17 @@ public class WorkspaceServiceTests
         var ownerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
 
-        dbContext.Workspaces.Add(
-            new Workspace
-            {
-                Id = workspaceId,
-                Name = "Test workspace",
-                Description = "Test description",
-                Members =
-                [
-                    new WorkspaceMember
-                    {
-                        WorkspaceId = workspaceId,
-                        UserId = ownerId,
-                        Role = WorkspaceRole.Owner
-                    },
-                    new WorkspaceMember
-                    {
-                        WorkspaceId = workspaceId,
-                        UserId = memberId,
-                        Role = WorkspaceRole.Member
-                    }
-                ]
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member)
+            );
+
+        dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
 
@@ -1559,29 +1265,18 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task LeaveAsync_OwnerLeavesWorkspace_ThrowsConflictException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
 
-        dbContext.Workspaces.Add(
-            new Workspace
-            {
-                Id = workspaceId,
-                Name = "Test workspace",
-                Description = "Test description",
-                Members =
-                [
-                    new WorkspaceMember
-                    {
-                        WorkspaceId = workspaceId,
-                        UserId = ownerId,
-                        Role = WorkspaceRole.Owner
-                    }
-                ]
-            });
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+
+        dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
 
@@ -1606,7 +1301,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task RemoveMemberAsync_AdminRemovesMember_ShouldRemoveMembership()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1614,43 +1309,26 @@ public class WorkspaceServiceTests
         var adminId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
 
-        var admin = new User
-        {
-            Id = adminId,
-            Username = "admin",
-            Email = "admin@test.com",
-            PasswordHash = "hash"
-        };
+        var admin = TestDataFactory.CreateUser(
+            adminId,
+            "admin",
+            "admin@test.com");
 
-        var member = new User
-        {
-            Id = memberId,
-            Username = "member",
-            Email = "member@test.com",
-            PasswordHash = "hash"
-        };
+        var member = TestDataFactory.CreateUser(
+            memberId,
+            "member",
+            "member@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = adminId,
-                    Role = WorkspaceRole.Admin
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            adminId,
+            WorkspaceRole.Admin);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Users.AddRange(admin, member);
         dbContext.Workspaces.Add(workspace);
@@ -1686,7 +1364,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task RemoveMemberAsync_MemberTriesToRemoveUser_ShouldThrowForbidden()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1694,35 +1372,21 @@ public class WorkspaceServiceTests
         var currentUserId = Guid.NewGuid();
         var targetUserId = Guid.NewGuid();
 
-        var targetUser = new User
-        {
-            Id = targetUserId,
-            Username = "target",
-            Email = "target@test.com",
-            PasswordHash = "hash"
-        };
+        var targetUser = TestDataFactory.CreateUser(
+            targetUserId,
+            "target",
+            "target@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = currentUserId,
-                    Role = WorkspaceRole.Member
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = targetUserId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            currentUserId,
+            WorkspaceRole.Member);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                targetUserId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Users.Add(targetUser);
         dbContext.Workspaces.Add(workspace);
@@ -1755,7 +1419,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task RemoveMemberAsync_TargetIsOwner_ShouldThrowConflict()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1763,43 +1427,25 @@ public class WorkspaceServiceTests
         var adminId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com",
-            PasswordHash = "hash"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
 
-        var admin = new User
-        {
-            Id = adminId,
-            Username = "admin",
-            Email = "admin@test.com",
-            PasswordHash = "hash"
-        };
+        var admin = TestDataFactory.CreateUser(
+            adminId,
+            "admin",
+            "admin@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = adminId,
-                    Role = WorkspaceRole.Admin
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                adminId,
+                WorkspaceRole.Admin)
+            );
 
         dbContext.Users.AddRange(owner, admin);
         dbContext.Workspaces.Add(workspace);
@@ -1833,7 +1479,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task ChangeMemberRoleAsync_OwnerChangesMemberRole_ShouldUpdateRole()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1841,43 +1487,25 @@ public class WorkspaceServiceTests
         var ownerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com",
-            PasswordHash = "hash"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
 
-        var member = new User
-        {
-            Id = memberId,
-            Username = "member",
-            Email = "member@test.com",
-            PasswordHash = "hash"
-        };
+        var member = TestDataFactory.CreateUser(
+            memberId,
+            "member",
+            "member@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Users.AddRange(owner, member);
         dbContext.Workspaces.Add(workspace);
@@ -1907,7 +1535,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task ChangeMemberRoleAsync_NonOwnerTriesToChangeRole_ShouldThrowForbidden()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -1915,43 +1543,26 @@ public class WorkspaceServiceTests
         var adminId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
 
-        var admin = new User
-        {
-            Id = adminId,
-            Username = "admin",
-            Email = "admin@test.com",
-            PasswordHash = "hash"
-        };
+        var admin = TestDataFactory.CreateUser(
+            adminId,
+            "admin",
+            "admin@test.com");
 
-        var member = new User
-        {
-            Id = memberId,
-            Username = "member",
-            Email = "member@test.com",
-            PasswordHash = "hash"
-        };
+        var member = TestDataFactory.CreateUser(
+            memberId,
+            "member",
+            "member@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = adminId,
-                    Role = WorkspaceRole.Admin
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            adminId,
+            WorkspaceRole.Admin);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Users.AddRange(admin, member);
         dbContext.Workspaces.Add(workspace);
@@ -1986,36 +1597,21 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task ChangeMemberRoleAsync_OwnerChangesOwnRole_ShouldThrowConflict()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
         var workspaceId = Guid.NewGuid();
         var ownerId = Guid.NewGuid();
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com",
-            PasswordHash = "hash"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    Role = WorkspaceRole.Owner
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
 
         dbContext.Users.Add(owner);
         dbContext.Workspaces.Add(workspace);
@@ -2050,7 +1646,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task TransferOwnershipAsync_OwnerTransfersOwnership_SavesNewRoles()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -2058,43 +1654,25 @@ public class WorkspaceServiceTests
         var memberId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
 
-        var member = new User
-        {
-            Id = memberId,
-            Username = "member",
-            Email = "member@test.com"
-        };
+        var member = TestDataFactory.CreateUser(
+            memberId,
+            "member",
+            "member@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    User = owner,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    User = member,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId,
+                memberId,
+                WorkspaceRole.Member)
+            );
 
         dbContext.Users.AddRange(owner, member);
         dbContext.Workspaces.Add(workspace);
@@ -2133,7 +1711,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task TransferOwnershipAsync_NonOwner_ThrowsForbiddenException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -2141,43 +1719,25 @@ public class WorkspaceServiceTests
         var memberId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
 
-        var member = new User
-        {
-            Id = memberId,
-            Username = "member",
-            Email = "member@test.com"
-        };
+        var member = TestDataFactory.CreateUser(
+            memberId,
+            "member",
+            "member@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    User = owner,
-                    Role = WorkspaceRole.Owner
-                },
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = memberId,
-                    User = member,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            ownerId);
+        workspace.Members.Add(
+            TestDataFactory.CreateWorkspaceMember(
+                workspaceId, 
+                memberId, 
+                WorkspaceRole.Member)
+            );
 
         dbContext.Users.AddRange(owner, member);
         dbContext.Workspaces.Add(workspace);
@@ -2203,7 +1763,7 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task TransferOwnershipAsync_TargetIsNotMember_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateService(dbContext);
 
@@ -2211,36 +1771,19 @@ public class WorkspaceServiceTests
         var otherUserId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
 
-        var owner = new User
-        {
-            Id = ownerId,
-            Username = "owner",
-            Email = "owner@test.com"
-        };
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "owner",
+            "owner@test.com");
 
-        var otherUser = new User
-        {
-            Id = otherUserId,
-            Username = "outsider",
-            Email = "outsider@test.com"
-        };
+        var otherUser = TestDataFactory.CreateUser(
+            otherUserId, 
+            "outsider", 
+            "outsider@test.com");
 
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = ownerId,
-                    User = owner,
-                    Role = WorkspaceRole.Owner
-                }
-            ]
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            ownerId);
 
         dbContext.Users.AddRange(owner, otherUser);
         dbContext.Workspaces.Add(workspace);
@@ -2261,15 +1804,6 @@ public class WorkspaceServiceTests
         Assert.Equal(
             "User not found",
             exception.Message);
-    }
-
-    private static AppDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        return new AppDbContext(options);
     }
 
     private WorkspaceService CreateService(
