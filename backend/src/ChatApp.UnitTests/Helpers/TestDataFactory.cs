@@ -53,6 +53,26 @@ public static class TestDataFactory
         };
     }
 
+
+    public static Message CreateMessage(
+        Guid messageId,
+        Guid channelId,
+        Guid userId,
+        string content = "Test message",
+        DateTime? createdAt = null,
+        DateTime? updatedAt = null)
+    {
+        return new Message
+        {
+            Id = messageId,
+            ChannelId = channelId,
+            UserId = userId,
+            Content = content,
+            CreatedAt = createdAt ?? DateTime.UtcNow,
+            UpdatedAt = updatedAt ?? null
+        };
+    }
+
     public static User CreateUser(
         Guid userId,
         string username = "testuser",
