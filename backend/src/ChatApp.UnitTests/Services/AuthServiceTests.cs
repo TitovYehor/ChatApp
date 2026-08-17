@@ -4,6 +4,7 @@ using ChatApp.Domain.Entities;
 using ChatApp.Infrastructure.Authentication;
 using ChatApp.Infrastructure.Persistence;
 using ChatApp.Infrastructure.Services;
+using ChatApp.UnitTests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -78,9 +79,12 @@ public class AuthServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var existingUser = CreateUser(
-            username: "existinguser",
-            email: "existing@example.com");
+        var userId = Guid.NewGuid();
+
+        var existingUser = TestDataFactory.CreateUser(
+            userId,
+            "existinguser",
+            "existing@example.com");
 
         dbContext.Users.Add(existingUser);
 
@@ -92,7 +96,7 @@ public class AuthServiceTests
         {
             Username = "differentuser",
             Email = "existing@example.com",
-            Password = "Password123"
+            Password = "test-password-hash"
         };
 
         var exception = await Assert.ThrowsAsync<UserAlreadyExistsException>(
@@ -110,9 +114,12 @@ public class AuthServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var existingUser = CreateUser(
-            username: "existinguser",
-            email: "existing@example.com");
+        var userId = Guid.NewGuid();
+
+        var existingUser = TestDataFactory.CreateUser(
+            userId,
+            "existinguser",
+            "existing@example.com");
 
         dbContext.Users.Add(existingUser);
 
@@ -124,7 +131,7 @@ public class AuthServiceTests
         {
             Username = "existinguser",
             Email = "different@example.com",
-            Password = "Password123"
+            Password = "test-password-hash"
         };
 
         var exception = await Assert.ThrowsAsync<UserAlreadyExistsException>(
@@ -142,10 +149,12 @@ public class AuthServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var user = CreateUser(
-            username: "testuser",
-            email: "test@example.com",
-            password: "Password123");
+        var userId = Guid.NewGuid();
+
+        var user = TestDataFactory.CreateUser(
+            userId,
+            "testuser",
+            "test@example.com");
 
         dbContext.Users.Add(user);
 
@@ -156,7 +165,7 @@ public class AuthServiceTests
         var request = new LoginRequestDto
         {
             Email = "test@example.com",
-            Password = "Password123"
+            Password = "test-password-hash"
         };
 
         var result = await service.LoginAsync(request);
@@ -193,7 +202,10 @@ public class AuthServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var user = CreateUser();
+        var userId = Guid.NewGuid();
+
+        var user = TestDataFactory.CreateUser(
+            userId);
 
         dbContext.Users.Add(user);
 
@@ -204,7 +216,7 @@ public class AuthServiceTests
         var request = new LoginRequestDto
         {
             Email = "unknown@example.com",
-            Password = "Password123"
+            Password = "test-password-hash"
         };
 
         var exception = await Assert.ThrowsAsync<InvalidCredentialsException>(
@@ -220,8 +232,10 @@ public class AuthServiceTests
     {
         await using var dbContext = CreateDbContext();
 
-        var user = CreateUser(
-            password: "CorrectPassword123");
+        var userId = Guid.NewGuid();
+
+        var user = TestDataFactory.CreateUser(
+            userId);
 
         dbContext.Users.Add(user);
 
@@ -255,40 +269,18 @@ public class AuthServiceTests
     private static AuthService CreateAuthService(
         AppDbContext dbContext)
     {
-        var jwtSettings = new JwtSettings
-        {
-            SecretKey =
-                "test-secret-key-that-is-long-enough-for-hmac-sha256",
-            Issuer = "test-issuer",
-            Audience = "test-audience",
-            ExpirationMinutes = 60
-        };
+        var jwtSettings = CreateJwtSettings();
 
         return new AuthService(
             dbContext,
             Options.Create(jwtSettings));
     }
 
-    private static User CreateUser(
-        string username = "testuser",
-        string email = "test@example.com",
-        string password = "Password123")
-    {
-        return new User
-        {
-            Id = Guid.NewGuid(),
-            Username = username,
-            Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
-        };
-    }
-
     private static JwtSettings CreateJwtSettings()
     {
         return new JwtSettings
         {
-            SecretKey =
-                "test-secret-key-that-is-long-enough-for-hmac-sha256",
+            SecretKey = "test-secret-key-that-is-long-enough-for-hmac-sha256",
             Issuer = "test-issuer",
             Audience = "test-audience",
             ExpirationMinutes = 60
