@@ -2,10 +2,9 @@
 using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Messages.Requests;
 using ChatApp.Contracts.Messages.Responses;
-using ChatApp.Domain.Entities;
-using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
 using ChatApp.Infrastructure.Services;
+using ChatApp.UnitTests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -23,7 +22,7 @@ public class MessageServiceTests
     [Fact]
     public async Task CreateAsync_MemberCreatesMessage_ReturnsMessageAndNotifies()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -31,11 +30,19 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                userId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            userId
+        );
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId, 
+            userId);
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -83,7 +90,7 @@ public class MessageServiceTests
     [Fact]
     public async Task CreateAsync_ChannelDoesNotExist_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -113,7 +120,7 @@ public class MessageServiceTests
     [Fact]
     public async Task CreateAsync_UserIsNotWorkspaceMember_ThrowsForbiddenException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -122,11 +129,16 @@ public class MessageServiceTests
         var memberId = Guid.NewGuid();
         var nonMemberId = Guid.NewGuid();
 
-        var (workspace, channel) =
-            CreateMessageContextWithoutUser(
-                memberId,
-                workspaceId,
-                channelId);
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            memberId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
 
         dbContext.Workspaces.Add(workspace);
         dbContext.Channels.Add(channel);
@@ -161,7 +173,7 @@ public class MessageServiceTests
     [Fact]
     public async Task GetByIdAsync_MemberRetrievesMessage_ReturnsMessage()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -170,20 +182,28 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                userId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            userId
+        );
 
-        var message = new Message
-        {
-            Id = messageId,
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Hello world",
-            CreatedAt = DateTime.UtcNow
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
+
+        var message = TestDataFactory.CreateMessage(
+            messageId,
+            channelId,
+            userId,
+            "Hello world",
+            DateTime.UtcNow
+        );
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -208,7 +228,7 @@ public class MessageServiceTests
     [Fact]
     public async Task GetByIdAsync_MessageDoesNotExist_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -226,7 +246,7 @@ public class MessageServiceTests
     [Fact]
     public async Task GetByIdAsync_UserIsNotWorkspaceMember_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -236,19 +256,27 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                memberId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            memberId
+        );
 
-        var message = new Message
-        {
-            Id = messageId,
-            ChannelId = channelId,
-            UserId = memberId,
-            Content = "Secret message"
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            memberId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
+
+        var message = TestDataFactory.CreateMessage(
+            messageId,
+            channelId,
+            memberId,
+            "Secret message"
+        );
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -268,7 +296,7 @@ public class MessageServiceTests
     [Fact]
     public async Task GetByChannelIdAsync_MemberGetsMessages_ReturnsPagedResult()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -276,38 +304,39 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                userId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            userId
+        );
 
-        var firstMessage = new Message
-        {
-            Id = Guid.NewGuid(),
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "First message",
-            CreatedAt = DateTime.UtcNow.AddMinutes(-3)
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId);
 
-        var secondMessage = new Message
-        {
-            Id = Guid.NewGuid(),
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Second message",
-            CreatedAt = DateTime.UtcNow.AddMinutes(-2)
-        };
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general");
 
-        var thirdMessage = new Message
-        {
-            Id = Guid.NewGuid(),
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Third message",
-            CreatedAt = DateTime.UtcNow.AddMinutes(-1)
-        };
+        var firstMessage = TestDataFactory.CreateMessage(
+            Guid.NewGuid(),
+            channelId,
+            userId,
+            "First message",
+            DateTime.UtcNow.AddMinutes(-3));
+
+        var secondMessage = TestDataFactory.CreateMessage(
+            Guid.NewGuid(),
+            channelId,
+            userId,
+            "Second message",
+            DateTime.UtcNow.AddMinutes(-2));
+
+        var thirdMessage = TestDataFactory.CreateMessage(
+            Guid.NewGuid(),
+            channelId,
+            userId,
+            "Third message",
+            DateTime.UtcNow.AddMinutes(-1));
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -346,7 +375,7 @@ public class MessageServiceTests
     [Fact]
     public async Task GetByChannelIdAsync_WithSearch_ReturnsMatchingMessages()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -354,29 +383,34 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                userId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            userId
+        );
 
-        var matchingMessage = new Message
-        {
-            Id = Guid.NewGuid(),
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Hello from the backend",
-            CreatedAt = DateTime.UtcNow.AddMinutes(-2)
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId
+        );
 
-        var nonMatchingMessage = new Message
-        {
-            Id = Guid.NewGuid(),
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Something completely different",
-            CreatedAt = DateTime.UtcNow.AddMinutes(-1)
-        };
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
+
+        var matchingMessage = TestDataFactory.CreateMessage(
+            Guid.NewGuid(),
+            channelId,
+            userId,
+            "Hello from the backend",
+            DateTime.UtcNow.AddMinutes(-2));
+
+        var nonMatchingMessage = TestDataFactory.CreateMessage(
+            Guid.NewGuid(),
+            channelId,
+            userId,
+            "This message does not match the search term",
+            DateTime.UtcNow.AddMinutes(-1));
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -416,7 +450,7 @@ public class MessageServiceTests
     [Fact]
     public async Task GetByChannelIdAsync_UserIsNotWorkspaceMember_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -425,11 +459,20 @@ public class MessageServiceTests
         var workspaceId = Guid.NewGuid();
         var channelId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                memberId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            memberId
+        );
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            memberId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -451,7 +494,7 @@ public class MessageServiceTests
     [Fact]
     public async Task UpdateAsync_MessageOwnerUpdatesMessage_ReturnsUpdatedMessageAndNotifies()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -460,22 +503,30 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                userId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            userId
+        );
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
 
         var originalCreatedAt = DateTime.UtcNow.AddMinutes(-5);
 
-        var message = new Message
-        {
-            Id = messageId,
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Old content",
-            CreatedAt = originalCreatedAt
-        };
+        var message = TestDataFactory.CreateMessage(
+            messageId,
+            channelId,
+            userId,
+            "Old content",
+            originalCreatedAt
+        );
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -524,7 +575,7 @@ public class MessageServiceTests
     [Fact]
     public async Task UpdateAsync_UserIsNotMessageOwner_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -534,19 +585,29 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var (owner, workspace, channel) =
-            CreateMessageContext(
-                ownerId,
-                workspaceId,
-                channelId);
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "testuser",
+            "test@example.com"
+        );
 
-        var message = new Message
-        {
-            Id = messageId,
-            ChannelId = channelId,
-            UserId = ownerId,
-            Content = "Original content"
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            ownerId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
+
+        var message = TestDataFactory.CreateMessage(
+            messageId,
+            channelId,
+            ownerId,
+            "Original content"
+        );
 
         dbContext.Users.Add(owner);
 
@@ -579,7 +640,7 @@ public class MessageServiceTests
     [Fact]
     public async Task UpdateAsync_ContentIsUnchanged_ReturnsMessageWithoutUpdatingOrNotifying()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -588,24 +649,34 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                userId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            userId,
+            "testuser",
+            "test@example.com"
+        );
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
 
         var createdAt = DateTime.UtcNow.AddMinutes(-5);
         var updatedAt = DateTime.UtcNow.AddMinutes(-2);
 
-        var message = new Message
-        {
-            Id = messageId,
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Same content",
-            CreatedAt = createdAt,
-            UpdatedAt = updatedAt
-        };
+        var message = TestDataFactory.CreateMessage(
+            messageId,
+            channelId,
+            userId,
+            "Same content",
+            createdAt,
+            updatedAt
+        );
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -645,7 +716,7 @@ public class MessageServiceTests
     [Fact]
     public async Task DeleteAsync_MessageOwnerDeletesMessage_RemovesMessageAndNotifies()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -654,19 +725,29 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var (user, workspace, channel) =
-            CreateMessageContext(
-                userId,
-                workspaceId,
-                channelId);
+        var user = TestDataFactory.CreateUser(
+            userId,
+            "testuser",
+            "test@example.com"
+        );
 
-        var message = new Message
-        {
-            Id = messageId,
-            ChannelId = channelId,
-            UserId = userId,
-            Content = "Message to delete"
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
+
+        var message = TestDataFactory.CreateMessage(
+            messageId,
+            channelId,
+            userId,
+            "Message to delete"
+        );
 
         dbContext.Users.Add(user);
         dbContext.Workspaces.Add(workspace);
@@ -696,7 +777,7 @@ public class MessageServiceTests
     [Fact]
     public async Task DeleteAsync_UserIsNotMessageOwner_ThrowsNotFoundException()
     {
-        await using var dbContext = CreateDbContext();
+        await using var dbContext = TestDataFactory.CreateDbContext();
 
         var service = CreateMessageService(dbContext);
 
@@ -706,19 +787,28 @@ public class MessageServiceTests
         var channelId = Guid.NewGuid();
         var messageId = Guid.NewGuid();
 
-        var (owner, workspace, channel) =
-            CreateMessageContext(
-                ownerId,
-                workspaceId,
-                channelId);
+        var owner = TestDataFactory.CreateUser(
+            ownerId,
+            "testuser",
+            "test@example.com"
+        );
 
-        var message = new Message
-        {
-            Id = messageId,
-            ChannelId = channelId,
-            UserId = ownerId,
-            Content = "Original content"
-        };
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            ownerId
+        );
+
+        var channel = TestDataFactory.CreateChannel(
+            channelId,
+            workspaceId,
+            "general"
+        );
+
+        var message = TestDataFactory.CreateMessage(
+            messageId, 
+            channelId, 
+            ownerId, 
+            "Original content");
 
         dbContext.Users.Add(owner);
         dbContext.Workspaces.Add(workspace);
@@ -746,86 +836,8 @@ public class MessageServiceTests
             Times.Never);
     }
 
-    private static AppDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        return new AppDbContext(options);
-    }
-
     private MessageService CreateMessageService(AppDbContext dbContext)
     {
         return new MessageService(dbContext, _chatNotifierMock.Object);
-    }
-
-    private static (User User, Workspace Workspace, Channel Channel) CreateMessageContext(
-        Guid userId,
-        Guid workspaceId,
-        Guid channelId)
-    {
-        var user = new User
-        {
-            Id = userId,
-            Username = "testuser",
-            Email = "test@example.com"
-        };
-
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = userId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
-
-        return (user, workspace, channel);
-    }
-
-    private static (Workspace Workspace, Channel Channel) CreateMessageContextWithoutUser(
-        Guid userId,
-        Guid workspaceId,
-        Guid channelId)
-    {
-        var workspace = new Workspace
-        {
-            Id = workspaceId,
-            Name = "Test workspace",
-            Description = "Test description",
-            Members =
-            [
-                new WorkspaceMember
-                {
-                    WorkspaceId = workspaceId,
-                    UserId = userId,
-                    Role = WorkspaceRole.Member
-                }
-            ]
-        };
-
-        var channel = new Channel
-        {
-            Id = channelId,
-            WorkspaceId = workspaceId,
-            Name = "general"
-        };
-
-        return (workspace, channel);
     }
 }
