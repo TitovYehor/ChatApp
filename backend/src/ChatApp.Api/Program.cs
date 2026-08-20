@@ -87,6 +87,18 @@ builder.Services.AddAuthentication(
             }
         };
     });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "Frontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 builder.Services.AddOpenApi();
 
@@ -104,6 +116,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
