@@ -1,5 +1,6 @@
 import { API_BASE_URL } from './config'
 import { getAccessToken } from '../lib/authStorage'
+import { ApiError } from './ApiError'
 
 export async function apiRequest<T>(
     endpoint: string,
@@ -27,7 +28,8 @@ export async function apiRequest<T>(
     )
 
     if (!response.ok) {
-        throw new Error(
+        throw new ApiError(
+            response.status,
             `API request failed: ${response.status}`,
         )
     }
