@@ -10,7 +10,12 @@ export async function apiRequest<T>(
 
     const headers = new Headers(options.headers)
 
-    headers.set('Content-Type', 'application/json')
+    if (options.body) {
+        headers.set(
+            'Content-Type',
+            'application/json',
+        )
+    }
 
     if (token) {
         headers.set(
@@ -27,12 +32,31 @@ export async function apiRequest<T>(
         },
     )
 
+    const responseBody = await readResponseBody(response)
+
     if (!response.ok) {
         throw new ApiError(
             response.status,
             `API request failed: ${response.status}`,
+            responseBody,
         )
     }
 
-    return response.json() as Promise<T>
+    return responseBody as T
+}
+
+async function readResponseBody(
+    response: Response,
+): Promise<unknown> {
+    if (response.status === 204) {
+        return undefined
+    }
+
+    const contentType = response.headers.get('content-type')
+
+    if (contentType?.includes('application/json')) {
+        return response.json()
+    }
+
+    return response.text()
 }
