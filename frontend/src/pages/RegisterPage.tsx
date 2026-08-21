@@ -2,7 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { register } from '../api/authApi'
-import { useAuth } from '../features/auth/AuthContext'
+import { useAuth } from '../features/auth/useAuth'
 import { ApiError } from '../api/ApiError'
 
 function RegisterPage() {
