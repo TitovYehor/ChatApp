@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom'
 
 import ProtectedRoute from './components/ProtectedRoute'
+import PublicRoute from './components/PublicRoute'
 
 import ChatPage from './pages/ChatPage'
 import LoginPage from './pages/LoginPage'
@@ -15,15 +16,17 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route
-                    path="/login"
-                    element={<LoginPage />}
-                />
+                <Route element={<PublicRoute />}>
+                    <Route
+                        path="/login"
+                        element={<LoginPage />}
+                    />
 
-                <Route
-                    path="/register"
-                    element={<RegisterPage />}
-                />
+                    <Route
+                        path="/register"
+                        element={<RegisterPage />}
+                    />
+                </Route>
 
                 <Route element={<ProtectedRoute />}>
                     <Route
