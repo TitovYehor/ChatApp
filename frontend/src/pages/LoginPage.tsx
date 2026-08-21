@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react'
+import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { login } from '../api/authApi'
@@ -19,7 +19,7 @@ function LoginPage() {
     }
 
     async function handleSubmit(
-        event: FormEvent<HTMLFormElement>,
+        event: React.SubmitEvent,
     ) {
         event.preventDefault()
 
