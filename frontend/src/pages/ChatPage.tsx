@@ -1,37 +1,86 @@
+import { useState } from 'react'
+
+import { useChannels } from '../features/channels/useChannels'
 import { useWorkspaces } from '../features/workspaces/useWorkspaces'
 
 function ChatPage() {
     const {
         workspaces,
-        isLoading,
-        error,
+        isLoading: isLoadingWorkspaces,
+        error: workspacesError,
     } = useWorkspaces()
 
-    if (isLoading) {
+    const [
+        selectedWorkspaceId,
+        setSelectedWorkspaceId,
+    ] = useState<string | null>(null)
+
+    const {
+        channels,
+        isLoading: isLoadingChannels,
+        error: channelsError,
+    } = useChannels(selectedWorkspaceId)
+
+    if (isLoadingWorkspaces) {
         return <div>Loading workspaces...</div>
     }
 
-    if (error) {
-        return <div>{error}</div>
+    if (workspacesError) {
+        return <div>{workspacesError}</div>
     }
 
     return (
         <main>
             <h1>Chat</h1>
 
-            <h2>Workspaces</h2>
+            <section>
+                <h2>Workspaces</h2>
 
-            {workspaces.length === 0 ? (
-                <p>No workspaces found</p>
-            ) : (
-                <ul>
-                    {workspaces.map((workspace) => (
-                        <li key={workspace.id}>
-                            {workspace.name}
-                        </li>
-                    ))}
-                </ul>
-            )}
+                {workspaces.length === 0 ? (
+                    <p>No workspaces found</p>
+                ) : (
+                    <ul>
+                        {workspaces.map((workspace) => (
+                            <li key={workspace.id}>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setSelectedWorkspaceId(
+                                            workspace.id,
+                                        )
+                                    }
+                                >
+                                    {workspace.name}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
+
+            <section>
+                <h2>Channels</h2>
+
+                {selectedWorkspaceId === null ? (
+                    <p>
+                        Select a workspace to see its channels
+                    </p>
+                ) : isLoadingChannels ? (
+                    <p>Loading channels...</p>
+                ) : channelsError ? (
+                    <p>{channelsError}</p>
+                ) : channels.length === 0 ? (
+                    <p>No channels found</p>
+                ) : (
+                    <ul>
+                        {channels.map((channel) => (
+                            <li key={channel.id}>
+                                {channel.name}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
         </main>
     )
 }
