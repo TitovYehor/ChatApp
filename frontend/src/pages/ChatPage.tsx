@@ -1,7 +1,12 @@
 import { useState } from 'react'
 
-import { useChannels } from '../features/channels/useChannels'
+import ChatLayout from '../layouts/ChatLayout'
+
+import WorkspaceSidebar from '../features/workspaces/WorkspaceSidebar'
+import ChannelSidebar from '../features/channels/ChannelSidebar'
+
 import { useWorkspaces } from '../features/workspaces/useWorkspaces'
+import { useChannels } from '../features/channels/useChannels'
 
 function ChatPage() {
     const {
@@ -15,11 +20,23 @@ function ChatPage() {
         setSelectedWorkspaceId,
     ] = useState<string | null>(null)
 
+    const [
+        selectedChannelId,
+        setSelectedChannelId,
+    ] = useState<string | null>(null)
+
     const {
         channels,
         isLoading: isLoadingChannels,
         error: channelsError,
     } = useChannels(selectedWorkspaceId)
+
+    const handleSelectWorkspace = (
+        workspaceId: string,
+    ) => {
+        setSelectedWorkspaceId(workspaceId)
+        setSelectedChannelId(null)
+    }
 
     if (isLoadingWorkspaces) {
         return <div>Loading workspaces...</div>
@@ -30,58 +47,55 @@ function ChatPage() {
     }
 
     return (
-        <main>
-            <h1>Chat</h1>
-
-            <section>
-                <h2>Workspaces</h2>
-
-                {workspaces.length === 0 ? (
-                    <p>No workspaces found</p>
-                ) : (
-                    <ul>
-                        {workspaces.map((workspace) => (
-                            <li key={workspace.id}>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setSelectedWorkspaceId(
-                                            workspace.id,
-                                        )
-                                    }
-                                >
-                                    {workspace.name}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
-
-            <section>
-                <h2>Channels</h2>
-
-                {selectedWorkspaceId === null ? (
-                    <p>
-                        Select a workspace to see its channels
-                    </p>
+        <ChatLayout
+            workspaces={
+                <WorkspaceSidebar
+                    workspaces={workspaces}
+                    selectedWorkspaceId={
+                        selectedWorkspaceId
+                    }
+                    onSelectWorkspace={
+                        handleSelectWorkspace
+                    }
+                />
+            }
+            channels={
+                selectedWorkspaceId === null ? (
+                    <p>Select a workspace</p>
                 ) : isLoadingChannels ? (
                     <p>Loading channels...</p>
                 ) : channelsError ? (
                     <p>{channelsError}</p>
-                ) : channels.length === 0 ? (
-                    <p>No channels found</p>
                 ) : (
-                    <ul>
-                        {channels.map((channel) => (
-                            <li key={channel.id}>
-                                {channel.name}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
-        </main>
+                    <ChannelSidebar
+                        channels={channels}
+                        selectedChannelId={
+                            selectedChannelId
+                        }
+                        onSelectChannel={
+                            setSelectedChannelId
+                        }
+                    />
+                )
+            }
+        >
+            {selectedChannelId === null ? (
+                <div>
+                    <h1>Chat</h1>
+                    <p>
+                        Select a channel to start chatting
+                    </p>
+                </div>
+            ) : (
+                <div>
+                    <h1>Channel selected</h1>
+                    <p>
+                        Channel ID:{' '}
+                        {selectedChannelId}
+                    </p>
+                </div>
+            )}
+        </ChatLayout>
     )
 }
 
