@@ -7,6 +7,7 @@ import ChannelSidebar from '../features/channels/ChannelSidebar'
 
 import { useWorkspaces } from '../features/workspaces/useWorkspaces'
 import { useChannels } from '../features/channels/useChannels'
+import { useMessages } from '../features/messages/useMessages'
 
 function ChatPage() {
     const {
@@ -30,6 +31,12 @@ function ChatPage() {
         isLoading: isLoadingChannels,
         error: channelsError,
     } = useChannels(selectedWorkspaceId)
+
+    const {
+        messages,
+        isLoading: isMessagesLoading,
+        error: messagesError,
+    } = useMessages(selectedChannelId)
 
     const handleSelectWorkspace = (
         workspaceId: string,
@@ -87,13 +94,30 @@ function ChatPage() {
                     </p>
                 </div>
             ) : (
-                <div>
-                    <h1>Channel selected</h1>
-                    <p>
-                        Channel ID:{' '}
-                        {selectedChannelId}
-                    </p>
-                </div>
+                <section>
+                    <h2>Messages</h2>
+
+                    {!selectedChannelId ? (
+                        <p>Select a channel</p>
+                    ) : isMessagesLoading ? (
+                        <p>Loading messages...</p>
+                    ) : messagesError ? (
+                        <p>{messagesError}</p>
+                    ) : messages.length === 0 ? (
+                        <p>No messages yet</p>
+                    ) : (
+                        <ul>
+                            {messages.map((message) => (
+                                <li key={message.id}>
+                                    <strong>
+                                        {message.username}
+                                    </strong>
+                                    : {message.content}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
             )}
         </ChatLayout>
     )
