@@ -36,7 +36,12 @@ function ChatPage() {
         messages,
         isLoading: isMessagesLoading,
         error: messagesError,
+        sendMessage,
+        isSending,
+        sendError,
     } = useMessages(selectedChannelId)
+
+    const [messageContent, setMessageContent] = useState('')
 
     const handleSelectWorkspace = (
         workspaceId: string,
@@ -117,10 +122,58 @@ function ChatPage() {
                             ))}
                         </ul>
                     )}
+
+                    {selectedChannelId && (
+                        <form onSubmit={handleSendMessage}>
+                            <input
+                                type="text"
+                                value={messageContent}
+                                onChange={(event) =>
+                                    setMessageContent(
+                                        event.target.value,
+                                    )
+                                }
+                                placeholder="Write a message..."
+                                disabled={isSending}
+                            />
+
+                            <button
+                                type="submit"
+                                disabled={
+                                    isSending ||
+                                    messageContent.trim().length === 0
+                                }
+                            >
+                                {isSending
+                                    ? 'Sending...'
+                                    : 'Send'}
+                            </button>
+
+                            {sendError && (
+                                <p>{sendError}</p>
+                            )}
+                        </form>
+                    )}
                 </section>
             )}
         </ChatLayout>
     )
+
+    function handleSendMessage(
+        event: React.SubmitEvent,
+    ) {
+        event.preventDefault()
+
+        const content = messageContent.trim()
+
+        if (!selectedChannelId || !content) {
+            return
+        }
+
+        void sendMessage(content).then(() => {
+            setMessageContent('')
+        })
+    }
 }
 
 export default ChatPage
