@@ -8,6 +8,7 @@ import ChannelSidebar from '../features/channels/ChannelSidebar'
 import { useWorkspaces } from '../features/workspaces/useWorkspaces'
 import { useChannels } from '../features/channels/useChannels'
 import { useMessages } from '../features/messages/useMessages'
+import { useChatConnection } from '../features/chat/useChatConnection'
 
 function ChatPage() {
     const {
@@ -42,6 +43,11 @@ function ChatPage() {
     } = useMessages(selectedChannelId)
 
     const [messageContent, setMessageContent] = useState('')
+
+    const {
+        isConnected,
+        error: connectionError,
+    } = useChatConnection()
 
     const handleSelectWorkspace = (
         workspaceId: string,
@@ -156,6 +162,17 @@ function ChatPage() {
                     )}
                 </section>
             )}
+
+            {connectionError && (
+                <p>{connectionError}</p>
+            )}
+
+            <p>
+                Realtime:{' '}
+                {isConnected
+                    ? 'Connected'
+                    : 'Connecting...'}
+            </p>
         </ChatLayout>
     )
 
