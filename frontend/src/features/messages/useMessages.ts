@@ -26,9 +26,6 @@ export function useMessages(
             create(channelId!, {
                 content,
             }),
-        onSuccess: () => {
-            void query.refetch()
-        },
     })
 
     return {
