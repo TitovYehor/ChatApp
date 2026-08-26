@@ -4,50 +4,110 @@ import {
 } from 'react'
 
 import {
+    HubConnectionState,
+} from '@microsoft/signalr'
+
+import {
     getChatConnection,
+    scheduleStopChatConnection,
     startChatConnection,
-    stopChatConnection,
 } from '../../services/signalR/chatConnection'
 
 export function useChatConnection() {
-    const [isConnected, setIsConnected] =
-        useState(false)
+    const connection =
+        getChatConnection()
+
+    const [
+        connectionState,
+        setConnectionState,
+    ] = useState<HubConnectionState>(
+        connection.state,
+    )
 
     const [error, setError] =
         useState<string | null>(null)
 
     useEffect(() => {
-        let isMounted = true
+        const handleReconnecting = () => {
+            setConnectionState(
+                HubConnectionState.Reconnecting,
+            )
+        }
+
+        const handleReconnected = () => {
+            setConnectionState(
+                HubConnectionState.Connected,
+            )
+
+            setError(null)
+        }
+
+        const handleClosed = () => {
+            setConnectionState(
+                HubConnectionState.Disconnected,
+            )
+        }
+
+        connection.onreconnecting(
+            handleReconnecting,
+        )
+
+        connection.onreconnected(
+            handleReconnected,
+        )
+
+        connection.onclose(
+            handleClosed,
+        )
 
         async function connect() {
             try {
                 await startChatConnection()
 
-                if (isMounted) {
-                    setIsConnected(true)
-                    setError(null)
-                }
+                setConnectionState(
+                    connection.state,
+                )
+
+                setError(null)
             } catch {
-                if (isMounted) {
-                    setError(
-                        'Failed to connect to chat',
-                    )
-                }
+                setConnectionState(
+                    HubConnectionState.Disconnected,
+                )
+
+                setError(
+                    'Failed to connect to chat',
+                )
             }
         }
 
         void connect()
 
         return () => {
-            isMounted = false
+            connection.off(
+                'reconnecting',
+                handleReconnecting,
+            )
 
-            void stopChatConnection()
+            connection.off(
+                'reconnected',
+                handleReconnected,
+            )
+
+            connection.off(
+                'close',
+                handleClosed,
+            )
+
+            scheduleStopChatConnection()
         }
-    }, [])
+    }, [connection])
 
     return {
-        connection: getChatConnection(),
-        isConnected,
+        connection,
+        isConnected:
+            connectionState ===
+            HubConnectionState.Connected,
+        connectionState,
         error,
     }
 }
