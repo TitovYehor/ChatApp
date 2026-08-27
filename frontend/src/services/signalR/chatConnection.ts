@@ -100,3 +100,47 @@ export async function stopChatConnection(): Promise<void> {
 
     await connection.stop()
 }
+
+export async function joinChannel(
+    channelId: string,
+): Promise<void> {
+    const chatConnection =
+        getChatConnection()
+
+    if (
+        chatConnection.state !==
+        HubConnectionState.Connected
+    ) {
+        throw new Error(
+            'Chat connection is not connected',
+        )
+    }
+
+    await chatConnection.invoke(
+        'JoinChannel',
+        {
+            channelId,
+        },
+    )
+}
+
+export async function leaveChannel(
+    channelId: string,
+): Promise<void> {
+    const chatConnection =
+        getChatConnection()
+
+    if (
+        chatConnection.state !==
+        HubConnectionState.Connected
+    ) {
+        return
+    }
+
+    await chatConnection.invoke(
+        'LeaveChannel',
+        {
+            channelId,
+        },
+    )
+}
