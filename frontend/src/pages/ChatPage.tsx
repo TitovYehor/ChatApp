@@ -9,6 +9,8 @@ import { useWorkspaces } from '../features/workspaces/useWorkspaces'
 import { useChannels } from '../features/channels/useChannels'
 import { useMessages } from '../features/messages/useMessages'
 import { useChatConnection } from '../features/chat/useChatConnection'
+import { useChannelSignalR } from '../features/chat/useChannelSignalR'
+import { useRealtimeMessages } from '../features/messages/useRealtimeMessages'
 
 function ChatPage() {
     const {
@@ -48,6 +50,10 @@ function ChatPage() {
         isConnected,
         error: connectionError,
     } = useChatConnection()
+
+    useChannelSignalR(selectedChannelId)
+
+    useRealtimeMessages(selectedChannelId)
 
     const handleSelectWorkspace = (
         workspaceId: string,
