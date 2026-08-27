@@ -11,6 +11,7 @@ import { useMessages } from '../features/messages/useMessages'
 import { useChatConnection } from '../features/chat/useChatConnection'
 import { useChannelSignalR } from '../features/chat/useChannelSignalR'
 import { useRealtimeMessages } from '../features/messages/useRealtimeMessages'
+import { useRealtimePresence } from '../features/presence/useRealtimePresence'
 
 function ChatPage() {
     const {
@@ -54,6 +55,8 @@ function ChatPage() {
     useChannelSignalR(selectedChannelId)
 
     useRealtimeMessages(selectedChannelId)
+
+    useRealtimePresence()
 
     const handleSelectWorkspace = (
         workspaceId: string,
