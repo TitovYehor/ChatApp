@@ -11,7 +11,9 @@ import { useMessages } from '../features/messages/useMessages'
 import { useChatConnection } from '../features/chat/useChatConnection'
 import { useChannelSignalR } from '../features/chat/useChannelSignalR'
 import { useRealtimeMessages } from '../features/messages/useRealtimeMessages'
-import { useRealtimePresence } from '../features/presence/useRealtimePresence'
+import { useWorkspaceMembers } from '../features/workspaces/useWorkspaceMembers'
+import WorkspaceMembers from '../features/workspaces/WorkspaceMembers'
+import { usePresence } from '../features/presence/usePresence'
 
 function ChatPage() {
     const {
@@ -56,7 +58,17 @@ function ChatPage() {
 
     useRealtimeMessages(selectedChannelId)
 
-    useRealtimePresence()
+    const {
+        members,
+        isLoading: isLoadingMembers,
+        error: membersError,
+    } = useWorkspaceMembers(
+        selectedWorkspaceId,
+    )
+
+    const {
+        onlineUsers,
+    } = usePresence()
 
     const handleSelectWorkspace = (
         workspaceId: string,
@@ -94,15 +106,28 @@ function ChatPage() {
                 ) : channelsError ? (
                     <p>{channelsError}</p>
                 ) : (
-                    <ChannelSidebar
-                        channels={channels}
-                        selectedChannelId={
-                            selectedChannelId
-                        }
-                        onSelectChannel={
-                            setSelectedChannelId
-                        }
-                    />
+                    <>
+                        <ChannelSidebar
+                            channels={channels}
+                            selectedChannelId={
+                                selectedChannelId
+                            }
+                            onSelectChannel={
+                                setSelectedChannelId
+                            }
+                        />
+
+                        {isLoadingMembers ? (
+                            <p>Loading members...</p>
+                        ) : membersError ? (
+                            <p>{membersError}</p>
+                        ) : (
+                            <WorkspaceMembers
+                                members={members}
+                                onlineUsers={onlineUsers}
+                            />
+                        )}
+                    </>
                 )
             }
         >
