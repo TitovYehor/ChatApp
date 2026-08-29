@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useRef,
     useState,
@@ -13,14 +14,16 @@ import type {
 } from '../../types/presenceTypes'
 
 export function useTypingIndicator(
-    channelId: string | null,
-    currentUserId: string | null,
-) {
-    const connection =
-        getChatConnection()
+        channelId: string | null,
+        currentUserId: string | null,
+    ) {
+        const connection =
+            getChatConnection()
 
-    const [typingUsers, setTypingUsers] =
-        useState<UserTypingResponse[]>([])
+    const [
+        typingUsers,
+        setTypingUsers,
+    ] = useState<UserTypingResponse[]>([])
 
     const stopTimers =
         useRef<
@@ -28,8 +31,9 @@ export function useTypingIndicator(
         >(new Map())
 
     useEffect(() => {
+        const timers = stopTimers.current
+
         if (!channelId) {
-            setTypingUsers([])
             return
         }
 
@@ -76,14 +80,12 @@ export function useTypingIndicator(
                 })
 
                 const existingTimer =
-                    stopTimers.current.get(
+                    timers.get(
                         response.userId,
                     )
 
                 if (existingTimer) {
-                    clearTimeout(
-                        existingTimer,
-                    )
+                    clearTimeout(existingTimer)
                 }
 
                 const timer =
@@ -97,12 +99,12 @@ export function useTypingIndicator(
                                 ),
                         )
 
-                        stopTimers.current.delete(
+                        timers.delete(
                             response.userId,
                         )
                     }, 3000)
 
-                stopTimers.current.set(
+                timers.set(
                     response.userId,
                     timer,
                 )
@@ -111,14 +113,14 @@ export function useTypingIndicator(
             }
 
             const timer =
-                stopTimers.current.get(
+                timers.get(
                     response.userId,
                 )
 
             if (timer) {
                 clearTimeout(timer)
 
-                stopTimers.current.delete(
+                timers.delete(
                     response.userId,
                 )
             }
@@ -146,12 +148,12 @@ export function useTypingIndicator(
 
             for (
                 const timer
-                of stopTimers.current.values()
+                of timers.values()
             ) {
                 clearTimeout(timer)
             }
 
-            stopTimers.current.clear()
+            timers.clear()
 
             setTypingUsers([])
         }
@@ -161,31 +163,43 @@ export function useTypingIndicator(
         currentUserId,
     ])
 
-    const startTyping = async () => {
-        if (!channelId) {
-            return
-        }
+    const startTyping = useCallback(
+        async () => {
+            if (!channelId) {
+                return
+            }
 
-        await connection.invoke(
-            'TypingStarted',
-            {
-                channelId,
-            },
-        )
-    }
+            await connection.invoke(
+                'TypingStarted',
+                {
+                    channelId,
+                },
+            )
+        },
+        [
+            channelId,
+            connection,
+        ],
+    )
 
-    const stopTyping = async () => {
-        if (!channelId) {
-            return
-        }
+    const stopTyping = useCallback(
+        async () => {
+            if (!channelId) {
+                return
+            }
 
-        await connection.invoke(
-            'TypingStopped',
-            {
-                channelId,
-            },
-        )
-    }
+            await connection.invoke(
+                'TypingStopped',
+                {
+                    channelId,
+                },
+            )
+        },
+        [
+            channelId,
+            connection,
+        ],
+    )
 
     return {
         typingUsers,
