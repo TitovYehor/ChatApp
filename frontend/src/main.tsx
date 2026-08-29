@@ -6,12 +6,15 @@ import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './features/auth/AuthProvider'
 import { queryClient } from './lib/queryClient'
+import AuthenticatedApp from './components/AuthenticatedApp'
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <AuthProvider>
             <QueryClientProvider client={queryClient}>
-                <App />
+                <AuthenticatedApp>
+                    <App />
+                </AuthenticatedApp>
             </QueryClientProvider>
         </AuthProvider>
     </StrictMode>,
