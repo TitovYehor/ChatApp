@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 import ChatLayout from '../layouts/ChatLayout'
 
 import WorkspaceSidebar from '../features/workspaces/WorkspaceSidebar'
 import ChannelSidebar from '../features/channels/ChannelSidebar'
 
+import { useAuth } from '../features/auth/useAuth'
 import { useWorkspaces } from '../features/workspaces/useWorkspaces'
 import { useChannels } from '../features/channels/useChannels'
 import { useMessages } from '../features/messages/useMessages'
@@ -13,8 +14,13 @@ import { useRealtimeMessages } from '../features/messages/useRealtimeMessages'
 import { useWorkspaceMembers } from '../features/workspaces/useWorkspaceMembers'
 import WorkspaceMembers from '../features/workspaces/WorkspaceMembers'
 import { usePresence } from '../features/presence/usePresence'
+import { useTypingIndicator } from '../features/presence/useTypingIndicator'
 
 function ChatPage() {
+    const {
+        user,
+    } = useAuth()
+
     const {
         workspaces,
         isLoading: isLoadingWorkspaces,
@@ -63,6 +69,32 @@ function ChatPage() {
     const {
         onlineUsers,
     } = usePresence()
+
+    const {
+        typingUsers,
+        startTyping,
+        stopTyping,
+    } = useTypingIndicator(
+        selectedChannelId,
+        user?.id ?? null,
+        )
+
+    const typingTimeoutRef =
+        useRef<ReturnType<typeof setTimeout> | null>(
+            null,
+        )
+
+    useEffect(() => {
+        if (typingTimeoutRef.current) {
+            clearTimeout(
+                typingTimeoutRef.current,
+            )
+
+            typingTimeoutRef.current = null
+        }
+
+        void stopTyping()
+    }, [selectedChannelId])
 
     const handleSelectWorkspace = (
         workspaceId: string,
@@ -157,16 +189,45 @@ function ChatPage() {
                         </ul>
                     )}
 
+                    {typingUsers.length > 0 && (
+                        <p>
+                            {typingUsers.length === 1
+                                ? `${typingUsers[0].username} is typing...`
+                                : typingUsers.length === 2
+                                    ? `${typingUsers[0].username} and ${typingUsers[1].username} are typing...`
+                                    : `${typingUsers[0].username} and ${typingUsers.length - 1} others are typing...`}
+                        </p>
+                    )}
+
                     {selectedChannelId && (
                         <form onSubmit={handleSendMessage}>
                             <input
                                 type="text"
                                 value={messageContent}
-                                onChange={(event) =>
-                                    setMessageContent(
-                                        event.target.value,
-                                    )
-                                }
+                                onChange={(event) => {
+                                    const value =
+                                        event.target.value
+
+                                    setMessageContent(value)
+
+                                    if (!value.trim()) {
+                                        void stopTyping()
+                                        return
+                                    }
+
+                                    void startTyping()
+
+                                    if (typingTimeoutRef.current) {
+                                        clearTimeout(
+                                            typingTimeoutRef.current,
+                                        )
+                                    }
+
+                                    typingTimeoutRef.current =
+                                        setTimeout(() => {
+                                            void stopTyping()
+                                        }, 1500)
+                                }}
                                 placeholder="Write a message..."
                                 disabled={isSending}
                             />
@@ -203,6 +264,16 @@ function ChatPage() {
         if (!selectedChannelId || !content) {
             return
         }
+
+        if (typingTimeoutRef.current) {
+            clearTimeout(
+                typingTimeoutRef.current,
+            )
+
+            typingTimeoutRef.current = null
+        }
+
+        void stopTyping()
 
         void sendMessage(content).then(() => {
             setMessageContent('')
