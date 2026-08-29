@@ -94,7 +94,11 @@ function ChatPage() {
         }
 
         void stopTyping()
-    }, [selectedChannelId])
+
+    }, [
+        selectedChannelId,
+        stopTyping,
+    ])
 
     const handleSelectWorkspace = (
         workspaceId: string,
