@@ -12,6 +12,8 @@ let connection: HubConnection | null = null
 
 let startPromise: Promise<void> | null = null
 
+let stopRequested = false
+
 const INITIAL_RETRY_DELAY = 2000
 const MAX_RETRY_DELAY = 10000
 
@@ -30,18 +32,20 @@ export function getChatConnection(): HubConnection {
             },
         )
         .withAutomaticReconnect()
-        .configureLogging(LogLevel.Information)
+        .configureLogging(
+            LogLevel.Information,
+        )
         .build()
 
     return connection
 }
 
 export async function startChatConnection(): Promise<void> {
-    const chatConnection =
-        getChatConnection()
+    const chatConnection = getChatConnection()
 
-    if (
-        chatConnection.state ===
+    stopRequested = false
+
+    if (chatConnection.state ===
         HubConnectionState.Connected
     ) {
         return
@@ -65,24 +69,40 @@ export async function startChatConnection(): Promise<void> {
 async function connectWithRetry(
     chatConnection: HubConnection,
 ): Promise<void> {
-    let retryDelay =
-        INITIAL_RETRY_DELAY
+    let retryDelay = INITIAL_RETRY_DELAY
 
-    while (
-        chatConnection.state !==
-        HubConnectionState.Connected
-    ) {
+    while (!stopRequested) {
+        if (chatConnection.state ===
+            HubConnectionState.Connected
+        ) {
+            return
+        }
+
         try {
+            console.info(
+                'Attempting to connect to SignalR...',
+            )
+
             await chatConnection.start()
+
+            console.info(
+                'SignalR connection established.',
+            )
 
             return
         } catch (error) {
+            if (stopRequested) {
+                return
+            }
+
             console.warn(
-                `Failed to connect to SignalR. Retrying in ${retryDelay}ms.`,
+                `Failed to connect to SignalR.Retrying in ${ retryDelay } ms.`,
                 error,
             )
 
-            await delay(retryDelay)
+            await delay(
+                retryDelay,
+            )
 
             retryDelay = Math.min(
                 retryDelay * 2,
@@ -95,25 +115,28 @@ async function connectWithRetry(
 function delay(
     milliseconds: number,
 ): Promise<void> {
-    return new Promise((resolve) => {
-        setTimeout(
-            resolve,
-            milliseconds,
-        )
-    })
+    return new Promise(
+        (resolve) => {
+            setTimeout(
+                resolve,
+                milliseconds,
+            )
+        },
+    )
 }
 
 export async function stopChatConnection(): Promise<void> {
-    if (!connection) {
-        return
-    }
+    stopRequested = true
 
     if (startPromise) {
         await startPromise
     }
 
-    if (
-        connection.state ===
+    if (!connection) {
+        return
+    }
+
+    if (connection.state ===
         HubConnectionState.Disconnected
     ) {
         return
@@ -125,11 +148,9 @@ export async function stopChatConnection(): Promise<void> {
 export async function joinChannel(
     channelId: string,
 ): Promise<void> {
-    const chatConnection =
-        getChatConnection()
+    const chatConnection = getChatConnection()
 
-    if (
-        chatConnection.state !==
+    if (chatConnection.state !==
         HubConnectionState.Connected
     ) {
         throw new Error(
@@ -148,11 +169,9 @@ export async function joinChannel(
 export async function leaveChannel(
     channelId: string,
 ): Promise<void> {
-    const chatConnection =
-        getChatConnection()
+    const chatConnection = getChatConnection()
 
-    if (
-        chatConnection.state !==
+    if (chatConnection.state !==
         HubConnectionState.Connected
     ) {
         return
