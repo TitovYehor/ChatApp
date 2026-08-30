@@ -19,6 +19,7 @@ import { useTypingIndicator } from '../features/presence/useTypingIndicator'
 function ChatPage() {
     const {
         user,
+        logout,
     } = useAuth()
 
     const {
@@ -161,6 +162,19 @@ function ChatPage() {
                 )
             }
         >
+            <div>
+                <p>
+                    Logged in as {user?.username}
+                </p>
+
+                <button
+                    type="button"
+                    onClick={logout}
+                >
+                    Logout
+                </button>
+            </div>
+
             {selectedChannelId === null ? (
                 <div>
                     <h1>Chat</h1>
