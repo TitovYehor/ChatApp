@@ -12,7 +12,8 @@ let connection: HubConnection | null = null
 
 let startPromise: Promise<void> | null = null
 
-let stopTimer: ReturnType<typeof setTimeout> | null = null
+const INITIAL_RETRY_DELAY = 2000
+const MAX_RETRY_DELAY = 10000
 
 export function getChatConnection(): HubConnection {
     if (connection) {
@@ -39,11 +40,6 @@ export async function startChatConnection(): Promise<void> {
     const chatConnection =
         getChatConnection()
 
-    if (stopTimer !== null) {
-        clearTimeout(stopTimer)
-        stopTimer = null
-    }
-
     if (
         chatConnection.state ===
         HubConnectionState.Connected
@@ -56,35 +52,60 @@ export async function startChatConnection(): Promise<void> {
         return
     }
 
-    startPromise = chatConnection
-        .start()
-        .finally(() => {
+    startPromise =
+        connectWithRetry(
+            chatConnection,
+        ).finally(() => {
             startPromise = null
         })
 
     await startPromise
 }
 
-export function scheduleStopChatConnection(): void {
-    if (stopTimer !== null) {
-        clearTimeout(stopTimer)
+async function connectWithRetry(
+    chatConnection: HubConnection,
+): Promise<void> {
+    let retryDelay =
+        INITIAL_RETRY_DELAY
+
+    while (
+        chatConnection.state !==
+        HubConnectionState.Connected
+    ) {
+        try {
+            await chatConnection.start()
+
+            return
+        } catch (error) {
+            console.warn(
+                `Failed to connect to SignalR. Retrying in ${retryDelay}ms.`,
+                error,
+            )
+
+            await delay(retryDelay)
+
+            retryDelay = Math.min(
+                retryDelay * 2,
+                MAX_RETRY_DELAY,
+            )
+        }
     }
+}
 
-    stopTimer = setTimeout(() => {
-        stopTimer = null
-
-        void stopChatConnection()
-    }, 0)
+function delay(
+    milliseconds: number,
+): Promise<void> {
+    return new Promise((resolve) => {
+        setTimeout(
+            resolve,
+            milliseconds,
+        )
+    })
 }
 
 export async function stopChatConnection(): Promise<void> {
     if (!connection) {
         return
-    }
-
-    if (stopTimer !== null) {
-        clearTimeout(stopTimer)
-        stopTimer = null
     }
 
     if (startPromise) {
