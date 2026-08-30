@@ -1,8 +1,12 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import {
+    useMutation,
+    useQuery,
+} from '@tanstack/react-query'
 
 import {
     create,
     getByChannelId,
+    remove,
 } from '../../api/messageApi'
 
 export function useMessages(
@@ -21,30 +25,59 @@ export function useMessages(
         enabled: channelId !== null,
     })
 
-    const createMutation = useMutation({
-        mutationFn: (content: string) =>
-            create(channelId!, {
-                content,
-            }),
-    })
+    const createMutation =
+        useMutation({
+            mutationFn: (
+                content: string,
+            ) =>
+                create(channelId!, {
+                    content,
+                }),
+        })
+
+    const deleteMutation =
+        useMutation({
+            mutationFn: (
+                messageId: string,
+            ) =>
+                remove(messageId),
+        })
 
     return {
-        messages: query.data?.items ?? [],
+        messages:
+            query.data?.items ?? [],
 
-        isLoading: query.isLoading,
+        isLoading:
+            query.isLoading,
 
-        error: query.error
-            ? 'Failed to load messages'
-            : null,
+        error:
+            query.error
+                ? 'Failed to load messages'
+                : null,
 
-        reload: query.refetch,
+        reload:
+            query.refetch,
 
-        sendMessage: createMutation.mutateAsync,
+        sendMessage:
+            createMutation.mutateAsync,
 
-        isSending: createMutation.isPending,
+        isSending:
+            createMutation.isPending,
 
-        sendError: createMutation.error
-            ? 'Failed to send message'
-            : null,
+        sendError:
+            createMutation.error
+                ? 'Failed to send message'
+                : null,
+
+        deleteMessage:
+            deleteMutation.mutateAsync,
+
+        isDeleting:
+            deleteMutation.isPending,
+
+        deleteError:
+            deleteMutation.error
+                ? 'Failed to delete message'
+                : null,
     }
 }
