@@ -8,6 +8,7 @@ import {
 
 import {
     startChatConnection,
+    stopChatConnection,
 } from '../services/signalR/chatConnection'
 
 interface AuthenticatedAppProps {
@@ -22,11 +23,12 @@ function AuthenticatedApp({
     } = useAuth()
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (isAuthenticated) {
+            void startChatConnection()
             return
         }
 
-        void startChatConnection()
+        void stopChatConnection()
     }, [isAuthenticated])
 
     return children
