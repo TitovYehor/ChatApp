@@ -51,12 +51,25 @@ function ChatPage() {
         sendMessage,
         isSending,
         sendError,
+        updateMessage,
+        isUpdating,
+        updateError,
         deleteMessage,
         isDeleting,
         deleteError,
     } = useMessages(selectedChannelId)
 
     const [messageContent, setMessageContent] = useState('')
+
+    const [
+        editingMessageId,
+        setEditingMessageId,
+    ] = useState<string | null>(null)
+
+    const [
+        editingMessageContent,
+        setEditingMessageContent,
+    ] = useState('')
 
     useChannelSignalR(selectedChannelId)
 
@@ -199,29 +212,131 @@ function ChatPage() {
                         <p>No messages yet</p>
                     ) : (
                         <ul>
-                            {messages.map((message) => (
-                                <li key={message.id}>
-                                    <strong>
-                                        {message.username}
-                                    </strong>
-                                    : {message.content}
+                            {messages.map((message) => {
+                                const isEditing =
+                                    editingMessageId ===
+                                    message.id
 
-                                    {message.userId === user?.id && (
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                void handleDeleteMessage(
-                                                    message.id,
-                                                )
-                                            }
-                                            disabled={isDeleting}
-                                        >
-                                            Delete
-                                        </button>
-                                    )}
-                                </li>
-                            ))}
+                                const isOwnMessage =
+                                    message.userId ===
+                                    user?.id
+
+                                return (
+                                    <li key={message.id}>
+                                        {isEditing ? (
+                                            <>
+                                                <input
+                                                    type="text"
+                                                    value={
+                                                        editingMessageContent
+                                                    }
+                                                    onChange={(
+                                                        event,
+                                                    ) =>
+                                                        setEditingMessageContent(
+                                                            event
+                                                                .target
+                                                                .value,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        isUpdating
+                                                    }
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        void handleSaveEditing()
+                                                    }
+                                                    disabled={
+                                                        isUpdating ||
+                                                        editingMessageContent
+                                                            .trim()
+                                                            .length ===
+                                                        0
+                                                    }
+                                                >
+                                                    {isUpdating
+                                                        ? 'Saving...'
+                                                        : 'Save'}
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={
+                                                        handleCancelEditing
+                                                    }
+                                                    disabled={
+                                                        isUpdating
+                                                    }
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <strong>
+                                                    {
+                                                        message.username
+                                                    }
+                                                </strong>
+                                                :{' '}
+                                                {
+                                                    message.content
+                                                }
+
+                                                {message.updatedAt && (
+                                                    <span>
+                                                        {' '}
+                                                        (edited)
+                                                    </span>
+                                                )}
+
+                                                {isOwnMessage && (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleStartEditing(
+                                                                    message.id,
+                                                                    message.content,
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                isUpdating ||
+                                                                isDeleting
+                                                            }
+                                                        >
+                                                            Edit
+                                                        </button>
+
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                void handleDeleteMessage(
+                                                                    message.id,
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                isDeleting ||
+                                                                isUpdating
+                                                            }
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </>
+                                        )}
+                                    </li>
+                                )
+                            })}
                         </ul>
+                    )}
+
+                    {updateError && (
+                        <p>{updateError}</p>
                     )}
 
                     {deleteError && (
@@ -317,6 +432,40 @@ function ChatPage() {
         void sendMessage(content).then(() => {
             setMessageContent('')
         })
+    }
+
+    function handleStartEditing(
+        messageId: string,
+        content: string,
+    ) {
+        setEditingMessageId(messageId)
+        setEditingMessageContent(content)
+    }
+
+    function handleCancelEditing() {
+        setEditingMessageId(null)
+        setEditingMessageContent('')
+    }
+
+    async function handleSaveEditing() {
+        if (!editingMessageId) {
+            return
+        }
+
+        const content = editingMessageContent.trim()
+
+        if (!content) {
+            return
+        }
+
+        await updateMessage({
+            messageId:
+                editingMessageId,
+            content,
+        })
+
+        setEditingMessageId(null)
+        setEditingMessageContent('')
     }
 
     async function handleDeleteMessage(
