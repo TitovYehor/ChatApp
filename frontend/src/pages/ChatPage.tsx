@@ -51,6 +51,9 @@ function ChatPage() {
         sendMessage,
         isSending,
         sendError,
+        deleteMessage,
+        isDeleting,
+        deleteError,
     } = useMessages(selectedChannelId)
 
     const [messageContent, setMessageContent] = useState('')
@@ -202,9 +205,27 @@ function ChatPage() {
                                         {message.username}
                                     </strong>
                                     : {message.content}
+
+                                    {message.userId === user?.id && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                void handleDeleteMessage(
+                                                    message.id,
+                                                )
+                                            }
+                                            disabled={isDeleting}
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
                                 </li>
                             ))}
                         </ul>
+                    )}
+
+                    {deleteError && (
+                        <p>{deleteError}</p>
                     )}
 
                     {typingUsers.length > 0 && (
@@ -296,6 +317,20 @@ function ChatPage() {
         void sendMessage(content).then(() => {
             setMessageContent('')
         })
+    }
+
+    async function handleDeleteMessage(
+        messageId: string,
+    ) {
+        const confirmed = window.confirm(
+            'Delete this message?',
+        )
+
+        if (!confirmed) {
+            return
+        }
+
+        await deleteMessage(messageId)
     }
 }
 
