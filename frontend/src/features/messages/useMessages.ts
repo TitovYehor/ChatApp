@@ -7,6 +7,7 @@ import {
     create,
     getByChannelId,
     remove,
+    update,
 } from '../../api/messageApi'
 
 export function useMessages(
@@ -31,6 +32,20 @@ export function useMessages(
                 content: string,
             ) =>
                 create(channelId!, {
+                    content,
+                }),
+        })
+
+    const updateMutation =
+        useMutation({
+            mutationFn: ({
+                messageId,
+                content,
+            }: {
+                messageId: string
+                content: string
+            }) =>
+                update(messageId, {
                     content,
                 }),
         })
@@ -67,6 +82,17 @@ export function useMessages(
         sendError:
             createMutation.error
                 ? 'Failed to send message'
+                : null,
+
+        updateMessage:
+            updateMutation.mutateAsync,
+
+        isUpdating:
+            updateMutation.isPending,
+
+        updateError:
+            updateMutation.error
+                ? 'Failed to update message'
                 : null,
 
         deleteMessage:
