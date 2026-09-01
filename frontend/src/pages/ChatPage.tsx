@@ -1,9 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react'
+import {
+    useEffect,
+    useState,
+} from 'react'
 
 import ChatLayout from '../layouts/ChatLayout'
 
 import WorkspaceSidebar from '../features/workspaces/WorkspaceSidebar'
 import ChannelSidebar from '../features/channels/ChannelSidebar'
+import WorkspaceMembers from '../features/workspaces/WorkspaceMembers'
+
+import MessageList from '../features/messages/MessageList'
+import MessageComposer from '../features/messages/MessageComposer'
+import TypingIndicator from '../features/presence/TypingIndicator'
 
 import { useAuth } from '../features/auth/useAuth'
 import { useWorkspaces } from '../features/workspaces/useWorkspaces'
@@ -12,7 +20,6 @@ import { useMessages } from '../features/messages/useMessages'
 import { useChannelSignalR } from '../features/chat/useChannelSignalR'
 import { useRealtimeMessages } from '../features/messages/useRealtimeMessages'
 import { useWorkspaceMembers } from '../features/workspaces/useWorkspaceMembers'
-import WorkspaceMembers from '../features/workspaces/WorkspaceMembers'
 import { usePresence } from '../features/presence/usePresence'
 import { useTypingIndicator } from '../features/presence/useTypingIndicator'
 
@@ -42,42 +49,38 @@ function ChatPage() {
         channels,
         isLoading: isLoadingChannels,
         error: channelsError,
-    } = useChannels(selectedWorkspaceId)
+    } = useChannels(
+        selectedWorkspaceId,
+    )
 
     const {
         messages,
-        isLoading: isMessagesLoading,
+        isLoading:
+        isMessagesLoading,
         error: messagesError,
         sendMessage,
         isSending,
         sendError,
         updateMessage,
         isUpdating,
-        updateError,
         deleteMessage,
         isDeleting,
-        deleteError,
-    } = useMessages(selectedChannelId)
+    } = useMessages(
+        selectedChannelId,
+    )
 
-    const [messageContent, setMessageContent] = useState('')
+    useChannelSignalR(
+        selectedChannelId,
+    )
 
-    const [
-        editingMessageId,
-        setEditingMessageId,
-    ] = useState<string | null>(null)
-
-    const [
-        editingMessageContent,
-        setEditingMessageContent,
-    ] = useState('')
-
-    useChannelSignalR(selectedChannelId)
-
-    useRealtimeMessages(selectedChannelId)
+    useRealtimeMessages(
+        selectedChannelId,
+    )
 
     const {
         members,
-        isLoading: isLoadingMembers,
+        isLoading:
+        isLoadingMembers,
         error: membersError,
     } = useWorkspaceMembers(
         selectedWorkspaceId,
@@ -94,49 +97,78 @@ function ChatPage() {
     } = useTypingIndicator(
         selectedChannelId,
         user?.id ?? null,
-        )
-
-    const typingTimeoutRef =
-        useRef<ReturnType<typeof setTimeout> | null>(
-            null,
-        )
+    )
 
     useEffect(() => {
-        if (typingTimeoutRef.current) {
-            clearTimeout(
-                typingTimeoutRef.current,
-            )
-
-            typingTimeoutRef.current = null
+        if (!selectedChannelId) {
+            return
         }
 
-        void stopTyping()
-
+        return () => {
+            void stopTyping()
+        }
     }, [
         selectedChannelId,
         stopTyping,
     ])
 
-    const handleSelectWorkspace = (
+    function handleSelectWorkspace(
         workspaceId: string,
-    ) => {
-        setSelectedWorkspaceId(workspaceId)
+    ) {
+        setSelectedWorkspaceId(
+            workspaceId,
+        )
+
         setSelectedChannelId(null)
     }
 
+    async function handleSendMessage(
+        content: string,
+    ) {
+        await sendMessage(content)
+    }
+
+    async function handleUpdateMessage(
+        messageId: string,
+        content: string,
+    ) {
+        await updateMessage({
+            messageId,
+            content,
+        })
+    }
+
+    async function handleDeleteMessage(
+        messageId: string,
+    ) {
+        await deleteMessage(
+            messageId,
+        )
+    }
+
     if (isLoadingWorkspaces) {
-        return <div>Loading workspaces...</div>
+        return (
+            <div>
+                Loading workspaces...
+            </div>
+        )
     }
 
     if (workspacesError) {
-        return <div>{workspacesError}</div>
+        return (
+            <div>
+                {workspacesError}
+            </div>
+        )
     }
 
     return (
         <ChatLayout
             workspaces={
                 <WorkspaceSidebar
-                    workspaces={workspaces}
+                    workspaces={
+                        workspaces
+                    }
                     selectedWorkspaceId={
                         selectedWorkspaceId
                     }
@@ -146,16 +178,29 @@ function ChatPage() {
                 />
             }
             channels={
-                selectedWorkspaceId === null ? (
-                    <p>Select a workspace</p>
+                selectedWorkspaceId ===
+                    null ? (
+                    <p>
+                        Select a
+                        workspace
+                    </p>
                 ) : isLoadingChannels ? (
-                    <p>Loading channels...</p>
+                    <p>
+                        Loading
+                        channels...
+                    </p>
                 ) : channelsError ? (
-                    <p>{channelsError}</p>
+                    <p>
+                        {
+                            channelsError
+                        }
+                    </p>
                 ) : (
                     <>
                         <ChannelSidebar
-                            channels={channels}
+                            channels={
+                                channels
+                            }
                             selectedChannelId={
                                 selectedChannelId
                             }
@@ -165,13 +210,24 @@ function ChatPage() {
                         />
 
                         {isLoadingMembers ? (
-                            <p>Loading members...</p>
+                            <p>
+                                Loading
+                                members...
+                            </p>
                         ) : membersError ? (
-                            <p>{membersError}</p>
+                            <p>
+                                {
+                                    membersError
+                                }
+                            </p>
                         ) : (
                             <WorkspaceMembers
-                                members={members}
-                                onlineUsers={onlineUsers}
+                                members={
+                                    members
+                                }
+                                onlineUsers={
+                                    onlineUsers
+                                }
                             />
                         )}
                     </>
@@ -180,307 +236,107 @@ function ChatPage() {
         >
             <div>
                 <p>
-                    Logged in as {user?.username}
+                    Logged in as{' '}
+                    {
+                        user?.username
+                    }
                 </p>
 
                 <button
                     type="button"
-                    onClick={logout}
+                    onClick={
+                        logout
+                    }
                 >
                     Logout
                 </button>
             </div>
 
-            {selectedChannelId === null ? (
+            {selectedChannelId ===
+                null ? (
                 <div>
-                    <h1>Chat</h1>
+                    <h1>
+                        Chat
+                    </h1>
+
                     <p>
-                        Select a channel to start chatting
+                        Select a
+                        channel to
+                        start
+                        chatting
                     </p>
                 </div>
             ) : (
                 <section>
-                    <h2>Messages</h2>
+                    <h2>
+                        Messages
+                    </h2>
 
-                    {!selectedChannelId ? (
-                        <p>Select a channel</p>
-                    ) : isMessagesLoading ? (
-                        <p>Loading messages...</p>
-                    ) : messagesError ? (
-                        <p>{messagesError}</p>
-                    ) : messages.length === 0 ? (
-                        <p>No messages yet</p>
-                    ) : (
-                        <ul>
-                            {messages.map((message) => {
-                                const isEditing =
-                                    editingMessageId ===
-                                    message.id
-
-                                const isOwnMessage =
-                                    message.userId ===
-                                    user?.id
-
-                                return (
-                                    <li key={message.id}>
-                                        {isEditing ? (
-                                            <>
-                                                <input
-                                                    type="text"
-                                                    value={
-                                                        editingMessageContent
-                                                    }
-                                                    onChange={(
-                                                        event,
-                                                    ) =>
-                                                        setEditingMessageContent(
-                                                            event
-                                                                .target
-                                                                .value,
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        isUpdating
-                                                    }
-                                                />
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        void handleSaveEditing()
-                                                    }
-                                                    disabled={
-                                                        isUpdating ||
-                                                        editingMessageContent
-                                                            .trim()
-                                                            .length ===
-                                                        0
-                                                    }
-                                                >
-                                                    {isUpdating
-                                                        ? 'Saving...'
-                                                        : 'Save'}
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={
-                                                        handleCancelEditing
-                                                    }
-                                                    disabled={
-                                                        isUpdating
-                                                    }
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <strong>
-                                                    {
-                                                        message.username
-                                                    }
-                                                </strong>
-                                                :{' '}
-                                                {
-                                                    message.content
-                                                }
-
-                                                {message.updatedAt && (
-                                                    <span>
-                                                        {' '}
-                                                        (edited)
-                                                    </span>
-                                                )}
-
-                                                {isOwnMessage && (
-                                                    <>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                handleStartEditing(
-                                                                    message.id,
-                                                                    message.content,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                isUpdating ||
-                                                                isDeleting
-                                                            }
-                                                        >
-                                                            Edit
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                void handleDeleteMessage(
-                                                                    message.id,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                isDeleting ||
-                                                                isUpdating
-                                                            }
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </>
-                                        )}
-                                    </li>
-                                )
-                            })}
-                        </ul>
-                    )}
-
-                    {updateError && (
-                        <p>{updateError}</p>
-                    )}
-
-                    {deleteError && (
-                        <p>{deleteError}</p>
-                    )}
-
-                    {typingUsers.length > 0 && (
+                    {isMessagesLoading ? (
                         <p>
-                            {typingUsers.length === 1
-                                ? `${typingUsers[0].username} is typing...`
-                                : typingUsers.length === 2
-                                    ? `${typingUsers[0].username} and ${typingUsers[1].username} are typing...`
-                                    : `${typingUsers[0].username} and ${typingUsers.length - 1} others are typing...`}
+                            Loading
+                            messages...
                         </p>
+                    ) : messagesError ? (
+                        <p>
+                            {
+                                messagesError
+                            }
+                        </p>
+                    ) : messages.length ===
+                        0 ? (
+                        <p>
+                            No messages
+                            yet
+                        </p>
+                    ) : (
+                        <MessageList
+                            messages={messages}
+                            currentUserId={
+                                user?.id ?? null
+                            }
+                            isUpdating={
+                                isUpdating
+                            }
+                            isDeleting={
+                                isDeleting
+                            }
+                            onUpdate={
+                                handleUpdateMessage
+                            }
+                            onDelete={
+                                handleDeleteMessage
+                            }
+                        />
                     )}
 
-                    {selectedChannelId && (
-                        <form onSubmit={handleSendMessage}>
-                            <input
-                                type="text"
-                                value={messageContent}
-                                onChange={(event) => {
-                                    const value =
-                                        event.target.value
+                    <TypingIndicator
+                        typingUsers={
+                            typingUsers
+                        }
+                    />
 
-                                    setMessageContent(value)
-
-                                    if (!value.trim()) {
-                                        void stopTyping()
-                                        return
-                                    }
-
-                                    void startTyping()
-
-                                    if (typingTimeoutRef.current) {
-                                        clearTimeout(
-                                            typingTimeoutRef.current,
-                                        )
-                                    }
-
-                                    typingTimeoutRef.current =
-                                        setTimeout(() => {
-                                            void stopTyping()
-                                        }, 1500)
-                                }}
-                                placeholder="Write a message..."
-                                disabled={isSending}
-                            />
-
-                            <button
-                                type="submit"
-                                disabled={
-                                    isSending ||
-                                    messageContent.trim().length === 0
-                                }
-                            >
-                                {isSending
-                                    ? 'Sending...'
-                                    : 'Send'}
-                            </button>
-
-                            {sendError && (
-                                <p>{sendError}</p>
-                            )}
-                        </form>
-                    )}
+                    <MessageComposer
+                        isSending={
+                            isSending
+                        }
+                        sendError={
+                            sendError
+                        }
+                        onSend={
+                            handleSendMessage
+                        }
+                        onStartTyping={
+                            startTyping
+                        }
+                        onStopTyping={
+                            stopTyping
+                        }
+                    />
                 </section>
             )}
         </ChatLayout>
     )
-
-    function handleSendMessage(
-        event: React.SubmitEvent,
-    ) {
-        event.preventDefault()
-
-        const content = messageContent.trim()
-
-        if (!selectedChannelId || !content) {
-            return
-        }
-
-        if (typingTimeoutRef.current) {
-            clearTimeout(
-                typingTimeoutRef.current,
-            )
-
-            typingTimeoutRef.current = null
-        }
-
-        void stopTyping()
-
-        void sendMessage(content).then(() => {
-            setMessageContent('')
-        })
-    }
-
-    function handleStartEditing(
-        messageId: string,
-        content: string,
-    ) {
-        setEditingMessageId(messageId)
-        setEditingMessageContent(content)
-    }
-
-    function handleCancelEditing() {
-        setEditingMessageId(null)
-        setEditingMessageContent('')
-    }
-
-    async function handleSaveEditing() {
-        if (!editingMessageId) {
-            return
-        }
-
-        const content = editingMessageContent.trim()
-
-        if (!content) {
-            return
-        }
-
-        await updateMessage({
-            messageId:
-                editingMessageId,
-            content,
-        })
-
-        setEditingMessageId(null)
-        setEditingMessageContent('')
-    }
-
-    async function handleDeleteMessage(
-        messageId: string,
-    ) {
-        const confirmed = window.confirm(
-            'Delete this message?',
-        )
-
-        if (!confirmed) {
-            return
-        }
-
-        await deleteMessage(messageId)
-    }
 }
 
 export default ChatPage
