@@ -19,11 +19,15 @@ export function useMessages(
             channelId,
         ],
         queryFn: () =>
-            getByChannelId(channelId!, {
-                pageNumber: 1,
-                pageSize: 50,
-            }),
-        enabled: channelId !== null,
+            getByChannelId(
+                channelId!,
+                {
+                    pageNumber: 1,
+                    pageSize: 50,
+                },
+            ),
+        enabled:
+            channelId !== null,
     })
 
     const createMutation =
@@ -31,9 +35,12 @@ export function useMessages(
             mutationFn: (
                 content: string,
             ) =>
-                create(channelId!, {
-                    content,
-                }),
+                create(
+                    channelId!,
+                    {
+                        content,
+                    },
+                ),
         })
 
     const updateMutation =
@@ -45,9 +52,12 @@ export function useMessages(
                 messageId: string
                 content: string
             }) =>
-                update(messageId, {
-                    content,
-                }),
+                update(
+                    messageId,
+                    {
+                        content,
+                    },
+                ),
         })
 
     const deleteMutation =
@@ -55,7 +65,9 @@ export function useMessages(
             mutationFn: (
                 messageId: string,
             ) =>
-                remove(messageId),
+                remove(
+                    messageId,
+                ),
         })
 
     return {
@@ -65,10 +77,9 @@ export function useMessages(
         isLoading:
             query.isLoading,
 
-        error:
-            query.error
-                ? 'Failed to load messages'
-                : null,
+        error: query.error
+            ? 'Failed to load messages'
+            : null,
 
         reload:
             query.refetch,
@@ -87,6 +98,10 @@ export function useMessages(
         updateMessage:
             updateMutation.mutateAsync,
 
+        updatingMessageId:
+            updateMutation.variables
+                ?.messageId ?? null,
+
         isUpdating:
             updateMutation.isPending,
 
@@ -97,6 +112,10 @@ export function useMessages(
 
         deleteMessage:
             deleteMutation.mutateAsync,
+
+        deletingMessageId:
+            deleteMutation.variables ??
+            null,
 
         isDeleting:
             deleteMutation.isPending,
