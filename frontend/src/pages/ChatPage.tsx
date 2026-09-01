@@ -62,9 +62,9 @@ function ChatPage() {
         isSending,
         sendError,
         updateMessage,
-        isUpdating,
+        updatingMessageId,
         deleteMessage,
-        isDeleting,
+        deletingMessageId,
     } = useMessages(
         selectedChannelId,
     )
@@ -181,13 +181,11 @@ function ChatPage() {
                 selectedWorkspaceId ===
                     null ? (
                     <p>
-                        Select a
-                        workspace
+                        Select a workspace
                     </p>
                 ) : isLoadingChannels ? (
                     <p>
-                        Loading
-                        channels...
+                        Loading channels...
                     </p>
                 ) : channelsError ? (
                     <p>
@@ -211,8 +209,7 @@ function ChatPage() {
 
                         {isLoadingMembers ? (
                             <p>
-                                Loading
-                                members...
+                                Loading members...
                             </p>
                         ) : membersError ? (
                             <p>
@@ -274,8 +271,7 @@ function ChatPage() {
 
                     {isMessagesLoading ? (
                         <p>
-                            Loading
-                            messages...
+                            Loading messages...
                         </p>
                     ) : messagesError ? (
                         <p>
@@ -295,11 +291,11 @@ function ChatPage() {
                             currentUserId={
                                 user?.id ?? null
                             }
-                            isUpdating={
-                                isUpdating
+                            updatingMessageId={
+                                updatingMessageId
                             }
-                            isDeleting={
-                                isDeleting
+                            deletingMessageId={
+                                deletingMessageId
                             }
                             onUpdate={
                                 handleUpdateMessage
