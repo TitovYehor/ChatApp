@@ -11,6 +11,12 @@ interface MessageListProps {
     updatingMessageId: string | null
     deletingMessageId: string | null
 
+    updateError: string | null
+    updateErrorMessageId: string | null
+
+    deleteError: string | null
+    deleteErrorMessageId: string | null
+
     onUpdate: (
         messageId: string,
         content: string,
@@ -26,6 +32,10 @@ function MessageList({
     currentUserId,
     updatingMessageId,
     deletingMessageId,
+    updateError,
+    deleteError,
+    updateErrorMessageId,
+    deleteErrorMessageId,
     onUpdate,
     onDelete,
 }: MessageListProps) {
@@ -34,12 +44,8 @@ function MessageList({
             {messages.map(
                 (message) => (
                     <MessageItem
-                        key={
-                            message.id
-                        }
-                        message={
-                            message
-                        }
+                        key={message.id}
+                        message={message}
                         currentUserId={
                             currentUserId
                         }
@@ -51,12 +57,20 @@ function MessageList({
                             deletingMessageId ===
                             message.id
                         }
-                        onUpdate={
-                            onUpdate
+                        updateError={
+                            updateErrorMessageId ===
+                                message.id
+                                ? updateError
+                                : null
                         }
-                        onDelete={
-                            onDelete
+                        deleteError={
+                            deleteErrorMessageId ===
+                                message.id
+                                ? deleteError
+                                : null
                         }
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
                     />
                 ),
             )}
