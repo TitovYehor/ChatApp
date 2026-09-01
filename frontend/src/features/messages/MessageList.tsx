@@ -8,8 +8,8 @@ interface MessageListProps {
     messages: MessageResponse[]
     currentUserId: string | null
 
-    isUpdating: boolean
-    isDeleting: boolean
+    updatingMessageId: string | null
+    deletingMessageId: string | null
 
     onUpdate: (
         messageId: string,
@@ -24,34 +24,42 @@ interface MessageListProps {
 function MessageList({
     messages,
     currentUserId,
-    isUpdating,
-    isDeleting,
+    updatingMessageId,
+    deletingMessageId,
     onUpdate,
     onDelete,
 }: MessageListProps) {
     return (
         <ul>
-            {messages.map((message) => (
-                <MessageItem
-                    key={message.id}
-                    message={message}
-                    currentUserId={
-                        currentUserId
-                    }
-                    isUpdating={
-                        isUpdating
-                    }
-                    isDeleting={
-                        isDeleting
-                    }
-                    onUpdate={
-                        onUpdate
-                    }
-                    onDelete={
-                        onDelete
-                    }
-                />
-            ))}
+            {messages.map(
+                (message) => (
+                    <MessageItem
+                        key={
+                            message.id
+                        }
+                        message={
+                            message
+                        }
+                        currentUserId={
+                            currentUserId
+                        }
+                        isUpdating={
+                            updatingMessageId ===
+                            message.id
+                        }
+                        isDeleting={
+                            deletingMessageId ===
+                            message.id
+                        }
+                        onUpdate={
+                            onUpdate
+                        }
+                        onDelete={
+                            onDelete
+                        }
+                    />
+                ),
+            )}
         </ul>
     )
 }
