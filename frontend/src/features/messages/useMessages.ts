@@ -1,4 +1,8 @@
 import {
+    useState,
+} from 'react'
+
+import {
     useMutation,
     useQuery,
 } from '@tanstack/react-query'
@@ -30,45 +34,91 @@ export function useMessages(
             channelId !== null,
     })
 
-    const createMutation =
-        useMutation({
-            mutationFn: (
-                content: string,
-            ) =>
-                create(
-                    channelId!,
-                    {
-                        content,
-                    },
-                ),
-        })
+    const createMutation = useMutation({
+        mutationFn: (
+            content: string,
+        ) =>
+            create(
+                channelId!,
+                {
+                    content,
+                },
+            ),
+    })
 
-    const updateMutation =
-        useMutation({
-            mutationFn: ({
+    const [
+        updateErrorMessageId,
+        setUpdateErrorMessageId,
+    ] = useState<string | null>(null)
+
+    const [
+        deleteErrorMessageId,
+        setDeleteErrorMessageId,
+    ] = useState<string | null>(null)
+
+    const updateMutation = useMutation({
+        mutationFn: ({
+            messageId,
+            content,
+        }: {
+            messageId: string
+            content: string
+        }) =>
+            update(
                 messageId,
-                content,
-            }: {
-                messageId: string
-                content: string
-            }) =>
-                update(
-                    messageId,
-                    {
-                        content,
-                    },
-                ),
-        })
+                {
+                    content,
+                },
+            ),
+        onMutate: ({
+            messageId,
+        }) => {
+            setUpdateErrorMessageId(
+                null,
+            )
 
-    const deleteMutation =
-        useMutation({
-            mutationFn: (
-                messageId: string,
-            ) =>
-                remove(
-                    messageId,
-                ),
-        })
+            return {
+                messageId,
+            }
+        },
+        onError: (
+            _error,
+            _variables,
+            context,
+        ) => {
+            setUpdateErrorMessageId(
+                context?.messageId ??
+                null,
+            )
+        },
+    })
+
+    const deleteMutation = useMutation({
+        mutationFn: (
+            messageId: string,
+        ) => remove(messageId),
+        onMutate: (
+            messageId,
+        ) => {
+            setDeleteErrorMessageId(
+                null,
+            )
+
+            return {
+                messageId,
+            }
+        },
+        onError: (
+            _error,
+            _variables,
+            context,
+        ) => {
+            setDeleteErrorMessageId(
+                context?.messageId ??
+                null,
+            )
+        },
+    })
 
     return {
         messages:
@@ -105,11 +155,13 @@ export function useMessages(
         isUpdating:
             updateMutation.isPending,
 
+        updateErrorMessageId,
+
         updateError:
             updateMutation.error
                 ? 'Failed to update message'
                 : null,
-
+        
         deleteMessage:
             deleteMutation.mutateAsync,
 
@@ -119,6 +171,8 @@ export function useMessages(
 
         isDeleting:
             deleteMutation.isPending,
+
+        deleteErrorMessageId,
 
         deleteError:
             deleteMutation.error
