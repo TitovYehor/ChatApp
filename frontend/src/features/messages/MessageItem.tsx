@@ -9,15 +9,21 @@ import type {
 interface MessageItemProps {
     message: MessageResponse
     currentUserId: string | null
+
     onUpdate: (
         messageId: string,
         content: string,
     ) => Promise<void>
+
     onDelete: (
         messageId: string,
     ) => Promise<void>
+
     isUpdating: boolean
     isDeleting: boolean
+
+    updateError: string | null
+    deleteError: string | null
 }
 
 function MessageItem({
@@ -27,6 +33,8 @@ function MessageItem({
     onDelete,
     isUpdating,
     isDeleting,
+    updateError,
+    deleteError,
 }: MessageItemProps) {
     const [
         isEditing,
@@ -115,6 +123,10 @@ function MessageItem({
                     >
                         Cancel
                     </button>
+
+                    {updateError && (
+                        <p>{updateError}</p>
+                    )}
                 </>
             ) : (
                 <>
@@ -156,7 +168,11 @@ function MessageItem({
                                 {isDeleting
                                     ? 'Deleting...'
                                     : 'Delete'}
-                            </button>
+                                </button>
+
+                            {deleteError && (
+                                <p>{deleteError}</p>
+                            )}
                         </>
                     )}
                 </>
