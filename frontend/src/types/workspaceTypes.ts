@@ -41,7 +41,4 @@ export interface WorkspaceMemberResponse {
     joinedAt: string
 }
 
-export type WorkspaceRole =
-    | 'Owner'
-    | 'Admin'
-    | 'Member'
+export type WorkspaceRole = 1 | 2 | 3
