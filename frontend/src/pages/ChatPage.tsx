@@ -55,16 +55,19 @@ function ChatPage() {
 
     const {
         messages,
-        isLoading:
-        isMessagesLoading,
+        isLoading: isMessagesLoading,
         error: messagesError,
         sendMessage,
         isSending,
         sendError,
         updateMessage,
         updatingMessageId,
+        updateError,
+        updateErrorMessageId,
         deleteMessage,
         deletingMessageId,
+        deleteError,
+        deleteErrorMessageId,
     } = useMessages(
         selectedChannelId,
     )
@@ -79,8 +82,7 @@ function ChatPage() {
 
     const {
         members,
-        isLoading:
-        isLoadingMembers,
+        isLoading: isLoadingMembers,
         error: membersError,
     } = useWorkspaceMembers(
         selectedWorkspaceId,
@@ -136,14 +138,6 @@ function ChatPage() {
             messageId,
             content,
         })
-    }
-
-    async function handleDeleteMessage(
-        messageId: string,
-    ) {
-        await deleteMessage(
-            messageId,
-        )
     }
 
     if (isLoadingWorkspaces) {
@@ -271,7 +265,8 @@ function ChatPage() {
 
                     {isMessagesLoading ? (
                         <p>
-                            Loading messages...
+                            Loading
+                            messages...
                         </p>
                     ) : messagesError ? (
                         <p>
@@ -287,9 +282,12 @@ function ChatPage() {
                         </p>
                     ) : (
                         <MessageList
-                            messages={messages}
+                            messages={
+                                messages
+                            }
                             currentUserId={
-                                user?.id ?? null
+                                user?.id ??
+                                null
                             }
                             updatingMessageId={
                                 updatingMessageId
@@ -297,11 +295,23 @@ function ChatPage() {
                             deletingMessageId={
                                 deletingMessageId
                             }
+                            updateError={
+                                updateError
+                            }
+                            updateErrorMessageId={
+                                updateErrorMessageId
+                            }
+                            deleteError={
+                                deleteError
+                            }
+                            deleteErrorMessageId={
+                                deleteErrorMessageId
+                            }
                             onUpdate={
                                 handleUpdateMessage
                             }
                             onDelete={
-                                handleDeleteMessage
+                                deleteMessage
                             }
                         />
                     )}
