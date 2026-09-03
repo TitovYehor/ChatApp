@@ -1,4 +1,5 @@
 import ChannelCreateForm from './ChannelCreateForm'
+import ChannelItem from './ChannelItem'
 
 import type {
     ChannelResponse,
@@ -13,11 +14,20 @@ interface ChannelSidebarProps {
     isCreating: boolean
     createError: string | null
 
+    updatingChannelId: string | null
+    updateChannelError: string | null
+    updateErrorChannelId: string | null
+
     onSelectChannel: (
         channelId: string,
     ) => void
 
     onCreateChannel: (
+        name: string,
+    ) => Promise<void>
+
+    onUpdateChannel: (
+        channelId: string,
         name: string,
     ) => Promise<void>
 }
@@ -28,8 +38,12 @@ function ChannelSidebar({
     canManageChannels,
     isCreating,
     createError,
+    updatingChannelId,
+    updateChannelError,
+    updateErrorChannelId,
     onSelectChannel,
     onCreateChannel,
+    onUpdateChannel,
 }: ChannelSidebarProps) {
     return (
         <div>
@@ -61,37 +75,39 @@ function ChannelSidebar({
                     {channels.map(
                         (
                             channel,
-                        ) => {
-                            const isSelected =
-                                channel.id ===
-                                selectedChannelId
-
-                            return (
-                                <li
-                                    key={
+                        ) => (
+                            <ChannelItem
+                                key={
+                                    channel.id
+                                }
+                                channel={
+                                    channel
+                                }
+                                isSelected={
+                                    channel.id ===
+                                    selectedChannelId
+                                }
+                                canManageChannels={
+                                    canManageChannels
+                                }
+                                isUpdating={
+                                    updatingChannelId ===
+                                    channel.id
+                                }
+                                updateChannelError={
+                                    updateErrorChannelId ===
                                         channel.id
-                                    }
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            onSelectChannel(
-                                                channel.id,
-                                            )
-                                        }
-                                        aria-pressed={
-                                            isSelected
-                                        }
-                                    >
-                                        #
-                                        {' '}
-                                        {
-                                            channel.name
-                                        }
-                                    </button>
-                                </li>
-                            )
-                        },
+                                        ? updateChannelError
+                                        : null
+                                }
+                                onSelect={
+                                    onSelectChannel
+                                }
+                                onUpdate={
+                                    onUpdateChannel
+                                }
+                            />
+                        ),
                     )}
                 </ul>
             )}
