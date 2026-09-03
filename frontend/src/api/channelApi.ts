@@ -47,3 +47,14 @@ export function update(
         },
     )
 }
+
+export function remove(
+    channelId: string,
+): Promise<void> {
+    return apiRequest<void>(
+        `/channels/${channelId}`,
+        {
+            method: 'DELETE',
+        },
+    )
+}
