@@ -1,4 +1,8 @@
 import {
+    useState,
+} from 'react'
+
+import {
     useMutation,
     useQuery,
     useQueryClient,
@@ -7,6 +11,7 @@ import {
 import {
     create,
     getByWorkspaceId,
+    update,
 } from '../../api/channelApi'
 
 import type {
@@ -72,6 +77,81 @@ export function useChannels(
             },
         })
 
+    const [
+        updateErrorChannelId,
+        setUpdateErrorChannelId,
+    ] = useState<string | null>(null)
+
+    const updateMutation =
+        useMutation({
+            mutationFn: ({
+                channelId,
+                name,
+            }: {
+                channelId: string
+                name: string
+            }) =>
+                update(
+                    channelId,
+                    {
+                        name,
+                    },
+                ),
+
+            onMutate: ({
+                channelId,
+            }) => {
+                setUpdateErrorChannelId(
+                    null,
+                )
+
+                return {
+                    channelId,
+                }
+            },
+
+            onSuccess: (
+                channel,
+            ) => {
+                queryClient.setQueryData<
+                    ChannelResponse[]
+                >(
+                    [
+                        'channels',
+                        workspaceId,
+                    ],
+                    (
+                        current,
+                    ) => {
+                        if (!current) {
+                            return current
+                        }
+
+                        return current.map(
+                            (
+                                currentChannel,
+                            ) =>
+                                currentChannel.id ===
+                                    channel.id
+                                    ? channel
+                                    : currentChannel,
+                        )
+                    },
+                )
+            },
+
+            onError: (
+                _error,
+                _variables,
+                context,
+            ) => {
+                setUpdateErrorChannelId(
+                    context?.channelId ??
+                    null,
+                )
+            },
+        })
+
     return {
         channels:
             query.data ?? [],
@@ -95,6 +175,26 @@ export function useChannels(
         createError:
             createMutation.error
                 ? 'Failed to create channel'
+                : null,
+
+        updateChannel:
+            updateMutation.mutateAsync,
+
+        updatingChannelId:
+            updateMutation.isPending
+                ? updateMutation
+                    .variables
+                    ?.channelId ?? null
+                : null,
+
+        isUpdating:
+            updateMutation.isPending,
+
+        updateErrorChannelId,
+
+        updateChannelError:
+            updateMutation.error
+                ? 'Failed to update channel'
                 : null,
     }
 }
