@@ -3,6 +3,7 @@ import { apiRequest } from './client'
 import type {
     ChannelResponse,
     CreateChannelRequest,
+    UpdateChannelRequest,
 } from '../types/channelTypes'
 
 export function getByWorkspaceId(
@@ -29,6 +30,19 @@ export function create(
         `/workspaces/${workspaceId}/channels`,
         {
             method: 'POST',
+            body: JSON.stringify(request),
+        },
+    )
+}
+
+export function update(
+    channelId: string,
+    request: UpdateChannelRequest,
+): Promise<ChannelResponse> {
+    return apiRequest<ChannelResponse>(
+        `/channels/${channelId}`,
+        {
+            method: 'PUT',
             body: JSON.stringify(request),
         },
     )
