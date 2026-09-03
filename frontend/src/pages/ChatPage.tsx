@@ -65,6 +65,10 @@ function ChatPage() {
         createChannel,
         isCreating,
         createError,
+        updateChannel,
+        updatingChannelId,
+        updateChannelError,
+        updateErrorChannelId,
     } = useChannels(
         selectedWorkspaceId,
     )
@@ -150,6 +154,16 @@ function ChatPage() {
         )
     }
 
+    async function handleUpdateChannel(
+        channelId: string,
+        name: string,
+    ) {
+        await updateChannel({
+            channelId,
+            name,
+        })
+    }
+
     async function handleSendMessage(
         content: string,
     ) {
@@ -231,11 +245,23 @@ function ChatPage() {
                             createError={
                                 createError
                             }
+                            updatingChannelId={
+                                updatingChannelId
+                            }
+                            updateChannelError={
+                                updateChannelError
+                            }
+                            updateErrorChannelId={
+                                updateErrorChannelId
+                            }
                             onSelectChannel={
                                 setSelectedChannelId
                             }
                             onCreateChannel={
                                 handleCreateChannel
+                            }
+                            onUpdateChannel={
+                                handleUpdateChannel
                             }
                         />
 
