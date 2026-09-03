@@ -40,6 +40,19 @@ function ChatPage() {
         setSelectedWorkspaceId,
     ] = useState<string | null>(null)
 
+    const selectedWorkspace =
+        workspaces.find(
+            (workspace) =>
+                workspace.id ===
+                selectedWorkspaceId,
+        )
+
+    const canManageChannels =
+        selectedWorkspace?.currentUserRole ===
+        1 ||
+        selectedWorkspace?.currentUserRole ===
+        2
+
     const [
         selectedChannelId,
         setSelectedChannelId,
@@ -49,6 +62,9 @@ function ChatPage() {
         channels,
         isLoading: isLoadingChannels,
         error: channelsError,
+        createChannel,
+        isCreating,
+        createError,
     } = useChannels(
         selectedWorkspaceId,
     )
@@ -124,6 +140,16 @@ function ChatPage() {
         setSelectedChannelId(null)
     }
 
+    async function handleCreateChannel(
+        name: string,
+    ) {
+        const channel = await createChannel(name)
+
+        setSelectedChannelId(
+            channel.id,
+        )
+    }
+
     async function handleSendMessage(
         content: string,
     ) {
@@ -196,8 +222,20 @@ function ChatPage() {
                             selectedChannelId={
                                 selectedChannelId
                             }
+                            canManageChannels={
+                                canManageChannels
+                            }
+                            isCreating={
+                                isCreating
+                            }
+                            createError={
+                                createError
+                            }
                             onSelectChannel={
                                 setSelectedChannelId
+                            }
+                            onCreateChannel={
+                                handleCreateChannel
                             }
                         />
 
