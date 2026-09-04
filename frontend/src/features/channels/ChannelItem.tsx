@@ -14,6 +14,9 @@ interface ChannelItemProps {
     isUpdating: boolean
     updateChannelError: string | null
 
+    isDeleting: boolean
+    deleteChannelError: string | null
+
     onSelect: (
         channelId: string,
     ) => void
@@ -21,6 +24,10 @@ interface ChannelItemProps {
     onUpdate: (
         channelId: string,
         name: string,
+    ) => Promise<void>
+
+    onDelete: (
+        channelId: string,
     ) => Promise<void>
 }
 
@@ -30,8 +37,11 @@ function ChannelItem({
     canManageChannels,
     isUpdating,
     updateChannelError,
+    isDeleting,
+    deleteChannelError,
     onSelect,
     onUpdate,
+    onDelete,
 }: ChannelItemProps) {
     const [
         isEditing,
@@ -44,17 +54,24 @@ function ChannelItem({
     ] = useState(channel.name)
 
     function handleStartEditing() {
-        setEditingName(channel.name)
+        setEditingName(
+            channel.name,
+        )
+
         setIsEditing(true)
     }
 
     function handleCancelEditing() {
-        setEditingName(channel.name)
+        setEditingName(
+            channel.name,
+        )
+
         setIsEditing(false)
     }
 
     async function handleSaveEditing() {
-        const name = editingName.trim()
+        const name =
+            editingName.trim()
 
         if (!name) {
             return
@@ -66,6 +83,21 @@ function ChannelItem({
         )
 
         setIsEditing(false)
+    }
+
+    async function handleDelete() {
+        const confirmed =
+            window.confirm(
+                `Delete #${channel.name}?`,
+            )
+
+        if (!confirmed) {
+            return
+        }
+
+        await onDelete(
+            channel.id,
+        )
     }
 
     return (
@@ -95,6 +127,7 @@ function ChannelItem({
                         }}
                         disabled={
                             isUpdating ||
+                            isDeleting ||
                             editingName
                                 .trim()
                                 .length ===
@@ -138,6 +171,9 @@ function ChannelItem({
                         aria-pressed={
                             isSelected
                         }
+                        disabled={
+                            isDeleting
+                        }
                     >
                         #
                         {' '}
@@ -147,17 +183,43 @@ function ChannelItem({
                     </button>
 
                     {canManageChannels && (
-                        <button
-                            type="button"
-                            onClick={
-                                handleStartEditing
-                            }
-                            disabled={
-                                isUpdating
-                            }
-                        >
-                            Edit
-                        </button>
+                        <>
+                            <button
+                                type="button"
+                                onClick={
+                                    handleStartEditing
+                                }
+                                disabled={
+                                    isUpdating ||
+                                    isDeleting
+                                }
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    void handleDelete()
+                                }}
+                                disabled={
+                                    isUpdating ||
+                                    isDeleting
+                                }
+                            >
+                                {isDeleting
+                                    ? 'Deleting...'
+                                    : 'Delete'}
+                            </button>
+
+                            {deleteChannelError && (
+                                <p>
+                                    {
+                                        deleteChannelError
+                                    }
+                                </p>
+                            )}
+                        </>
                     )}
                 </>
             )}
