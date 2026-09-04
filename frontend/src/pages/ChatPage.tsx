@@ -69,6 +69,10 @@ function ChatPage() {
         updatingChannelId,
         updateChannelError,
         updateErrorChannelId,
+        deleteChannel,
+        deletingChannelId,
+        deleteChannelError,
+        deleteErrorChannelId,
     } = useChannels(
         selectedWorkspaceId,
     )
@@ -164,6 +168,23 @@ function ChatPage() {
         })
     }
 
+    async function handleDeleteChannel(
+        channelId: string,
+    ) {
+        await deleteChannel(
+            channelId,
+        )
+
+        if (
+            selectedChannelId ===
+            channelId
+        ) {
+            setSelectedChannelId(
+                null,
+            )
+        }
+    }
+
     async function handleSendMessage(
         content: string,
     ) {
@@ -254,6 +275,15 @@ function ChatPage() {
                             updateErrorChannelId={
                                 updateErrorChannelId
                             }
+                            deletingChannelId={
+                                deletingChannelId
+                            }
+                            deleteChannelError={
+                                deleteChannelError
+                            }
+                            deleteErrorChannelId={
+                                deleteErrorChannelId
+                            }
                             onSelectChannel={
                                 setSelectedChannelId
                             }
@@ -262,6 +292,9 @@ function ChatPage() {
                             }
                             onUpdateChannel={
                                 handleUpdateChannel
+                            }
+                            onDeleteChannel={
+                                handleDeleteChannel
                             }
                         />
 
