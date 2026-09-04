@@ -12,6 +12,7 @@ import {
     create,
     getByWorkspaceId,
     update,
+    remove,
 } from '../../api/channelApi'
 
 import type {
@@ -152,6 +153,73 @@ export function useChannels(
             },
         })
 
+    const [
+        deleteErrorChannelId,
+        setDeleteErrorChannelId,
+    ] = useState<string | null>(null)
+
+    const deleteMutation =
+        useMutation({
+            mutationFn: (
+                channelId: string,
+            ) =>
+                remove(
+                    channelId,
+                ),
+
+            onMutate: (
+                channelId,
+            ) => {
+                setDeleteErrorChannelId(
+                    null,
+                )
+
+                return {
+                    channelId,
+                }
+            },
+
+            onSuccess: (
+                _data,
+                channelId,
+            ) => {
+                queryClient.setQueryData<
+                    ChannelResponse[]
+                >(
+                    [
+                        'channels',
+                        workspaceId,
+                    ],
+                    (
+                        current,
+                    ) => {
+                        if (!current) {
+                            return current
+                        }
+
+                        return current.filter(
+                            (
+                                channel,
+                            ) =>
+                                channel.id !==
+                                channelId,
+                        )
+                    },
+                )
+            },
+
+            onError: (
+                _error,
+                _variables,
+                context,
+            ) => {
+                setDeleteErrorChannelId(
+                    context?.channelId ??
+                    null,
+                )
+            },
+        })
+
     return {
         channels:
             query.data ?? [],
@@ -195,6 +263,25 @@ export function useChannels(
         updateChannelError:
             updateMutation.error
                 ? 'Failed to update channel'
+                : null,
+
+        deleteChannel:
+            deleteMutation.mutateAsync,
+
+        deletingChannelId:
+            deleteMutation.isPending
+                ? deleteMutation.variables ??
+                null
+                : null,
+
+        isDeleting:
+            deleteMutation.isPending,
+
+        deleteErrorChannelId,
+
+        deleteChannelError:
+            deleteMutation.error
+                ? 'Failed to delete channel'
                 : null,
     }
 }
