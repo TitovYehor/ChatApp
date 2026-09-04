@@ -18,6 +18,10 @@ interface ChannelSidebarProps {
     updateChannelError: string | null
     updateErrorChannelId: string | null
 
+    deletingChannelId: string | null
+    deleteChannelError: string | null
+    deleteErrorChannelId: string | null
+
     onSelectChannel: (
         channelId: string,
     ) => void
@@ -30,6 +34,10 @@ interface ChannelSidebarProps {
         channelId: string,
         name: string,
     ) => Promise<void>
+
+    onDeleteChannel: (
+        channelId: string,
+    ) => Promise<void>
 }
 
 function ChannelSidebar({
@@ -41,9 +49,13 @@ function ChannelSidebar({
     updatingChannelId,
     updateChannelError,
     updateErrorChannelId,
+    deletingChannelId,
+    deleteChannelError,
+    deleteErrorChannelId,
     onSelectChannel,
     onCreateChannel,
     onUpdateChannel,
+    onDeleteChannel,
 }: ChannelSidebarProps) {
     return (
         <div>
@@ -100,11 +112,24 @@ function ChannelSidebar({
                                         ? updateChannelError
                                         : null
                                 }
+                                isDeleting={
+                                    deletingChannelId ===
+                                    channel.id
+                                }
+                                deleteChannelError={
+                                    deleteErrorChannelId ===
+                                        channel.id
+                                        ? deleteChannelError
+                                        : null
+                                }
                                 onSelect={
                                     onSelectChannel
                                 }
                                 onUpdate={
                                     onUpdateChannel
+                                }
+                                onDelete={
+                                    onDeleteChannel
                                 }
                             />
                         ),
