@@ -1,4 +1,5 @@
 import WorkspaceCreateForm from './WorkspaceCreateForm'
+import WorkspaceItem from './WorkspaceItem'
 
 import type {
     WorkspaceResponse,
@@ -11,11 +12,21 @@ interface WorkspaceSidebarProps {
     isCreating: boolean
     createError: string | null
 
+    updatingWorkspaceId: string | null
+    updateWorkspaceError: string | null
+    updateErrorWorkspaceId: string | null
+
     onSelectWorkspace: (
         workspaceId: string,
     ) => void
 
     onCreateWorkspace: (
+        name: string,
+        description: string,
+    ) => Promise<void>
+
+    onUpdateWorkspace: (
+        workspaceId: string,
         name: string,
         description: string,
     ) => Promise<void>
@@ -26,8 +37,12 @@ function WorkspaceSidebar({
     selectedWorkspaceId,
     isCreating,
     createError,
+    updatingWorkspaceId,
+    updateWorkspaceError,
+    updateErrorWorkspaceId,
     onSelectWorkspace,
     onCreateWorkspace,
+    onUpdateWorkspace,
 }: WorkspaceSidebarProps) {
     return (
         <div>
@@ -62,28 +77,40 @@ function WorkspaceSidebar({
                                 workspace.id ===
                                 selectedWorkspaceId
 
+                            const canManageWorkspace =
+                                workspace.currentUserRole === 1
+
                             return (
-                                <li
+                                <WorkspaceItem
                                     key={
                                         workspace.id
                                     }
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            onSelectWorkspace(
-                                                workspace.id,
-                                            )
-                                        }
-                                        aria-pressed={
-                                            isSelected
-                                        }
-                                    >
-                                        {
-                                            workspace.name
-                                        }
-                                    </button>
-                                </li>
+                                    workspace={
+                                        workspace
+                                    }
+                                    isSelected={
+                                        isSelected
+                                    }
+                                    canManageWorkspace={
+                                        canManageWorkspace
+                                    }
+                                    isUpdating={
+                                        updatingWorkspaceId ===
+                                        workspace.id
+                                    }
+                                    updateError={
+                                        updateErrorWorkspaceId ===
+                                            workspace.id
+                                            ? updateWorkspaceError
+                                            : null
+                                    }
+                                    onSelect={
+                                        onSelectWorkspace
+                                    }
+                                    onUpdate={
+                                        onUpdateWorkspace
+                                    }
+                                />
                             )
                         },
                     )}
