@@ -33,6 +33,9 @@ function ChatPage() {
         workspaces,
         isLoading: isLoadingWorkspaces,
         error: workspacesError,
+        createWorkspace,
+        isCreating: isCreatingWorkspace,
+        createError: createWorkspaceError,
     } = useWorkspaces()
 
     const [
@@ -148,6 +151,25 @@ function ChatPage() {
         setSelectedChannelId(null)
     }
 
+    async function handleCreateWorkspace(
+        name: string,
+        description: string,
+    ) {
+        const workspace =
+            await createWorkspace({
+                name,
+                description,
+            })
+
+        setSelectedWorkspaceId(
+            workspace.id,
+        )
+
+        setSelectedChannelId(
+            null,
+        )
+    }
+
     async function handleCreateChannel(
         name: string,
     ) {
@@ -227,8 +249,17 @@ function ChatPage() {
                     selectedWorkspaceId={
                         selectedWorkspaceId
                     }
+                    isCreating={
+                        isCreatingWorkspace
+                    }
+                    createError={
+                        createWorkspaceError
+                    }
                     onSelectWorkspace={
                         handleSelectWorkspace
+                    }
+                    onCreateWorkspace={
+                        handleCreateWorkspace
                     }
                 />
             }
