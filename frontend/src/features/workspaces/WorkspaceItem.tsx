@@ -14,6 +14,9 @@ interface WorkspaceItemProps {
     isUpdating: boolean
     updateError: string | null
 
+    isDeleting: boolean
+    deleteError: string | null
+
     onSelect: (
         workspaceId: string,
     ) => void
@@ -23,6 +26,10 @@ interface WorkspaceItemProps {
         name: string,
         description: string,
     ) => Promise<void>
+
+    onDelete: (
+        workspaceId: string,
+    ) => Promise<void>
 }
 
 function WorkspaceItem({
@@ -31,8 +38,11 @@ function WorkspaceItem({
     canManageWorkspace,
     isUpdating,
     updateError,
+    isDeleting,
+    deleteError,
     onSelect,
     onUpdate,
+    onDelete,
 }: WorkspaceItemProps) {
     const [
         isEditing,
@@ -95,6 +105,21 @@ function WorkspaceItem({
         )
 
         setIsEditing(false)
+    }
+
+    async function handleDelete() {
+        const confirmed =
+            window.confirm(
+                `Delete workspace "${workspace.name}"?`,
+            )
+
+        if (!confirmed) {
+            return
+        }
+
+        await onDelete(
+            workspace.id,
+        )
     }
 
     return (
@@ -183,6 +208,9 @@ function WorkspaceItem({
                         aria-pressed={
                             isSelected
                         }
+                        disabled={
+                            isDeleting
+                        }
                     >
                         {
                             workspace.name
@@ -190,17 +218,41 @@ function WorkspaceItem({
                     </button>
 
                     {canManageWorkspace && (
-                        <button
-                            type="button"
-                            onClick={
-                                handleStartEditing
-                            }
-                            disabled={
-                                isUpdating
-                            }
-                        >
-                            Edit
-                        </button>
+                        <>
+                            <button
+                                type="button"
+                                onClick={
+                                    handleStartEditing
+                                }
+                                disabled={
+                                    isUpdating ||
+                                    isDeleting
+                                }
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    void handleDelete()
+                                }}
+                                disabled={
+                                    isUpdating ||
+                                    isDeleting
+                                }
+                            >
+                                {isDeleting
+                                    ? 'Deleting...'
+                                    : 'Delete'}
+                            </button>
+
+                            {deleteError && (
+                                <p>
+                                    {deleteError}
+                                </p>
+                            )}
+                        </>
                     )}
                 </>
             )}
