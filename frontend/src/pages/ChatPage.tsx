@@ -33,9 +33,15 @@ function ChatPage() {
         workspaces,
         isLoading: isLoadingWorkspaces,
         error: workspacesError,
+
         createWorkspace,
         isCreating: isCreatingWorkspace,
         createError: createWorkspaceError,
+
+        updateWorkspace,
+        updatingWorkspaceId,
+        updateWorkspaceError,
+        updateErrorWorkspaceId,
     } = useWorkspaces()
 
     const [
@@ -170,6 +176,18 @@ function ChatPage() {
         )
     }
 
+    async function handleUpdateWorkspace(
+        workspaceId: string,
+        name: string,
+        description: string,
+    ) {
+        await updateWorkspace({
+            workspaceId,
+            name,
+            description,
+        })
+    }
+
     async function handleCreateChannel(
         name: string,
     ) {
@@ -255,11 +273,23 @@ function ChatPage() {
                     createError={
                         createWorkspaceError
                     }
+                    updatingWorkspaceId={
+                        updatingWorkspaceId
+                    }
+                    updateWorkspaceError={
+                        updateWorkspaceError
+                    }
+                    updateErrorWorkspaceId={
+                        updateErrorWorkspaceId
+                    }
                     onSelectWorkspace={
                         handleSelectWorkspace
                     }
                     onCreateWorkspace={
                         handleCreateWorkspace
+                    }
+                    onUpdateWorkspace={
+                        handleUpdateWorkspace
                     }
                 />
             }
