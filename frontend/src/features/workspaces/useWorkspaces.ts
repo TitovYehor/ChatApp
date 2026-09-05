@@ -11,6 +11,7 @@ import {
 import {
     create,
     getAll,
+    remove,
     update,
 } from '../../api/workspaceApi'
 
@@ -149,6 +150,84 @@ export function useWorkspaces() {
             },
         })
 
+    const [
+        deleteErrorWorkspaceId,
+        setDeleteErrorWorkspaceId,
+    ] = useState<string | null>(null)
+
+    const deleteMutation =
+        useMutation({
+            mutationFn: (
+                workspaceId: string,
+            ) =>
+                remove(
+                    workspaceId,
+                ),
+
+            onMutate: (
+                workspaceId,
+            ) => {
+                setDeleteErrorWorkspaceId(
+                    null,
+                )
+
+                return {
+                    workspaceId,
+                }
+            },
+
+            onSuccess: (
+                _data,
+                workspaceId,
+            ) => {
+                queryClient.setQueryData<
+                    WorkspaceResponse[]
+                >(
+                    ['workspaces'],
+                    (
+                        current,
+                    ) => {
+                        if (!current) {
+                            return current
+                        }
+
+                        return current.filter(
+                            (
+                                workspace,
+                            ) =>
+                                workspace.id !==
+                                workspaceId,
+                        )
+                    },
+                )
+
+                queryClient.removeQueries({
+                    queryKey: [
+                        'workspace',
+                        workspaceId,
+                    ],
+                })
+
+                queryClient.removeQueries({
+                    queryKey: [
+                        'workspace-members',
+                        workspaceId,
+                    ],
+                })
+            },
+
+            onError: (
+                _error,
+                _variables,
+                context,
+            ) => {
+                setDeleteErrorWorkspaceId(
+                    context?.workspaceId ??
+                    null,
+                )
+            },
+        })
+
     return {
         workspaces:
             query.data ?? [],
@@ -192,6 +271,25 @@ export function useWorkspaces() {
         updateWorkspaceError:
             updateMutation.error
                 ? 'Failed to update workspace'
+                : null,
+
+        deleteWorkspace:
+            deleteMutation.mutateAsync,
+
+        deletingWorkspaceId:
+            deleteMutation.isPending
+                ? deleteMutation.variables ??
+                null
+                : null,
+
+        isDeleting:
+            deleteMutation.isPending,
+
+        deleteErrorWorkspaceId,
+
+        deleteWorkspaceError:
+            deleteMutation.error
+                ? 'Failed to delete workspace'
                 : null,
     }
 }
