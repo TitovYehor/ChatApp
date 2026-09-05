@@ -1,8 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+    useState,
+} from 'react'
+
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
 
 import {
     create,
     getAll,
+    update,
 } from '../../api/workspaceApi'
 
 import type {
@@ -57,6 +66,89 @@ export function useWorkspaces() {
             },
         })
 
+    const [
+        updateErrorWorkspaceId,
+        setUpdateErrorWorkspaceId,
+    ] = useState<string | null>(null)
+
+    const updateMutation =
+        useMutation({
+            mutationFn: ({
+                workspaceId,
+                name,
+                description,
+            }: {
+                workspaceId: string
+                name: string
+                description: string
+            }) =>
+                update(
+                    workspaceId,
+                    {
+                        name,
+                        description,
+                    },
+                ),
+
+            onMutate: ({
+                workspaceId,
+            }) => {
+                setUpdateErrorWorkspaceId(
+                    null,
+                )
+
+                return {
+                    workspaceId,
+                }
+            },
+
+            onSuccess: (
+                workspace,
+            ) => {
+                queryClient.setQueryData<
+                    WorkspaceResponse[]
+                >(
+                    ['workspaces'],
+                    (
+                        current,
+                    ) => {
+                        if (!current) {
+                            return current
+                        }
+
+                        return current.map(
+                            (
+                                currentWorkspace,
+                            ) =>
+                                currentWorkspace.id ===
+                                    workspace.id
+                                    ? workspace
+                                    : currentWorkspace,
+                        )
+                    },
+                )
+
+                queryClient.setQueryData(
+                    [
+                        'workspace',
+                        workspace.id,
+                    ],
+                    workspace,
+                )
+            },
+
+            onError: (
+                _error,
+                _variables,
+                context,
+            ) => {
+                setUpdateErrorWorkspaceId(
+                    context?.workspaceId ??
+                    null,
+                )
+            },
+        })
+
     return {
         workspaces:
             query.data ?? [],
@@ -80,6 +172,26 @@ export function useWorkspaces() {
         createError:
             createMutation.error
                 ? 'Failed to create workspace'
+                : null,
+
+        updateWorkspace:
+            updateMutation.mutateAsync,
+
+        updatingWorkspaceId:
+            updateMutation.isPending
+                ? updateMutation.variables
+                    ?.workspaceId ??
+                null
+                : null,
+
+        isUpdating:
+            updateMutation.isPending,
+
+        updateErrorWorkspaceId,
+
+        updateWorkspaceError:
+            updateMutation.error
+                ? 'Failed to update workspace'
                 : null,
     }
 }
