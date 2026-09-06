@@ -42,6 +42,11 @@ function ChatPage() {
         updatingWorkspaceId,
         updateWorkspaceError,
         updateErrorWorkspaceId,
+
+        deleteWorkspace,
+        deletingWorkspaceId,
+        deleteWorkspaceError,
+        deleteErrorWorkspaceId,
     } = useWorkspaces()
 
     const [
@@ -188,6 +193,26 @@ function ChatPage() {
         })
     }
 
+    async function handleDeleteWorkspace(
+        workspaceId: string,
+    ) {
+        await deleteWorkspace(
+            workspaceId,
+        )
+
+        if (selectedWorkspaceId ===
+            workspaceId
+        ) {
+            setSelectedWorkspaceId(
+                null,
+            )
+
+            setSelectedChannelId(
+                null,
+            )
+        }
+    }
+
     async function handleCreateChannel(
         name: string,
     ) {
@@ -267,12 +292,14 @@ function ChatPage() {
                     selectedWorkspaceId={
                         selectedWorkspaceId
                     }
+
                     isCreating={
                         isCreatingWorkspace
                     }
                     createError={
                         createWorkspaceError
                     }
+
                     updatingWorkspaceId={
                         updatingWorkspaceId
                     }
@@ -282,6 +309,17 @@ function ChatPage() {
                     updateErrorWorkspaceId={
                         updateErrorWorkspaceId
                     }
+
+                    deletingWorkspaceId={
+                        deletingWorkspaceId
+                    }
+                    deleteWorkspaceError={
+                        deleteWorkspaceError
+                    }
+                    deleteErrorWorkspaceId={
+                        deleteErrorWorkspaceId
+                    }
+
                     onSelectWorkspace={
                         handleSelectWorkspace
                     }
@@ -290,6 +328,9 @@ function ChatPage() {
                     }
                     onUpdateWorkspace={
                         handleUpdateWorkspace
+                    }
+                    onDeleteWorkspace={
+                        handleDeleteWorkspace
                     }
                 />
             }
