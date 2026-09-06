@@ -16,6 +16,10 @@ interface WorkspaceSidebarProps {
     updateWorkspaceError: string | null
     updateErrorWorkspaceId: string | null
 
+    deletingWorkspaceId: string | null
+    deleteWorkspaceError: string | null
+    deleteErrorWorkspaceId: string | null
+
     onSelectWorkspace: (
         workspaceId: string,
     ) => void
@@ -30,6 +34,10 @@ interface WorkspaceSidebarProps {
         name: string,
         description: string,
     ) => Promise<void>
+
+    onDeleteWorkspace: (
+        workspaceId: string,
+    ) => Promise<void>
 }
 
 function WorkspaceSidebar({
@@ -40,9 +48,13 @@ function WorkspaceSidebar({
     updatingWorkspaceId,
     updateWorkspaceError,
     updateErrorWorkspaceId,
+    deletingWorkspaceId,
+    deleteWorkspaceError,
+    deleteErrorWorkspaceId,
     onSelectWorkspace,
     onCreateWorkspace,
     onUpdateWorkspace,
+    onDeleteWorkspace
 }: WorkspaceSidebarProps) {
     return (
         <div>
@@ -104,11 +116,24 @@ function WorkspaceSidebar({
                                             ? updateWorkspaceError
                                             : null
                                     }
+                                    isDeleting={
+                                        deletingWorkspaceId ===
+                                        workspace.id
+                                    }
+                                    deleteError={
+                                        deleteErrorWorkspaceId ===
+                                            workspace.id
+                                            ? deleteWorkspaceError
+                                            : null
+                                    }
                                     onSelect={
                                         onSelectWorkspace
                                     }
                                     onUpdate={
                                         onUpdateWorkspace
+                                    }
+                                    onDelete={
+                                        onDeleteWorkspace
                                     }
                                 />
                             )
