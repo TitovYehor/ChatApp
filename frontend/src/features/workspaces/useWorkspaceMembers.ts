@@ -7,6 +7,7 @@ import {
 import {
     addMember,
     getMembers,
+    removeMember,
 } from '../../api/workspaceApi'
 
 export function useWorkspaceMembers(
@@ -50,6 +51,28 @@ export function useWorkspaceMembers(
             },
         })
 
+    const removeMemberMutation =
+        useMutation({
+            mutationFn: (
+                usernameOrEmail: string,
+            ) =>
+                removeMember(
+                    workspaceId!,
+                    {
+                        usernameOrEmail,
+                    },
+                ),
+
+            onSuccess: async () => {
+                await queryClient.invalidateQueries({
+                    queryKey: [
+                        'workspace-members',
+                        workspaceId,
+                    ],
+                })
+            },
+        })
+
     return {
         members:
             query.data ?? [],
@@ -73,6 +96,23 @@ export function useWorkspaceMembers(
         addError:
             addMemberMutation.error
                 ? 'Failed to add workspace member'
+                : null,
+
+        removeMember:
+            removeMemberMutation.mutateAsync,
+
+        removingMember:
+            removeMemberMutation.isPending
+                ? removeMemberMutation.variables ??
+                null
+                : null,
+
+        isRemoving:
+            removeMemberMutation.isPending,
+
+        removeError:
+            removeMemberMutation.error
+                ? 'Failed to remove workspace member'
                 : null,
     }
 }
