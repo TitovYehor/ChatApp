@@ -122,6 +122,9 @@ function ChatPage() {
         members,
         isLoading: isLoadingMembers,
         error: membersError,
+        addMember,
+        isAdding: isAddingMember,
+        addError: addMemberError,
     } = useWorkspaceMembers(
         selectedWorkspaceId,
     )
@@ -211,6 +214,14 @@ function ChatPage() {
                 null,
             )
         }
+    }
+
+    async function handleAddWorkspaceMember(
+        usernameOrEmail: string,
+    ) {
+        await addMember(
+            usernameOrEmail,
+        )
     }
 
     async function handleCreateChannel(
@@ -417,6 +428,19 @@ function ChatPage() {
                                 }
                                 onlineUsers={
                                     onlineUsers
+                                }
+                                canManageMembers={
+                                    selectedWorkspace?.currentUserRole ===
+                                    1
+                                }
+                                isAdding={
+                                    isAddingMember
+                                }
+                                addError={
+                                    addMemberError
+                                }
+                                onAddMember={
+                                    handleAddWorkspaceMember
                                 }
                             />
                         )}
