@@ -1,21 +1,54 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query'
 
 import {
+    addMember,
     getMembers,
 } from '../../api/workspaceApi'
 
 export function useWorkspaceMembers(
     workspaceId: string | null,
 ) {
+    const queryClient =
+        useQueryClient()
+
     const query = useQuery({
         queryKey: [
             'workspace-members',
             workspaceId,
         ],
         queryFn: () =>
-            getMembers(workspaceId!),
-        enabled: workspaceId !== null,
+            getMembers(
+                workspaceId!,
+            ),
+        enabled:
+            workspaceId !== null,
     })
+
+    const addMemberMutation =
+        useMutation({
+            mutationFn: (
+                usernameOrEmail: string,
+            ) =>
+                addMember(
+                    workspaceId!,
+                    {
+                        usernameOrEmail,
+                    },
+                ),
+
+            onSuccess: async () => {
+                await queryClient.invalidateQueries({
+                    queryKey: [
+                        'workspace-members',
+                        workspaceId,
+                    ],
+                })
+            },
+        })
 
     return {
         members:
@@ -30,5 +63,16 @@ export function useWorkspaceMembers(
 
         reload:
             query.refetch,
+
+        addMember:
+            addMemberMutation.mutateAsync,
+
+        isAdding:
+            addMemberMutation.isPending,
+
+        addError:
+            addMemberMutation.error
+                ? 'Failed to add workspace member'
+                : null,
     }
 }
