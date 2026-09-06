@@ -1,3 +1,5 @@
+import WorkspaceMemberAddForm from './WorkspaceMemberAddForm'
+
 import type {
     WorkspaceMemberResponse,
 } from '../../types/workspaceTypes'
@@ -9,11 +11,24 @@ import type {
 interface WorkspaceMembersProps {
     members: WorkspaceMemberResponse[]
     onlineUsers: OnlineUserResponse[]
+
+    canManageMembers: boolean
+
+    isAdding: boolean
+    addError: string | null
+
+    onAddMember: (
+        usernameOrEmail: string,
+    ) => Promise<void>
 }
 
 function WorkspaceMembers({
     members,
     onlineUsers,
+    canManageMembers,
+    isAdding,
+    addError,
+    onAddMember,
 }: WorkspaceMembersProps) {
     const onlineUserIds =
         new Set(
@@ -22,40 +37,64 @@ function WorkspaceMembers({
             ),
         )
 
-    if (members.length === 0) {
-        return (
-            <div>
-                <h3>Members</h3>
-                <p>No members</p>
-            </div>
-        )
-    }
-
     return (
         <div>
-            <h3>Members</h3>
+            <h3>
+                Members
+            </h3>
 
-            <ul>
-                {members.map((member) => {
-                    const isOnline =
-                        onlineUserIds.has(
-                            member.userId,
-                        )
+            {canManageMembers && (
+                <WorkspaceMemberAddForm
+                    isAdding={
+                        isAdding
+                    }
+                    addError={
+                        addError
+                    }
+                    onAdd={
+                        onAddMember
+                    }
+                />
+            )}
 
-                    return (
-                        <li key={member.userId}>
-                            <span>
-                                {isOnline
-                                    ? '🟢'
-                                    : '⚪'}
-                            </span>{' '}
-                            <strong>
-                                {member.username}
-                            </strong>
-                        </li>
-                    )
-                })}
-            </ul>
+            {members.length ===
+                0 ? (
+                <p>
+                    No members
+                </p>
+            ) : (
+                <ul>
+                    {members.map(
+                        (
+                            member,
+                        ) => {
+                            const isOnline =
+                                onlineUserIds.has(
+                                    member.userId,
+                                )
+
+                            return (
+                                <li
+                                    key={
+                                        member.userId
+                                    }
+                                >
+                                    <span>
+                                        {isOnline
+                                            ? '🟢'
+                                            : '⚪'}
+                                    </span>{' '}
+                                    <strong>
+                                        {
+                                            member.username
+                                        }
+                                    </strong>
+                                </li>
+                            )
+                        },
+                    )}
+                </ul>
+            )}
         </div>
     )
 }
