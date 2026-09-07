@@ -82,17 +82,6 @@ export function getMembers(
     )
 }
 
-export function join(
-    workspaceId: string,
-): Promise<void> {
-    return apiRequest<void>(
-        `/workspaces/${workspaceId}/join`,
-        {
-            method: 'POST',
-        },
-    )
-}
-
 export function leave(
     workspaceId: string,
 ): Promise<void> {
