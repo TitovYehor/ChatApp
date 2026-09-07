@@ -6,9 +6,14 @@ import {
 
 import {
     addMember,
+    changeMemberRole,
     getMembers,
     removeMember,
 } from '../../api/workspaceApi'
+
+import type {
+    WorkspaceRole,
+} from '../../types/workspaceTypes'
 
 export function useWorkspaceMembers(
     workspaceId: string | null,
@@ -73,6 +78,33 @@ export function useWorkspaceMembers(
             },
         })
 
+    const changeMemberRoleMutation =
+        useMutation({
+            mutationFn: ({
+                usernameOrEmail,
+                role,
+            }: {
+                usernameOrEmail: string
+                role: WorkspaceRole
+            }) =>
+                changeMemberRole(
+                    workspaceId!,
+                    {
+                        usernameOrEmail,
+                        role,
+                    },
+                ),
+
+            onSuccess: async () => {
+                await queryClient.invalidateQueries({
+                    queryKey: [
+                        'workspace-members',
+                        workspaceId,
+                    ],
+                })
+            },
+        })
+
     return {
         members:
             query.data ?? [],
@@ -113,6 +145,23 @@ export function useWorkspaceMembers(
         removeError:
             removeMemberMutation.error
                 ? 'Failed to remove workspace member'
+                : null,
+
+        changeMemberRole:
+            changeMemberRoleMutation.mutateAsync,
+
+        changingMemberRole:
+            changeMemberRoleMutation.isPending
+                ? changeMemberRoleMutation.variables?.usernameOrEmail ??
+                null
+                : null,
+
+        isChangingMemberRole:
+            changeMemberRoleMutation.isPending,
+
+        changeMemberRoleError:
+            changeMemberRoleMutation.error
+                ? 'Failed to change member role'
                 : null,
     }
 }
