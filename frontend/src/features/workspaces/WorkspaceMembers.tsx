@@ -1,7 +1,9 @@
 import WorkspaceMemberAddForm from './WorkspaceMemberAddForm'
+import WorkspaceMemberRoleSelect from './WorkspaceMemberRoleSelect'
 
 import type {
     WorkspaceMemberResponse,
+    WorkspaceRole,
 } from '../../types/workspaceTypes'
 
 import type {
@@ -23,12 +25,21 @@ interface WorkspaceMembersProps {
     removingMember: string | null
     removeError: string | null
 
+    isChangingMemberRole: boolean
+    changingMemberRole: string | null
+    changeMemberRoleError: string | null
+
     onAddMember: (
         usernameOrEmail: string,
     ) => Promise<void>
 
     onRemoveMember: (
         usernameOrEmail: string,
+    ) => Promise<void>
+
+    onChangeMemberRole: (
+        usernameOrEmail: string,
+        role: WorkspaceRole,
     ) => Promise<void>
 }
 
@@ -42,8 +53,12 @@ function WorkspaceMembers({
     isRemoving,
     removingMember,
     removeError,
+    isChangingMemberRole,
+    changingMemberRole,
+    changeMemberRoleError,
     onAddMember,
     onRemoveMember,
+    onChangeMemberRole,
 }: WorkspaceMembersProps) {
     const onlineUserIds =
         new Set(
@@ -51,6 +66,19 @@ function WorkspaceMembers({
                 (user) => user.userId,
             ),
         )
+
+    function getRoleName(
+        role: WorkspaceRole,
+    ) {
+        switch (role) {
+            case 1:
+                return 'Owner'
+            case 2:
+                return 'Admin'
+            case 3:
+                return 'Member'
+        }
+    }
 
     async function handleRemoveMember(
         usernameOrEmail: string,
@@ -66,6 +94,25 @@ function WorkspaceMembers({
 
         await onRemoveMember(
             usernameOrEmail,
+        )
+    }
+
+    async function handleChangeMemberRole(
+        usernameOrEmail: string,
+        role: WorkspaceRole,
+    ) {
+        const confirmed =
+            window.confirm(
+                `Are you sure you want to change ${usernameOrEmail}'s role to ${getRoleName(role)}?`,
+            )
+
+        if (!confirmed) {
+            return
+        }
+
+        await onChangeMemberRole(
+            usernameOrEmail,
+            role,
         )
     }
 
@@ -114,6 +161,10 @@ function WorkspaceMembers({
                                 removingMember ===
                                 member.username
 
+                            const isThisMemberChangingRole =
+                                changingMemberRole ===
+                                member.username
+
                             return (
                                 <li
                                     key={
@@ -139,9 +190,40 @@ function WorkspaceMembers({
                                         </span>
                                     )}
 
+                                    <span>
+                                        {' '}
+                                        —{' '}
+                                        {
+                                            getRoleName(
+                                                member.role,
+                                            )
+                                        }
+                                    </span>
+
                                     {canManageMembers &&
-                                        !isCurrentUser && (
+                                        !isCurrentUser &&
+                                        member.role !==
+                                        1 && (
                                             <>
+                                                {' '}
+
+                                                <WorkspaceMemberRoleSelect
+                                                    role={
+                                                        member.role
+                                                    }
+                                                    isChanging={
+                                                        isThisMemberChangingRole
+                                                    }
+                                                    onChange={(
+                                                        role,
+                                                    ) =>
+                                                        handleChangeMemberRole(
+                                                            member.username,
+                                                            role,
+                                                        )
+                                                    }
+                                                />
+
                                                 {' '}
 
                                                 <button
@@ -152,7 +234,8 @@ function WorkspaceMembers({
                                                         )
                                                     }
                                                     disabled={
-                                                        isRemoving
+                                                        isRemoving ||
+                                                        isChangingMemberRole
                                                     }
                                                 >
                                                     {isThisMemberBeingRemoved
@@ -167,6 +250,15 @@ function WorkspaceMembers({
                                             <p>
                                                 {
                                                     removeError
+                                                }
+                                            </p>
+                                        )}
+
+                                    {isThisMemberChangingRole &&
+                                        changeMemberRoleError && (
+                                            <p>
+                                                {
+                                                    changeMemberRoleError
                                                 }
                                             </p>
                                         )}
