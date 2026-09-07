@@ -122,9 +122,15 @@ function ChatPage() {
         members,
         isLoading: isLoadingMembers,
         error: membersError,
+
         addMember,
         isAdding: isAddingMember,
         addError: addMemberError,
+
+        removeMember,
+        isRemoving: isRemovingMember,
+        removingMember,
+        removeError: removeMemberError,
     } = useWorkspaceMembers(
         selectedWorkspaceId,
     )
@@ -220,6 +226,14 @@ function ChatPage() {
         usernameOrEmail: string,
     ) {
         await addMember(
+            usernameOrEmail,
+        )
+    }
+
+    async function handleRemoveWorkspaceMember(
+        usernameOrEmail: string,
+    ) {
+        await removeMember(
             usernameOrEmail,
         )
     }
@@ -429,6 +443,9 @@ function ChatPage() {
                                 onlineUsers={
                                     onlineUsers
                                 }
+                                currentUserId={
+                                    user?.id ?? null
+                                }
                                 canManageMembers={
                                     selectedWorkspace?.currentUserRole ===
                                     1
@@ -439,8 +456,20 @@ function ChatPage() {
                                 addError={
                                     addMemberError
                                 }
+                                isRemoving={
+                                    isRemovingMember
+                                }
+                                removingMember={
+                                    removingMember
+                                }
+                                removeError={
+                                    removeMemberError
+                                }
                                 onAddMember={
                                     handleAddWorkspaceMember
+                                }
+                                onRemoveMember={
+                                    handleRemoveWorkspaceMember
                                 }
                             />
                         )}
