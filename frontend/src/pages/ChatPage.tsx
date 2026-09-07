@@ -3,6 +3,10 @@ import {
     useState,
 } from 'react'
 
+import type {
+    WorkspaceRole,
+} from '../types/workspaceTypes'
+
 import ChatLayout from '../layouts/ChatLayout'
 
 import WorkspaceSidebar from '../features/workspaces/WorkspaceSidebar'
@@ -131,6 +135,11 @@ function ChatPage() {
         isRemoving: isRemovingMember,
         removingMember,
         removeError: removeMemberError,
+
+        changeMemberRole,
+        isChangingMemberRole,
+        changingMemberRole,
+        changeMemberRoleError,
     } = useWorkspaceMembers(
         selectedWorkspaceId,
     )
@@ -236,6 +245,16 @@ function ChatPage() {
         await removeMember(
             usernameOrEmail,
         )
+    }
+
+    async function handleChangeWorkspaceMemberRole(
+        usernameOrEmail: string,
+        role: WorkspaceRole,
+    ) {
+        await changeMemberRole({
+            usernameOrEmail,
+            role,
+        })
     }
 
     async function handleCreateChannel(
@@ -450,12 +469,14 @@ function ChatPage() {
                                     selectedWorkspace?.currentUserRole ===
                                     1
                                 }
+
                                 isAdding={
                                     isAddingMember
                                 }
                                 addError={
                                     addMemberError
                                 }
+
                                 isRemoving={
                                     isRemovingMember
                                 }
@@ -465,11 +486,25 @@ function ChatPage() {
                                 removeError={
                                     removeMemberError
                                 }
+
+                                isChangingMemberRole={
+                                    isChangingMemberRole
+                                }
+                                changingMemberRole={
+                                    changingMemberRole
+                                }
+                                changeMemberRoleError={
+                                    changeMemberRoleError
+                                }
+
                                 onAddMember={
                                     handleAddWorkspaceMember
                                 }
                                 onRemoveMember={
                                     handleRemoveWorkspaceMember
+                                }
+                                onChangeMemberRole={
+                                    handleChangeWorkspaceMemberRole
                                 }
                             />
                         )}
