@@ -1,5 +1,6 @@
 import WorkspaceMemberAddForm from './WorkspaceMemberAddForm'
 import WorkspaceMemberRoleSelect from './WorkspaceMemberRoleSelect'
+import WorkspaceOwnershipTransfer from './WorkspaceOwnershipTransfer'
 
 import type {
     WorkspaceMemberResponse,
@@ -29,6 +30,10 @@ interface WorkspaceMembersProps {
     changingMemberRole: string | null
     changeMemberRoleError: string | null
 
+    isTransferringOwnership: boolean
+    transferringOwnership: string | null
+    transferOwnershipError: string | null
+
     onAddMember: (
         usernameOrEmail: string,
     ) => Promise<void>
@@ -40,6 +45,10 @@ interface WorkspaceMembersProps {
     onChangeMemberRole: (
         usernameOrEmail: string,
         role: WorkspaceRole,
+    ) => Promise<void>
+
+    onTransferOwnership: (
+        usernameOrEmail: string,
     ) => Promise<void>
 }
 
@@ -56,9 +65,13 @@ function WorkspaceMembers({
     isChangingMemberRole,
     changingMemberRole,
     changeMemberRoleError,
+    isTransferringOwnership,
+    transferringOwnership,
+    transferOwnershipError,
     onAddMember,
     onRemoveMember,
     onChangeMemberRole,
+    onTransferOwnership,
 }: WorkspaceMembersProps) {
     const onlineUserIds =
         new Set(
@@ -132,6 +145,29 @@ function WorkspaceMembers({
                     }
                     onAdd={
                         onAddMember
+                    }
+                />
+            )}
+
+            {canManageMembers && (
+                <WorkspaceOwnershipTransfer
+                    members={
+                        members
+                    }
+                    currentUserId={
+                        currentUserId
+                    }
+                    isTransferring={
+                        isTransferringOwnership
+                    }
+                    transferringMember={
+                        transferringOwnership
+                    }
+                    transferError={
+                        transferOwnershipError
+                    }
+                    onTransfer={
+                        onTransferOwnership
                     }
                 />
             )}
