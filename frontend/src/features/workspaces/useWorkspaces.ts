@@ -13,6 +13,7 @@ import {
     getAll,
     remove,
     update,
+    leave,
 } from '../../api/workspaceApi'
 
 import type {
@@ -228,6 +229,56 @@ export function useWorkspaces() {
             },
         })
 
+    const leaveMutation =
+        useMutation({
+            mutationFn: (
+                workspaceId: string,
+            ) =>
+                leave(
+                    workspaceId,
+                ),
+
+            onSuccess: (
+                _data,
+                workspaceId,
+            ) => {
+                queryClient.setQueryData<
+                    WorkspaceResponse[]
+                >(
+                    ['workspaces'],
+                    (
+                        current,
+                    ) => {
+                        if (!current) {
+                            return current
+                        }
+
+                        return current.filter(
+                            (
+                                workspace,
+                            ) =>
+                                workspace.id !==
+                                workspaceId,
+                        )
+                    },
+                )
+
+                queryClient.removeQueries({
+                    queryKey: [
+                        'workspace',
+                        workspaceId,
+                    ],
+                })
+
+                queryClient.removeQueries({
+                    queryKey: [
+                        'workspace-members',
+                        workspaceId,
+                    ],
+                })
+            },
+        })
+
     return {
         workspaces:
             query.data ?? [],
@@ -290,6 +341,23 @@ export function useWorkspaces() {
         deleteWorkspaceError:
             deleteMutation.error
                 ? 'Failed to delete workspace'
+                : null,
+
+        leaveWorkspace:
+            leaveMutation.mutateAsync,
+
+        leavingWorkspaceId:
+            leaveMutation.isPending
+                ? leaveMutation.variables ??
+                null
+                : null,
+
+        isLeaving:
+            leaveMutation.isPending,
+
+        leaveWorkspaceError:
+            leaveMutation.error
+                ? 'Failed to leave workspace'
                 : null,
     }
 }
