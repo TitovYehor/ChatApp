@@ -9,6 +9,7 @@ import {
     changeMemberRole,
     getMembers,
     removeMember,
+    transferOwnership,
 } from '../../api/workspaceApi'
 
 import type {
@@ -105,6 +106,43 @@ export function useWorkspaceMembers(
             },
         })
 
+    const transferOwnershipMutation =
+        useMutation({
+            mutationFn: (
+                usernameOrEmail: string,
+            ) =>
+                transferOwnership(
+                    workspaceId!,
+                    {
+                        usernameOrEmail,
+                    },
+                ),
+
+            onSuccess: async () => {
+                await Promise.all([
+                    queryClient.invalidateQueries({
+                        queryKey: [
+                            'workspace-members',
+                            workspaceId,
+                        ],
+                    }),
+
+                    queryClient.invalidateQueries({
+                        queryKey: [
+                            'workspaces',
+                        ],
+                    }),
+
+                    queryClient.invalidateQueries({
+                        queryKey: [
+                            'workspace',
+                            workspaceId,
+                        ],
+                    }),
+                ])
+            },
+        })
+
     return {
         members:
             query.data ?? [],
@@ -162,6 +200,23 @@ export function useWorkspaceMembers(
         changeMemberRoleError:
             changeMemberRoleMutation.error
                 ? 'Failed to change member role'
+                : null,
+
+        transferOwnership:
+            transferOwnershipMutation.mutateAsync,
+
+        isTransferringOwnership:
+            transferOwnershipMutation.isPending,
+
+        transferringOwnership:
+            transferOwnershipMutation.isPending
+                ? transferOwnershipMutation.variables ??
+                null
+                : null,
+
+        transferOwnershipError:
+            transferOwnershipMutation.error
+                ? 'Failed to transfer workspace ownership'
                 : null,
     }
 }
