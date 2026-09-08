@@ -1,6 +1,7 @@
 import WorkspaceMemberAddForm from './WorkspaceMemberAddForm'
 import WorkspaceMemberRoleSelect from './WorkspaceMemberRoleSelect'
 import WorkspaceOwnershipTransfer from './WorkspaceOwnershipTransfer'
+import WorkspaceLeave from './WorkspaceLeave'
 
 import type {
     WorkspaceMemberResponse,
@@ -14,8 +15,10 @@ import type {
 interface WorkspaceMembersProps {
     members: WorkspaceMemberResponse[]
     onlineUsers: OnlineUserResponse[]
-
     currentUserId: string | null
+
+    workspaceName: string
+    currentUserRole: WorkspaceRole | null
 
     canManageMembers: boolean
 
@@ -34,6 +37,9 @@ interface WorkspaceMembersProps {
     transferringOwnership: string | null
     transferOwnershipError: string | null
 
+    isLeaving: boolean
+    leaveError: string | null
+
     onAddMember: (
         usernameOrEmail: string,
     ) => Promise<void>
@@ -50,28 +56,43 @@ interface WorkspaceMembersProps {
     onTransferOwnership: (
         usernameOrEmail: string,
     ) => Promise<void>
+
+    onLeaveWorkspace: () => Promise<void>
 }
 
 function WorkspaceMembers({
     members,
     onlineUsers,
     currentUserId,
+
+    workspaceName,
+    currentUserRole,
+
     canManageMembers,
+
     isAdding,
     addError,
+
     isRemoving,
     removingMember,
     removeError,
+
     isChangingMemberRole,
     changingMemberRole,
     changeMemberRoleError,
+
     isTransferringOwnership,
     transferringOwnership,
     transferOwnershipError,
+
+    isLeaving,
+    leaveError,
+
     onAddMember,
     onRemoveMember,
     onChangeMemberRole,
     onTransferOwnership,
+    onLeaveWorkspace,
 }: WorkspaceMembersProps) {
     const onlineUserIds =
         new Set(
@@ -171,6 +192,30 @@ function WorkspaceMembers({
                     }
                 />
             )}
+
+            <WorkspaceLeave
+                workspaceName={
+                    workspaceName
+                }
+                currentUserId={
+                    currentUserId
+                }
+                currentUserRole={
+                    currentUserRole
+                }
+                members={
+                    members
+                }
+                isLeaving={
+                    isLeaving
+                }
+                leaveError={
+                    leaveError
+                }
+                onLeave={
+                    onLeaveWorkspace
+                }
+            />
 
             {members.length ===
                 0 ? (
