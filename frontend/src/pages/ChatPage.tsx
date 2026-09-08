@@ -140,6 +140,11 @@ function ChatPage() {
         isChangingMemberRole,
         changingMemberRole,
         changeMemberRoleError,
+
+        transferOwnership,
+        isTransferringOwnership,
+        transferringOwnership,
+        transferOwnershipError,
     } = useWorkspaceMembers(
         selectedWorkspaceId,
     )
@@ -255,6 +260,14 @@ function ChatPage() {
             usernameOrEmail,
             role,
         })
+    }
+
+    async function handleTransferWorkspaceOwnership(
+        usernameOrEmail: string,
+    ) {
+        await transferOwnership(
+            usernameOrEmail,
+        )
     }
 
     async function handleCreateChannel(
@@ -497,6 +510,16 @@ function ChatPage() {
                                     changeMemberRoleError
                                 }
 
+                                isTransferringOwnership={
+                                    isTransferringOwnership
+                                }
+                                transferringOwnership={
+                                    transferringOwnership
+                                }
+                                transferOwnershipError={
+                                    transferOwnershipError
+                                }
+
                                 onAddMember={
                                     handleAddWorkspaceMember
                                 }
@@ -505,6 +528,9 @@ function ChatPage() {
                                 }
                                 onChangeMemberRole={
                                     handleChangeWorkspaceMemberRole
+                                }
+                                onTransferOwnership={
+                                    handleTransferWorkspaceOwnership
                                 }
                             />
                         )}
