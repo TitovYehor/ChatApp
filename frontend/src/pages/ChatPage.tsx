@@ -51,6 +51,11 @@ function ChatPage() {
         deletingWorkspaceId,
         deleteWorkspaceError,
         deleteErrorWorkspaceId,
+
+        leaveWorkspace,
+        isLeaving,
+        leavingWorkspaceId,
+        leaveWorkspaceError,
     } = useWorkspaces()
 
     const [
@@ -270,6 +275,24 @@ function ChatPage() {
         )
     }
 
+    async function handleLeaveWorkspace() {
+        if (!selectedWorkspaceId) {
+            return
+        }
+
+        await leaveWorkspace(
+            selectedWorkspaceId,
+        )
+
+        setSelectedWorkspaceId(
+            null,
+        )
+
+        setSelectedChannelId(
+            null,
+        )
+    }
+
     async function handleCreateChannel(
         name: string,
     ) {
@@ -478,6 +501,15 @@ function ChatPage() {
                                 currentUserId={
                                     user?.id ?? null
                                 }
+
+                                workspaceName={
+                                    selectedWorkspace?.name ?? ''
+                                }
+                                currentUserRole={
+                                    selectedWorkspace?.currentUserRole ??
+                                    null
+                                }
+
                                 canManageMembers={
                                     selectedWorkspace?.currentUserRole ===
                                     1
@@ -520,6 +552,18 @@ function ChatPage() {
                                     transferOwnershipError
                                 }
 
+                                isLeaving={
+                                    isLeaving &&
+                                    leavingWorkspaceId ===
+                                    selectedWorkspaceId
+                                }
+                                leaveError={
+                                    leavingWorkspaceId ===
+                                        selectedWorkspaceId
+                                        ? leaveWorkspaceError
+                                        : null
+                                }
+
                                 onAddMember={
                                     handleAddWorkspaceMember
                                 }
@@ -531,6 +575,9 @@ function ChatPage() {
                                 }
                                 onTransferOwnership={
                                     handleTransferWorkspaceOwnership
+                                }
+                                onLeaveWorkspace={
+                                    handleLeaveWorkspace
                                 }
                             />
                         )}
