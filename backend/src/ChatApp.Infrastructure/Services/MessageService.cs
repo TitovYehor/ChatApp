@@ -5,6 +5,7 @@ using ChatApp.Application.Mappings;
 using ChatApp.Contracts.Messages.Requests;
 using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Domain.Entities;
+using ChatApp.Domain.Enums;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -155,21 +156,34 @@ public class MessageService : IMessageService
     {
         var message = await _dbContext.Messages
             .Include(x => x.User)
+            .Include(x => x.Channel)
+                .ThenInclude(x => x.Workspace)
+                .ThenInclude(x => x.Members)
             .FirstOrDefaultAsync(x =>
-                x.Id == messageId &&
-                x.UserId == userId);
+                x.Id == messageId);
 
         if (message == null)
         {
-            throw new NotFoundException("Message not found");
+            throw new NotFoundException(
+                "Message not found");
         }
 
-        if (message.Content == request.Content.Trim())
+        var isOwner = message.UserId == userId;
+
+        if (!isOwner)
+        {
+            throw new ForbiddenException(
+                "You can only edit your own messages");
+        }
+
+        var content = request.Content.Trim();
+
+        if (message.Content == content)
         {
             return message.ToDto();
         }
 
-        message.Content = request.Content.Trim();
+        message.Content = content;
         message.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync();
@@ -184,17 +198,44 @@ public class MessageService : IMessageService
     }
 
     public async Task DeleteAsync(
-        Guid messageId, 
+        Guid messageId,
         Guid userId)
     {
         var message = await _dbContext.Messages
+            .Include(x => x.Channel)
+                .ThenInclude(x => x.Workspace)
+                .ThenInclude(x => x.Members)
             .FirstOrDefaultAsync(x =>
-                x.Id == messageId &&
-                x.UserId == userId);
+                x.Id == messageId);
 
         if (message == null)
         {
-            throw new NotFoundException("Message not found");
+            throw new NotFoundException(
+                "Message not found");
+        }
+
+        var member = message.Channel
+            .Workspace
+            .Members
+            .FirstOrDefault(x =>
+                x.UserId == userId);
+
+        if (member == null)
+        {
+            throw new ForbiddenException(
+                "User is not a member of this workspace");
+        }
+
+        var isOwner = message.UserId == userId;
+
+        var isWorkspaceAdmin = 
+            member.Role == WorkspaceRole.Admin ||
+            member.Role == WorkspaceRole.Owner;
+
+        if (!isOwner && !isWorkspaceAdmin)
+        {
+            throw new ForbiddenException(
+                "You do not have permission to delete this message");
         }
 
         var channelId = message.ChannelId;
