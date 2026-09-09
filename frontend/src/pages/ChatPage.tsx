@@ -1,8 +1,3 @@
-import {
-    useEffect,
-    useState,
-} from 'react'
-
 import type {
     WorkspaceRole,
 } from '../types/workspaceTypes'
@@ -18,14 +13,11 @@ import MessageComposer from '../features/messages/MessageComposer'
 import TypingIndicator from '../features/presence/TypingIndicator'
 
 import { useAuth } from '../features/auth/useAuth'
-import { useWorkspaces } from '../features/workspaces/useWorkspaces'
-import { useChannels } from '../features/channels/useChannels'
-import { useMessages } from '../features/messages/useMessages'
-import { useChannelSignalR } from '../features/chat/useChannelSignalR'
-import { useRealtimeMessages } from '../features/messages/useRealtimeMessages'
-import { useWorkspaceMembers } from '../features/workspaces/useWorkspaceMembers'
+import { useWorkspaceController } from '../features/workspaces/useWorkspaceController'
+import { useChannelController } from '../features/channels/useChannelController'
+import { useChatController } from '../features/chat/useChatController'
+import { useChatNavigation } from '../features/chat/useChatNavigation'
 import { usePresence } from '../features/presence/usePresence'
-import { useTypingIndicator } from '../features/presence/useTypingIndicator'
 
 function ChatPage() {
     const {
@@ -34,217 +26,99 @@ function ChatPage() {
     } = useAuth()
 
     const {
-        workspaces,
-        isLoading: isLoadingWorkspaces,
-        error: workspacesError,
-
-        createWorkspace,
-        isCreating: isCreatingWorkspace,
-        createError: createWorkspaceError,
-
-        updateWorkspace,
-        updatingWorkspaceId,
-        updateWorkspaceError,
-        updateErrorWorkspaceId,
-
-        deleteWorkspace,
-        deletingWorkspaceId,
-        deleteWorkspaceError,
-        deleteErrorWorkspaceId,
-
-        leaveWorkspace,
-        isLeaving,
-        leavingWorkspaceId,
-        leaveWorkspaceError,
-    } = useWorkspaces()
-
-    const [
         selectedWorkspaceId,
-        setSelectedWorkspaceId,
-    ] = useState<string | null>(null)
-
-    const selectedWorkspace =
-        workspaces.find(
-            (workspace) =>
-                workspace.id ===
-                selectedWorkspaceId,
-        )
-
-    const canManageChannels =
-        selectedWorkspace?.currentUserRole ===
-        1 ||
-        selectedWorkspace?.currentUserRole ===
-        2
-
-    const [
         selectedChannelId,
-        setSelectedChannelId,
-    ] = useState<string | null>(null)
 
-    const {
-        channels,
-        isLoading: isLoadingChannels,
-        error: channelsError,
-        createChannel,
-        isCreating,
-        createError,
-        updateChannel,
-        updatingChannelId,
-        updateChannelError,
-        updateErrorChannelId,
-        deleteChannel,
-        deletingChannelId,
-        deleteChannelError,
-        deleteErrorChannelId,
-    } = useChannels(
+        selectWorkspace,
+        selectChannel,
+
+        selectCreatedWorkspace,
+        selectCreatedChannel,
+
+        clearSelectedChannel,
+        clearSelectedWorkspace,
+        clearCurrentWorkspace,
+    } = useChatNavigation()
+
+    const workspace = useWorkspaceController(
         selectedWorkspaceId,
     )
 
-    const {
-        messages,
-        isLoading: isMessagesLoading,
-        error: messagesError,
-        sendMessage,
-        isSending,
-        sendError,
-        updateMessage,
-        updatingMessageId,
-        updateError,
-        updateErrorMessageId,
-        deleteMessage,
-        deletingMessageId,
-        deleteError,
-        deleteErrorMessageId,
-    } = useMessages(
-        selectedChannelId,
-    )
-
-    useChannelSignalR(
-        selectedChannelId,
-    )
-
-    useRealtimeMessages(
-        selectedChannelId,
-    )
-
-    const {
-        members,
-        isLoading: isLoadingMembers,
-        error: membersError,
-
-        addMember,
-        isAdding: isAddingMember,
-        addError: addMemberError,
-
-        removeMember,
-        isRemoving: isRemovingMember,
-        removingMember,
-        removeError: removeMemberError,
-
-        changeMemberRole,
-        isChangingMemberRole,
-        changingMemberRole,
-        changeMemberRoleError,
-
-        transferOwnership,
-        isTransferringOwnership,
-        transferringOwnership,
-        transferOwnershipError,
-    } = useWorkspaceMembers(
+    const channel = useChannelController(
         selectedWorkspaceId,
+    )
+
+    const chat = useChatController(
+        selectedChannelId,
+        user?.id ?? null,
     )
 
     const {
         onlineUsers,
     } = usePresence()
 
-    const {
-        typingUsers,
-        startTyping,
-        stopTyping,
-    } = useTypingIndicator(
-        selectedChannelId,
-        user?.id ?? null,
-    )
-
-    useEffect(() => {
-        if (!selectedChannelId) {
-            return
-        }
-
-        return () => {
-            void stopTyping()
-        }
-    }, [
-        selectedChannelId,
-        stopTyping,
-    ])
-
-    function handleSelectWorkspace(
-        workspaceId: string,
-    ) {
-        setSelectedWorkspaceId(
-            workspaceId,
-        )
-
-        setSelectedChannelId(null)
-    }
-
     async function handleCreateWorkspace(
         name: string,
         description: string,
     ) {
-        const workspace =
-            await createWorkspace({
+        const createdWorkspace =
+            await workspace.createWorkspaceAndReturn(
                 name,
                 description,
-            })
+            )
 
-        setSelectedWorkspaceId(
-            workspace.id,
+        selectCreatedWorkspace(
+            createdWorkspace.id,
         )
-
-        setSelectedChannelId(
-            null,
-        )
-    }
-
-    async function handleUpdateWorkspace(
-        workspaceId: string,
-        name: string,
-        description: string,
-    ) {
-        await updateWorkspace({
-            workspaceId,
-            name,
-            description,
-        })
     }
 
     async function handleDeleteWorkspace(
         workspaceId: string,
     ) {
-        await deleteWorkspace(
+        await workspace.deleteWorkspaceById(
             workspaceId,
         )
 
-        if (selectedWorkspaceId ===
-            workspaceId
-        ) {
-            setSelectedWorkspaceId(
-                null,
+        clearSelectedWorkspace(
+            workspaceId,
+        )
+    }
+
+    async function handleLeaveWorkspace() {
+        await workspace.leaveSelectedWorkspace()
+
+        clearCurrentWorkspace()
+    }
+
+    async function handleCreateChannel(
+        name: string,
+    ) {
+        const createdChannel =
+            await channel.createChannelAndReturn(
+                name,
             )
 
-            setSelectedChannelId(
-                null,
-            )
-        }
+        selectCreatedChannel(
+            createdChannel.id,
+        )
+    }
+
+    async function handleDeleteChannel(
+        channelId: string,
+    ) {
+        await channel.deleteChannelById(
+            channelId,
+        )
+
+        clearSelectedChannel(
+            channelId,
+        )
     }
 
     async function handleAddWorkspaceMember(
         usernameOrEmail: string,
     ) {
-        await addMember(
+        await workspace.addMember(
             usernameOrEmail,
         )
     }
@@ -252,7 +126,7 @@ function ChatPage() {
     async function handleRemoveWorkspaceMember(
         usernameOrEmail: string,
     ) {
-        await removeMember(
+        await workspace.removeMember(
             usernameOrEmail,
         )
     }
@@ -261,92 +135,21 @@ function ChatPage() {
         usernameOrEmail: string,
         role: WorkspaceRole,
     ) {
-        await changeMemberRole({
+        await workspace.changeWorkspaceMemberRole(
             usernameOrEmail,
             role,
-        })
+        )
     }
 
     async function handleTransferWorkspaceOwnership(
         usernameOrEmail: string,
     ) {
-        await transferOwnership(
+        await workspace.transferOwnership(
             usernameOrEmail,
         )
     }
 
-    async function handleLeaveWorkspace() {
-        if (!selectedWorkspaceId) {
-            return
-        }
-
-        await leaveWorkspace(
-            selectedWorkspaceId,
-        )
-
-        setSelectedWorkspaceId(
-            null,
-        )
-
-        setSelectedChannelId(
-            null,
-        )
-    }
-
-    async function handleCreateChannel(
-        name: string,
-    ) {
-        const channel = await createChannel(name)
-
-        setSelectedChannelId(
-            channel.id,
-        )
-    }
-
-    async function handleUpdateChannel(
-        channelId: string,
-        name: string,
-    ) {
-        await updateChannel({
-            channelId,
-            name,
-        })
-    }
-
-    async function handleDeleteChannel(
-        channelId: string,
-    ) {
-        await deleteChannel(
-            channelId,
-        )
-
-        if (
-            selectedChannelId ===
-            channelId
-        ) {
-            setSelectedChannelId(
-                null,
-            )
-        }
-    }
-
-    async function handleSendMessage(
-        content: string,
-    ) {
-        await sendMessage(content)
-    }
-
-    async function handleUpdateMessage(
-        messageId: string,
-        content: string,
-    ) {
-        await updateMessage({
-            messageId,
-            content,
-        })
-    }
-
-    if (isLoadingWorkspaces) {
+    if (workspace.isLoadingWorkspaces) {
         return (
             <div>
                 Loading workspaces...
@@ -354,10 +157,12 @@ function ChatPage() {
         )
     }
 
-    if (workspacesError) {
+    if (workspace.workspacesError) {
         return (
             <div>
-                {workspacesError}
+                {
+                    workspace.workspacesError
+                }
             </div>
         )
     }
@@ -367,220 +172,229 @@ function ChatPage() {
             workspaces={
                 <WorkspaceSidebar
                     workspaces={
-                        workspaces
+                        workspace.workspaces
                     }
                     selectedWorkspaceId={
                         selectedWorkspaceId
                     }
 
                     isCreating={
-                        isCreatingWorkspace
+                        workspace.isCreatingWorkspace
                     }
                     createError={
-                        createWorkspaceError
+                        workspace.createWorkspaceError
                     }
 
                     updatingWorkspaceId={
-                        updatingWorkspaceId
+                        workspace.updatingWorkspaceId
                     }
                     updateWorkspaceError={
-                        updateWorkspaceError
+                        workspace.updateWorkspaceError
                     }
                     updateErrorWorkspaceId={
-                        updateErrorWorkspaceId
+                        workspace.updateErrorWorkspaceId
                     }
 
                     deletingWorkspaceId={
-                        deletingWorkspaceId
+                        workspace.deletingWorkspaceId
                     }
                     deleteWorkspaceError={
-                        deleteWorkspaceError
+                        workspace.deleteWorkspaceError
                     }
                     deleteErrorWorkspaceId={
-                        deleteErrorWorkspaceId
+                        workspace.deleteErrorWorkspaceId
                     }
 
                     onSelectWorkspace={
-                        handleSelectWorkspace
+                        selectWorkspace
                     }
                     onCreateWorkspace={
                         handleCreateWorkspace
                     }
                     onUpdateWorkspace={
-                        handleUpdateWorkspace
+                        workspace.updateWorkspaceDetails
                     }
                     onDeleteWorkspace={
                         handleDeleteWorkspace
                     }
                 />
             }
+
             channels={
-                selectedWorkspaceId ===
-                    null ? (
+                selectedWorkspaceId === null ? (
                     <p>
                         Select a workspace
                     </p>
-                ) : isLoadingChannels ? (
-                    <p>
-                        Loading channels...
-                    </p>
-                ) : channelsError ? (
+                ) : workspace.isLoadingMembers ||
+                    channel.isLoadingChannels ? (
+                    <>
+                        {channel.isLoadingChannels && (
+                            <p>
+                                Loading channels...
+                            </p>
+                        )}
+
+                        {workspace.isLoadingMembers && (
+                            <p>
+                                Loading members...
+                            </p>
+                        )}
+                    </>
+                ) : channel.channelsError ? (
                     <p>
                         {
-                            channelsError
+                            channel.channelsError
+                        }
+                    </p>
+                ) : workspace.membersError ? (
+                    <p>
+                        {
+                            workspace.membersError
                         }
                     </p>
                 ) : (
                     <>
                         <ChannelSidebar
                             channels={
-                                channels
+                                channel.channels
                             }
                             selectedChannelId={
                                 selectedChannelId
                             }
                             canManageChannels={
-                                canManageChannels
+                                workspace.canManageChannels
                             }
+
                             isCreating={
-                                isCreating
+                                channel.isCreating
                             }
                             createError={
-                                createError
+                                channel.createError
                             }
+
                             updatingChannelId={
-                                updatingChannelId
+                                channel.updatingChannelId
                             }
                             updateChannelError={
-                                updateChannelError
+                                channel.updateChannelError
                             }
                             updateErrorChannelId={
-                                updateErrorChannelId
+                                channel.updateErrorChannelId
                             }
+
                             deletingChannelId={
-                                deletingChannelId
+                                channel.deletingChannelId
                             }
                             deleteChannelError={
-                                deleteChannelError
+                                channel.deleteChannelError
                             }
                             deleteErrorChannelId={
-                                deleteErrorChannelId
+                                channel.deleteErrorChannelId
                             }
+
                             onSelectChannel={
-                                setSelectedChannelId
+                                selectChannel
                             }
                             onCreateChannel={
                                 handleCreateChannel
                             }
                             onUpdateChannel={
-                                handleUpdateChannel
+                                channel.updateChannelDetails
                             }
                             onDeleteChannel={
                                 handleDeleteChannel
                             }
                         />
 
-                        {isLoadingMembers ? (
-                            <p>
-                                Loading members...
-                            </p>
-                        ) : membersError ? (
-                            <p>
-                                {
-                                    membersError
-                                }
-                            </p>
-                        ) : (
-                            <WorkspaceMembers
-                                members={
-                                    members
-                                }
-                                onlineUsers={
-                                    onlineUsers
-                                }
-                                currentUserId={
-                                    user?.id ?? null
-                                }
+                        <WorkspaceMembers
+                            members={
+                                workspace.members
+                            }
+                            onlineUsers={
+                                onlineUsers
+                            }
+                            currentUserId={
+                                user?.id ?? null
+                            }
 
-                                workspaceName={
-                                    selectedWorkspace?.name ?? ''
-                                }
-                                currentUserRole={
-                                    selectedWorkspace?.currentUserRole ??
-                                    null
-                                }
+                            workspaceName={
+                                workspace.selectedWorkspace?.name ??
+                                ''
+                            }
+                            currentUserRole={
+                                workspace.selectedWorkspace?.currentUserRole ??
+                                null
+                            }
 
-                                canManageMembers={
-                                    selectedWorkspace?.currentUserRole ===
-                                    1
-                                }
+                            canManageMembers={
+                                workspace.canManageMembers
+                            }
 
-                                isAdding={
-                                    isAddingMember
-                                }
-                                addError={
-                                    addMemberError
-                                }
+                            isAdding={
+                                workspace.isAddingMember
+                            }
+                            addError={
+                                workspace.addMemberError
+                            }
 
-                                isRemoving={
-                                    isRemovingMember
-                                }
-                                removingMember={
-                                    removingMember
-                                }
-                                removeError={
-                                    removeMemberError
-                                }
+                            isRemoving={
+                                workspace.isRemovingMember
+                            }
+                            removingMember={
+                                workspace.removingMember
+                            }
+                            removeError={
+                                workspace.removeMemberError
+                            }
 
-                                isChangingMemberRole={
-                                    isChangingMemberRole
-                                }
-                                changingMemberRole={
-                                    changingMemberRole
-                                }
-                                changeMemberRoleError={
-                                    changeMemberRoleError
-                                }
+                            isChangingMemberRole={
+                                workspace.isChangingMemberRole
+                            }
+                            changingMemberRole={
+                                workspace.changingMemberRole
+                            }
+                            changeMemberRoleError={
+                                workspace.changeMemberRoleError
+                            }
 
-                                isTransferringOwnership={
-                                    isTransferringOwnership
-                                }
-                                transferringOwnership={
-                                    transferringOwnership
-                                }
-                                transferOwnershipError={
-                                    transferOwnershipError
-                                }
+                            isTransferringOwnership={
+                                workspace.isTransferringOwnership
+                            }
+                            transferringOwnership={
+                                workspace.transferringOwnership
+                            }
+                            transferOwnershipError={
+                                workspace.transferOwnershipError
+                            }
 
-                                isLeaving={
-                                    isLeaving &&
-                                    leavingWorkspaceId ===
+                            isLeaving={
+                                workspace.isLeaving &&
+                                workspace.leavingWorkspaceId ===
+                                selectedWorkspaceId
+                            }
+                            leaveError={
+                                workspace.leavingWorkspaceId ===
                                     selectedWorkspaceId
-                                }
-                                leaveError={
-                                    leavingWorkspaceId ===
-                                        selectedWorkspaceId
-                                        ? leaveWorkspaceError
-                                        : null
-                                }
+                                    ? workspace.leaveWorkspaceError
+                                    : null
+                            }
 
-                                onAddMember={
-                                    handleAddWorkspaceMember
-                                }
-                                onRemoveMember={
-                                    handleRemoveWorkspaceMember
-                                }
-                                onChangeMemberRole={
-                                    handleChangeWorkspaceMemberRole
-                                }
-                                onTransferOwnership={
-                                    handleTransferWorkspaceOwnership
-                                }
-                                onLeaveWorkspace={
-                                    handleLeaveWorkspace
-                                }
-                            />
-                        )}
+                            onAddMember={
+                                handleAddWorkspaceMember
+                            }
+                            onRemoveMember={
+                                handleRemoveWorkspaceMember
+                            }
+                            onChangeMemberRole={
+                                handleChangeWorkspaceMemberRole
+                            }
+                            onTransferOwnership={
+                                handleTransferWorkspaceOwnership
+                            }
+                            onLeaveWorkspace={
+                                handleLeaveWorkspace
+                            }
+                        />
                     </>
                 )
             }
@@ -603,18 +417,15 @@ function ChatPage() {
                 </button>
             </div>
 
-            {selectedChannelId ===
-                null ? (
+            {selectedChannelId === null ? (
                 <div>
                     <h1>
                         Chat
                     </h1>
 
                     <p>
-                        Select a
-                        channel to
-                        start
-                        chatting
+                        Select a channel to
+                        start chatting
                     </p>
                 </div>
             ) : (
@@ -623,80 +434,83 @@ function ChatPage() {
                         Messages
                     </h2>
 
-                    {isMessagesLoading ? (
+                    {chat.isMessagesLoading ? (
                         <p>
                             Loading
                             messages...
                         </p>
-                    ) : messagesError ? (
+                    ) : chat.messagesError ? (
                         <p>
                             {
-                                messagesError
+                                chat.messagesError
                             }
                         </p>
-                    ) : messages.length ===
+                    ) : chat.messages.length ===
                         0 ? (
                         <p>
-                            No messages
-                            yet
+                            No messages yet
                         </p>
                     ) : (
                         <MessageList
                             messages={
-                                messages
+                                chat.messages
                             }
                             currentUserId={
                                 user?.id ??
                                 null
                             }
+
                             updatingMessageId={
-                                updatingMessageId
+                                chat.updatingMessageId
                             }
                             deletingMessageId={
-                                deletingMessageId
+                                chat.deletingMessageId
                             }
+
                             updateError={
-                                updateError
+                                chat.updateError
                             }
                             updateErrorMessageId={
-                                updateErrorMessageId
+                                chat.updateErrorMessageId
                             }
+
                             deleteError={
-                                deleteError
+                                chat.deleteError
                             }
                             deleteErrorMessageId={
-                                deleteErrorMessageId
+                                chat.deleteErrorMessageId
                             }
+
                             onUpdate={
-                                handleUpdateMessage
+                                chat.updateChatMessage
                             }
                             onDelete={
-                                deleteMessage
+                                chat.deleteMessage
                             }
                         />
                     )}
 
                     <TypingIndicator
                         typingUsers={
-                            typingUsers
+                            chat.typingUsers
                         }
                     />
 
                     <MessageComposer
                         isSending={
-                            isSending
+                            chat.isSending
                         }
                         sendError={
-                            sendError
+                            chat.sendError
                         }
                         onSend={
-                            handleSendMessage
+                            chat.sendChatMessage
                         }
                         onStartTyping={
-                            startTyping
+                            chat.startTyping
                         }
                         onStopTyping={
-                            stopTyping
+                            chat.stopTyping
                         }
                     />
                 </section>
