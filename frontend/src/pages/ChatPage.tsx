@@ -459,6 +459,9 @@ function ChatPage() {
                                 user?.id ??
                                 null
                             }
+                            canManageMessages={
+                                workspace.canManageMessages
+                            }
 
                             updatingMessageId={
                                 chat.updatingMessageId
