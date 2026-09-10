@@ -7,6 +7,7 @@ import type {
 interface MessageListProps {
     messages: MessageResponse[]
     currentUserId: string | null
+    canManageMessages: boolean
 
     updatingMessageId: string | null
     deletingMessageId: string | null
@@ -30,6 +31,7 @@ interface MessageListProps {
 function MessageList({
     messages,
     currentUserId,
+    canManageMessages,
     updatingMessageId,
     deletingMessageId,
     updateError,
@@ -48,6 +50,9 @@ function MessageList({
                         message={message}
                         currentUserId={
                             currentUserId
+                        }
+                        canManageMessages={
+                            canManageMessages
                         }
                         isUpdating={
                             updatingMessageId ===
