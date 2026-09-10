@@ -41,4 +41,10 @@ export interface WorkspaceMemberResponse {
     joinedAt: string
 }
 
+export interface WorkspaceUpdatedResponse {
+    workspaceId: string
+    name: string
+    description: string
+}
+
 export type WorkspaceRole = 1 | 2 | 3
