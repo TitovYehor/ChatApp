@@ -9,6 +9,7 @@ import type {
 interface MessageItemProps {
     message: MessageResponse
     currentUserId: string | null
+    canManageMessages: boolean
 
     onUpdate: (
         messageId: string,
@@ -29,6 +30,7 @@ interface MessageItemProps {
 function MessageItem({
     message,
     currentUserId,
+    canManageMessages,
     onUpdate,
     onDelete,
     isUpdating,
@@ -46,22 +48,32 @@ function MessageItem({
         setEditingContent,
     ] = useState(message.content)
 
-    const isOwnMessage =
-        currentUserId === message.userId
+    const isOwnMessage = currentUserId === message.userId
+
+    const canEditMessage = isOwnMessage
+
+    const canDeleteMessage =
+        isOwnMessage ||
+        canManageMessages
 
     const handleStartEditing = () => {
-        setEditingContent(message.content)
+        setEditingContent(
+            message.content,
+        )
+
         setIsEditing(true)
     }
 
     const handleCancelEditing = () => {
-        setEditingContent(message.content)
+        setEditingContent(
+            message.content,
+        )
+
         setIsEditing(false)
     }
 
     const handleSaveEditing = async () => {
-        const content =
-            editingContent.trim()
+        const content = editingContent.trim()
 
         if (!content) {
             return
@@ -76,7 +88,9 @@ function MessageItem({
     }
 
     const handleDelete = async () => {
-        await onDelete(message.id)
+        await onDelete(
+            message.id,
+        )
     }
 
     return (
@@ -89,13 +103,17 @@ function MessageItem({
 
                     <input
                         type="text"
-                        value={editingContent}
+                        value={
+                            editingContent
+                        }
                         onChange={(event) => {
                             setEditingContent(
                                 event.target.value,
                             )
                         }}
-                        disabled={isUpdating}
+                        disabled={
+                            isUpdating
+                        }
                     />
 
                     <button
@@ -105,7 +123,8 @@ function MessageItem({
                         }}
                         disabled={
                             isUpdating ||
-                            editingContent.trim()
+                            editingContent
+                                .trim()
                                 .length === 0
                         }
                     >
@@ -119,13 +138,19 @@ function MessageItem({
                         onClick={
                             handleCancelEditing
                         }
-                        disabled={isUpdating}
+                        disabled={
+                            isUpdating
+                        }
                     >
                         Cancel
                     </button>
 
                     {updateError && (
-                        <p>{updateError}</p>
+                        <p>
+                            {
+                                updateError
+                            }
+                        </p>
                     )}
                 </>
             ) : (
@@ -142,20 +167,22 @@ function MessageItem({
                         </span>
                     )}
 
-                    {isOwnMessage && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={
-                                    handleStartEditing
-                                }
-                                disabled={
-                                    isDeleting
-                                }
-                            >
-                                Edit
-                            </button>
+                    {canEditMessage && (
+                        <button
+                            type="button"
+                            onClick={
+                                handleStartEditing
+                            }
+                            disabled={
+                                isDeleting
+                            }
+                        >
+                            Edit
+                        </button>
+                    )}
 
+                    {canDeleteMessage && (
+                        <>
                             <button
                                 type="button"
                                 onClick={() => {
@@ -168,10 +195,14 @@ function MessageItem({
                                 {isDeleting
                                     ? 'Deleting...'
                                     : 'Delete'}
-                                </button>
+                            </button>
 
                             {deleteError && (
-                                <p>{deleteError}</p>
+                                <p>
+                                    {
+                                        deleteError
+                                    }
+                                </p>
                             )}
                         </>
                     )}
