@@ -10,9 +10,15 @@ import type {
     WorkspaceRole,
 } from '../../types/workspaceTypes'
 
+import {
+    useRealtimeWorkspaces,
+} from './useRealtimeWorkspaces'
+
 export function useWorkspaceController(
     selectedWorkspaceId: string | null,
 ) {
+    useRealtimeWorkspaces()
+
     const {
         workspaces,
         isLoading: isLoadingWorkspaces,
