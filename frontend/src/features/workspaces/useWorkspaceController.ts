@@ -79,6 +79,10 @@ export function useWorkspaceController(
     const canManageMembers =
         selectedWorkspace?.currentUserRole === 1
 
+    const canManageMessages =
+        selectedWorkspace?.currentUserRole === 1 ||
+        selectedWorkspace?.currentUserRole === 2
+
     async function createWorkspaceAndReturn(
         name: string,
         description: string,
@@ -138,6 +142,7 @@ export function useWorkspaceController(
 
         canManageChannels,
         canManageMembers,
+        canManageMessages,
 
         createWorkspaceAndReturn,
         isCreatingWorkspace,
