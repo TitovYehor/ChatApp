@@ -47,4 +47,8 @@ export interface WorkspaceUpdatedResponse {
     description: string
 }
 
+export interface WorkspaceDeletedResponse {
+    workspaceId: string
+}
+
 export type WorkspaceRole = 1 | 2 | 3
