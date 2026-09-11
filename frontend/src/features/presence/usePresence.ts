@@ -16,6 +16,10 @@ import type {
     UserPresenceChangedResponse,
 } from '../../types/presenceTypes'
 
+import {
+    SignalREvents
+} from '../../types/signalREvents'
+
 const PRESENCE_QUERY_KEY = [
     'presence',
 ]
@@ -93,23 +97,23 @@ export function usePresence() {
         }
 
         connection.on(
-            'OnlineUsersSnapshot',
+            SignalREvents.OnlineUsersSnapshot,
             handleSnapshot,
         )
 
         connection.on(
-            'UserPresenceChanged',
+            SignalREvents.UserPresenceChanged,
             handlePresenceChanged,
         )
 
         return () => {
             connection.off(
-                'OnlineUsersSnapshot',
+                SignalREvents.OnlineUsersSnapshot,
                 handleSnapshot,
             )
 
             connection.off(
-                'UserPresenceChanged',
+                SignalREvents.UserPresenceChanged,
                 handlePresenceChanged,
             )
         }
