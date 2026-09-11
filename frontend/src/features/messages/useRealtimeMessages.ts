@@ -19,6 +19,10 @@ import type {
     PagedResult,
 } from '../../types/pagedResultType'
 
+import {
+    SignalREvents,
+} from '../../types/signalREvents'
+
 export function useRealtimeMessages(
     channelId: string | null,
 ) {
@@ -168,33 +172,33 @@ export function useRealtimeMessages(
         }
 
         connection.on(
-            'MessageCreated',
+            SignalREvents.MessageCreated,
             handleMessageCreated,
         )
 
         connection.on(
-            'MessageUpdated',
+            SignalREvents.MessageUpdated,
             handleMessageUpdated,
         )
 
         connection.on(
-            'MessageDeleted',
+            SignalREvents.MessageDeleted,
             handleMessageDeleted,
         )
 
         return () => {
             connection.off(
-                'MessageCreated',
+                SignalREvents.MessageCreated,
                 handleMessageCreated,
             )
 
             connection.off(
-                'MessageUpdated',
+                SignalREvents.MessageUpdated,
                 handleMessageUpdated,
             )
 
             connection.off(
-                'MessageDeleted',
+                SignalREvents.MessageDeleted,
                 handleMessageDeleted,
             )
         }
