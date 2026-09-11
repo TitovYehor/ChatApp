@@ -42,6 +42,7 @@ function ChatPage() {
 
     const workspace = useWorkspaceController(
         selectedWorkspaceId,
+        clearSelectedWorkspace,
     )
 
     const channel = useChannelController(
