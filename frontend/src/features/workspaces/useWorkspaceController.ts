@@ -16,8 +16,12 @@ import {
 
 export function useWorkspaceController(
     selectedWorkspaceId: string | null,
+    onWorkspaceDeleted: (workspaceId: string) => void,
 ) {
-    useRealtimeWorkspaces()
+    useRealtimeWorkspaces(
+        selectedWorkspaceId,
+        onWorkspaceDeleted,
+    )
 
     const {
         workspaces,
