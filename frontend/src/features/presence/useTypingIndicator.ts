@@ -13,6 +13,10 @@ import type {
     UserTypingResponse,
 } from '../../types/presenceTypes'
 
+import {
+    SignalREvents
+} from '../../types/signalREvents'
+
 export function useTypingIndicator(
         channelId: string | null,
         currentUserId: string | null,
@@ -136,13 +140,13 @@ export function useTypingIndicator(
         }
 
         connection.on(
-            'UserTyping',
+            SignalREvents.UserTyping,
             handleUserTyping,
         )
 
         return () => {
             connection.off(
-                'UserTyping',
+                SignalREvents.UserTyping,
                 handleUserTyping,
             )
 
