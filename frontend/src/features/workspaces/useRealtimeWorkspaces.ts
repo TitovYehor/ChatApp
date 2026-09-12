@@ -7,6 +7,10 @@ import type {
     WorkspaceDeletedResponse,
 } from '../../types/workspaceTypes'
 
+import {
+    SignalREvents
+} from '../../types/signalREvents'
+
 export function useRealtimeWorkspaces(
     selectedWorkspaceId: string | null,
     onWorkspaceDeleted: (workspaceId: string) => void,
@@ -96,23 +100,23 @@ export function useRealtimeWorkspaces(
         }
 
         connection.on(
-            'WorkspaceUpdated',
+            SignalREvents.WorkspaceUpdated,
             handleWorkspaceUpdated,
         )
 
         connection.on(
-            'WorkspaceDeleted',
+            SignalREvents.WorkspaceDeleted,
             handleWorkspaceDeleted,
         )
 
         return () => {
             connection.off(
-                'WorkspaceUpdated',
+                SignalREvents.WorkspaceUpdated,
                 handleWorkspaceUpdated,
             )
 
             connection.off(
-                'WorkspaceDeleted',
+                SignalREvents.WorkspaceDeleted,
                 handleWorkspaceDeleted,
             )
         }
