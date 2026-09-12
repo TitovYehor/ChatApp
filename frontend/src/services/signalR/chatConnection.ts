@@ -8,6 +8,10 @@ import {
 import { SIGNALR_HUB_URL } from '../../api/config'
 import { getAccessToken } from '../../lib/authStorage'
 
+import {
+    SignalRMethods
+} from '../../types/signalRMethods'
+
 let connection: HubConnection | null = null
 
 let startPromise: Promise<void> | null = null
@@ -159,7 +163,7 @@ export async function joinChannel(
     }
 
     await chatConnection.invoke(
-        'JoinChannel',
+        SignalRMethods.JoinChannel,
         {
             channelId,
         },
@@ -178,7 +182,7 @@ export async function leaveChannel(
     }
 
     await chatConnection.invoke(
-        'LeaveChannel',
+        SignalRMethods.LeaveChannel,
         {
             channelId,
         },
