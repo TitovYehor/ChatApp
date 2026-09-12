@@ -25,4 +25,7 @@ public static class SignalREvents
 
     public const string WorkspaceUpdated = 
         nameof(WorkspaceUpdated);
+
+    public const string WorkspaceMemberAdded =
+        nameof(WorkspaceMemberAdded);
 }
