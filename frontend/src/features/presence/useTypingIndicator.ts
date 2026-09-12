@@ -17,6 +17,10 @@ import {
     SignalREvents
 } from '../../types/signalREvents'
 
+import {
+    SignalRMethods
+} from '../../types/signalRMethods'
+
 export function useTypingIndicator(
         channelId: string | null,
         currentUserId: string | null,
@@ -174,7 +178,7 @@ export function useTypingIndicator(
             }
 
             await connection.invoke(
-                'TypingStarted',
+                SignalRMethods.TypingStarted,
                 {
                     channelId,
                 },
@@ -193,7 +197,7 @@ export function useTypingIndicator(
             }
 
             await connection.invoke(
-                'TypingStopped',
+                SignalRMethods.TypingStopped,
                 {
                     channelId,
                 },
