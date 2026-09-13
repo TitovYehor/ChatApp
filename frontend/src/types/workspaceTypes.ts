@@ -51,4 +51,13 @@ export interface WorkspaceDeletedResponse {
     workspaceId: string
 }
 
+export interface WorkspaceMemberAddedResponse {
+    workspaceId: string
+    name: string
+    description: string
+    currentUserRole: WorkspaceRole
+    createdAt: string
+    addedByUsername: string
+}
+
 export type WorkspaceRole = 1 | 2 | 3
