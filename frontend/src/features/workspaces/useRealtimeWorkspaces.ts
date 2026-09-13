@@ -5,6 +5,7 @@ import type {
     WorkspaceResponse,
     WorkspaceUpdatedResponse,
     WorkspaceDeletedResponse,
+    WorkspaceMemberAddedResponse,
 } from '../../types/workspaceTypes'
 
 import {
@@ -99,6 +100,49 @@ export function useRealtimeWorkspaces(
             }
         }
 
+        const handleWorkspaceMemberAdded = (
+            response: WorkspaceMemberAddedResponse,
+        ) => {
+            queryClient.setQueryData<WorkspaceResponse[]>(
+                ['workspaces'],
+                (current) => {
+                    if (!current) {
+                        return [
+                            {
+                                id: response.workspaceId,
+                                name: response.name,
+                                description: response.description,
+                                currentUserRole:
+                                    response.currentUserRole,
+                                createdAt: response.createdAt,
+                            },
+                        ]
+                    }
+
+                    const alreadyExists = current.some(
+                        (workspace) =>
+                            workspace.id === response.workspaceId,
+                    )
+
+                    if (alreadyExists) {
+                        return current
+                    }
+
+                    return [
+                        ...current,
+                        {
+                            id: response.workspaceId,
+                            name: response.name,
+                            description: response.description,
+                            currentUserRole:
+                                response.currentUserRole,
+                            createdAt: response.createdAt,
+                        },
+                    ]
+                },
+            )
+        }
+
         connection.on(
             SignalREvents.WorkspaceUpdated,
             handleWorkspaceUpdated,
@@ -107,6 +151,11 @@ export function useRealtimeWorkspaces(
         connection.on(
             SignalREvents.WorkspaceDeleted,
             handleWorkspaceDeleted,
+        )
+
+        connection.on(
+            SignalREvents.WorkspaceMemberAdded,
+            handleWorkspaceMemberAdded,
         )
 
         return () => {
@@ -118,6 +167,11 @@ export function useRealtimeWorkspaces(
             connection.off(
                 SignalREvents.WorkspaceDeleted,
                 handleWorkspaceDeleted,
+            )
+
+            connection.off(
+                SignalREvents.WorkspaceMemberAdded,
+                handleWorkspaceMemberAdded,
             )
         }
     }, [
