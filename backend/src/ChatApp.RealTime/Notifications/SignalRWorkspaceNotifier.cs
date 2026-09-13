@@ -40,4 +40,15 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 SignalREvents.WorkspaceUpdated,
                 response);
     }
+
+    public async Task WorkspaceMemberAddedAsync(
+        Guid userId,
+        WorkspaceMemberAddedResponseDto response)
+    {
+        await _hubContext.Clients
+            .User(userId.ToString())
+            .SendAsync(
+                SignalREvents.WorkspaceMemberAdded,
+                response);
+    }
 }

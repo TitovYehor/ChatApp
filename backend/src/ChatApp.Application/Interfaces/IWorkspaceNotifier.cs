@@ -11,4 +11,8 @@ public interface IWorkspaceNotifier
     Task WorkspaceUpdatedAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceUpdatedResponseDto response);
+
+    Task WorkspaceMemberAddedAsync(
+        Guid userId,
+        WorkspaceMemberAddedResponseDto response);
 }
