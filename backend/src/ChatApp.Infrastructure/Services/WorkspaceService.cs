@@ -178,12 +178,13 @@ public class WorkspaceService : IWorkspaceService
     }
 
     public async Task AddMemberAsync(
-        Guid workspaceId,
-        Guid currentUserId,
-        AddWorkspaceMemberRequestDto request)
+    Guid workspaceId,
+    Guid currentUserId,
+    AddWorkspaceMemberRequestDto request)
     {
         var workspace = await _dbContext.Workspaces
             .Include(x => x.Members)
+                .ThenInclude(x => x.User)
             .FirstOrDefaultAsync(x =>
                 x.Id == workspaceId);
 
@@ -197,9 +198,10 @@ public class WorkspaceService : IWorkspaceService
                 x.UserId == currentUserId);
 
         if (currentMembership == null)
-        { 
+        {
             throw new ForbiddenException("Inviting user are not a member of this workspace");
         }
+
         if (currentMembership.Role == WorkspaceRole.Member)
         {
             throw new ForbiddenException("Users with 'Member' role are not allowed to invite");
@@ -214,20 +216,34 @@ public class WorkspaceService : IWorkspaceService
         {
             throw new NotFoundException("Invited user not found");
         }
+
         if (workspace.Members.Any(x => x.UserId == user.Id))
         {
             throw new ConflictException("User is already a workspace member");
         }
 
-        _dbContext.WorkspaceMembers.Add(
-            new WorkspaceMember
-            {
-                WorkspaceId = workspace.Id,
-                UserId = user.Id,
-                Role = WorkspaceRole.Member
-            });
+        var newMember = new WorkspaceMember
+        {
+            WorkspaceId = workspace.Id,
+            UserId = user.Id,
+            Role = WorkspaceRole.Member
+        };
+
+        _dbContext.WorkspaceMembers.Add(newMember);
 
         await _dbContext.SaveChangesAsync();
+
+        await _workspaceNotifier.WorkspaceMemberAddedAsync(
+            user.Id,
+            new WorkspaceMemberAddedResponseDto
+            {
+                WorkspaceId = workspace.Id,
+                Name = workspace.Name,
+                Description = workspace.Description,
+                CurrentUserRole = WorkspaceRoleDto.Member,
+                CreatedAt = workspace.CreatedAt,
+                AddedByUsername = currentMembership.User.Username
+            });
     }
 
     public async Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> GetMembersAsync(
