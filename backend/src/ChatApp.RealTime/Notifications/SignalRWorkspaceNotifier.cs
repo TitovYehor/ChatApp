@@ -51,4 +51,15 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 SignalREvents.WorkspaceMemberAdded,
                 response);
     }
+
+    public async Task WorkspaceMemberRemovedAsync(
+        Guid userId,
+        WorkspaceMemberRemovedResponseDto response)
+    {
+        await _hubContext.Clients
+            .User(userId.ToString())
+            .SendAsync(
+                SignalREvents.WorkspaceMemberRemoved,
+                response);
+    }
 }

@@ -15,4 +15,8 @@ public interface IWorkspaceNotifier
     Task WorkspaceMemberAddedAsync(
         Guid userId,
         WorkspaceMemberAddedResponseDto response);
+
+    Task WorkspaceMemberRemovedAsync(
+        Guid userId,
+        WorkspaceMemberRemovedResponseDto response);
 }
