@@ -60,4 +60,9 @@ export interface WorkspaceMemberAddedResponse {
     addedByUsername: string
 }
 
+export interface WorkspaceMemberRemovedResponse {
+    workspaceId: string
+    workspaceName: string
+}
+
 export type WorkspaceRole = 1 | 2 | 3
