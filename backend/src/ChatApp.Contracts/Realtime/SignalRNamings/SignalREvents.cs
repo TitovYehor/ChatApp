@@ -20,6 +20,7 @@ public static class SignalREvents
     public const string UserTyping =
         nameof(UserTyping);
 
+
     public const string WorkspaceDeleted =
         nameof(WorkspaceDeleted);
 
@@ -31,4 +32,8 @@ public static class SignalREvents
 
     public const string WorkspaceMemberRemoved =
         nameof(WorkspaceMemberRemoved);
+
+
+    public const string ChannelCreated =
+        nameof(ChannelCreated);
 }
