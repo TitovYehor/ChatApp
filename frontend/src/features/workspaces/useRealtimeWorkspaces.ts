@@ -6,6 +6,7 @@ import type {
     WorkspaceUpdatedResponse,
     WorkspaceDeletedResponse,
     WorkspaceMemberAddedResponse,
+    WorkspaceMemberRemovedResponse,
 } from '../../types/workspaceTypes'
 
 import {
@@ -14,7 +15,7 @@ import {
 
 export function useRealtimeWorkspaces(
     selectedWorkspaceId: string | null,
-    onWorkspaceDeleted: (workspaceId: string) => void,
+    onWorkspaceAccessLost: (workspaceId: string) => void,
 ) {
     const queryClient = useQueryClient()
     const connection = getChatConnection()
@@ -92,11 +93,8 @@ export function useRealtimeWorkspaces(
                 ],
             })
 
-            if (
-                selectedWorkspaceId ===
-                response.workspaceId
-            ) {
-                onWorkspaceDeleted(response.workspaceId)
+            if (selectedWorkspaceId === response.workspaceId) {
+                onWorkspaceAccessLost(response.workspaceId)
             }
         }
 
@@ -143,6 +141,37 @@ export function useRealtimeWorkspaces(
             )
         }
 
+        const handleWorkspaceMemberRemoved = (
+            response: WorkspaceMemberRemovedResponse,
+        ) => {
+            queryClient.setQueryData<WorkspaceResponse[]>(
+                ['workspaces'],
+                (current) => {
+                    if (!current) return current
+
+                    return current.filter(
+                        (workspace) =>
+                            workspace.id !== response.workspaceId,
+                    )
+                },
+            )
+
+            queryClient.removeQueries({
+                queryKey: ['workspace', response.workspaceId],
+            })
+
+            queryClient.removeQueries({
+                queryKey: [
+                    'workspace-members',
+                    response.workspaceId,
+                ],
+            })
+
+            if (selectedWorkspaceId === response.workspaceId) {
+                onWorkspaceAccessLost(response.workspaceId)
+            }
+        }
+
         connection.on(
             SignalREvents.WorkspaceUpdated,
             handleWorkspaceUpdated,
@@ -156,6 +185,11 @@ export function useRealtimeWorkspaces(
         connection.on(
             SignalREvents.WorkspaceMemberAdded,
             handleWorkspaceMemberAdded,
+        )
+
+        connection.on(
+            SignalREvents.WorkspaceMemberRemoved,
+            handleWorkspaceMemberRemoved,
         )
 
         return () => {
@@ -173,10 +207,15 @@ export function useRealtimeWorkspaces(
                 SignalREvents.WorkspaceMemberAdded,
                 handleWorkspaceMemberAdded,
             )
+
+            connection.off(
+                SignalREvents.WorkspaceMemberRemoved,
+                handleWorkspaceMemberRemoved,
+            )
         }
     }, [
         connection,
-        onWorkspaceDeleted,
+        onWorkspaceAccessLost,
         queryClient,
         selectedWorkspaceId,
     ])
