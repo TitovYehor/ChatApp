@@ -178,9 +178,9 @@ public class WorkspaceService : IWorkspaceService
     }
 
     public async Task AddMemberAsync(
-    Guid workspaceId,
-    Guid currentUserId,
-    AddWorkspaceMemberRequestDto request)
+        Guid workspaceId,
+        Guid currentUserId,
+        AddWorkspaceMemberRequestDto request)
     {
         var workspace = await _dbContext.Workspaces
             .Include(x => x.Members)
@@ -402,6 +402,14 @@ public class WorkspaceService : IWorkspaceService
         _dbContext.WorkspaceMembers.Remove(membership);
 
         await _dbContext.SaveChangesAsync();
+
+        await _workspaceNotifier.WorkspaceMemberRemovedAsync(
+            user.Id,
+            new WorkspaceMemberRemovedResponseDto
+            {
+                WorkspaceId = workspace.Id,
+                WorkspaceName = workspace.Name
+            });
     }
 
     public async Task ChangeMemberRoleAsync(
