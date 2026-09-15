@@ -15,13 +15,17 @@ public class ChannelService : IChannelService
 {
     private readonly AppDbContext _dbContext;
 
+    private readonly IChannelNotifier _channelNotifier;
+
     private readonly IWorkspaceAuthorizationService _workspaceAuthorization;
 
     public ChannelService(
         AppDbContext dbContext,
+        IChannelNotifier channelNotifier,
         IWorkspaceAuthorizationService workspaceAuthorization)
     {
         this._dbContext = dbContext;
+        this._channelNotifier = channelNotifier;
         this._workspaceAuthorization = workspaceAuthorization;
     }
 
@@ -62,7 +66,18 @@ public class ChannelService : IChannelService
             throw;
         }
 
-        return channel.ToDto();
+        var memberIds = await _dbContext.WorkspaceMembers
+            .Where(x => x.WorkspaceId == workspaceId)
+            .Select(x => x.UserId)
+            .ToListAsync();
+
+        var response = channel.ToDto();
+
+        await _channelNotifier.ChannelCreatedAsync(
+            memberIds,
+            response);
+
+        return response;
     }
 
     public async Task<ChannelResponseDto> GetByIdAsync(
