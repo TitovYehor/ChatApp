@@ -2,9 +2,17 @@ import {
     useChannels,
 } from './useChannels'
 
+import {
+    useRealtimeChannels,
+} from './useRealtimeChannels'
+
 export function useChannelController(
     workspaceId: string | null,
 ) {
+    useRealtimeChannels(
+        workspaceId,
+    )
+
     const {
         channels,
         isLoading: isLoadingChannels,
