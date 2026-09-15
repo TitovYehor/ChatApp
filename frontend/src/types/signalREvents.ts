@@ -11,4 +11,6 @@ export const SignalREvents = {
     WorkspaceUpdated: 'WorkspaceUpdated',
     WorkspaceMemberAdded: 'WorkspaceMemberAdded',
     WorkspaceMemberRemoved: 'WorkspaceMemberRemoved',
+
+    ChannelCreated: 'ChannelCreated',
 } as const
