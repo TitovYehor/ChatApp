@@ -1,6 +1,6 @@
 using ChatApp.Application.Interfaces;
-using ChatApp.Contracts.Realtime.SignalRNamings;
 using ChatApp.Contracts.Channels.Responses;
+using ChatApp.Contracts.Realtime.SignalRNamings;
 using ChatApp.RealTime.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
@@ -24,6 +24,17 @@ public sealed class SignalRChannelNotifier : IChannelNotifier
             .Users(memberIds.Select(x => x.ToString()))
             .SendAsync(
                 SignalREvents.ChannelCreated,
+                response);
+    }
+
+    public async Task ChannelUpdatedAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        ChannelResponseDto response)
+    {
+        await _hubContext.Clients
+            .Users(memberIds.Select(x => x.ToString()))
+            .SendAsync(
+                SignalREvents.ChannelUpdated,
                 response);
     }
 }

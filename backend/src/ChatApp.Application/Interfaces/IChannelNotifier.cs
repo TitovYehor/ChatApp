@@ -7,4 +7,8 @@ public interface IChannelNotifier
     Task ChannelCreatedAsync(
         IReadOnlyCollection<Guid> memberIds,
         ChannelResponseDto response);
+
+    Task ChannelUpdatedAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        ChannelResponseDto response);
 }
