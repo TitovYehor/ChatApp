@@ -21,11 +21,9 @@ import type {
 export function useRealtimeChannels(
     workspaceId: string | null,
 ) {
-    const queryClient =
-        useQueryClient()
+    const queryClient = useQueryClient()
 
-    const connection =
-        getChatConnection()
+    const connection = getChatConnection()
 
     useEffect(() => {
         if (!workspaceId) return
@@ -77,15 +75,62 @@ export function useRealtimeChannels(
             )
         }
 
+        const handleChannelUpdated = (
+            channel: ChannelResponse,
+        ) => {
+            if (
+                channel.workspaceId !==
+                workspaceId
+            ) {
+                return
+            }
+
+            queryClient.setQueryData<
+                ChannelResponse[]
+            >(
+                [
+                    'channels',
+                    workspaceId,
+                ],
+                (
+                    current,
+                ) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.map(
+                        (
+                            currentChannel,
+                        ) =>
+                            currentChannel.id ===
+                                channel.id
+                                ? channel
+                                : currentChannel,
+                    )
+                },
+            )
+        }
+
         connection.on(
             SignalREvents.ChannelCreated,
             handleChannelCreated,
+        )
+
+        connection.on(
+            SignalREvents.ChannelUpdated,
+            handleChannelUpdated,
         )
 
         return () => {
             connection.off(
                 SignalREvents.ChannelCreated,
                 handleChannelCreated,
+            )
+
+            connection.off(
+                SignalREvents.ChannelUpdated,
+                handleChannelUpdated,
             )
         }
     }, [
