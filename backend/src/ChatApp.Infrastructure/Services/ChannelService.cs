@@ -151,14 +151,24 @@ public class ChannelService : IChannelService
             if (postgresException.ConstraintName ==
                 DatabaseConstraintNames.UniqueChannelNamePerWorkspace)
             {
-                throw new ConflictException(
-                    "Channel with this name already exists");
+                throw new ConflictException("Channel with this name already exists");
             }
 
             throw;
         }
 
-        return channel.ToDto();
+        var memberIds = await _dbContext.WorkspaceMembers
+            .Where(x => x.WorkspaceId == channel.WorkspaceId)
+            .Select(x => x.UserId)
+            .ToListAsync();
+
+        var response = channel.ToDto();
+
+        await _channelNotifier.ChannelUpdatedAsync(
+            memberIds,
+            response);
+
+        return response;
     }
 
     public async Task DeleteAsync(
