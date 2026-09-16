@@ -39,4 +39,7 @@ public static class SignalREvents
 
     public const string ChannelUpdated =
         nameof(ChannelUpdated);
+
+    public const string ChannelDeleted =
+        nameof(ChannelDeleted);
 }
