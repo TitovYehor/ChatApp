@@ -47,6 +47,8 @@ function ChatPage() {
 
     const channel = useChannelController(
         selectedWorkspaceId,
+        selectedChannelId,
+        clearSelectedChannel,
     )
 
     const chat = useChatController(
