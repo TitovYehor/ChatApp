@@ -11,4 +11,8 @@ public interface IChannelNotifier
     Task ChannelUpdatedAsync(
         IReadOnlyCollection<Guid> memberIds,
         ChannelResponseDto response);
+
+    Task ChannelDeletedAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        ChannelDeletedResponseDto response);
 }

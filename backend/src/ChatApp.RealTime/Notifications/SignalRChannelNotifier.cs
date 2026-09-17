@@ -37,4 +37,15 @@ public sealed class SignalRChannelNotifier : IChannelNotifier
                 SignalREvents.ChannelUpdated,
                 response);
     }
+
+    public async Task ChannelDeletedAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        ChannelDeletedResponseDto response)
+    {
+        await _hubContext.Clients
+            .Users(memberIds.Select(x => x.ToString()))
+            .SendAsync(
+                SignalREvents.ChannelDeleted,
+                response);
+    }
 }
