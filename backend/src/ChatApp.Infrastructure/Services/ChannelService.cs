@@ -180,8 +180,23 @@ public class ChannelService : IChannelService
                 channelId,
                 userId);
 
+        var memberIds = await _dbContext.WorkspaceMembers
+            .Where(x => x.WorkspaceId == channel.WorkspaceId)
+            .Select(x => x.UserId)
+            .ToListAsync();
+
+        var response = new ChannelDeletedResponseDto
+        {
+            ChannelId = channel.Id,
+            WorkspaceId = channel.WorkspaceId,
+        };
+
         _dbContext.Channels.Remove(channel);
 
         await _dbContext.SaveChangesAsync();
+
+        await _channelNotifier.ChannelDeletedAsync(
+            memberIds,
+            response);
     }
 }
