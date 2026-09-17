@@ -13,3 +13,8 @@ export interface ChannelResponse {
     type: number
     createdAt: string
 }
+
+export interface ChannelDeletedResponse {
+    channelId: string
+    workspaceId: string
+}
