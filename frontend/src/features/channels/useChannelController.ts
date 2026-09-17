@@ -8,9 +8,15 @@ import {
 
 export function useChannelController(
     workspaceId: string | null,
+    selectedChannelId: string | null,
+    onChannelDeleted: (
+        channelId: string,
+    ) => void,
 ) {
     useRealtimeChannels(
         workspaceId,
+        selectedChannelId,
+        onChannelDeleted,
     )
 
     const {
