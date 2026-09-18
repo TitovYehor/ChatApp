@@ -19,4 +19,8 @@ public interface IWorkspaceNotifier
     Task WorkspaceMemberRemovedAsync(
         Guid userId,
         WorkspaceMemberRemovedResponseDto response);
+
+    Task WorkspaceMemberRoleChangedAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        WorkspaceMemberRoleChangedResponseDto response);
 }
