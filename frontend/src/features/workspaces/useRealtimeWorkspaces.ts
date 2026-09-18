@@ -7,6 +7,8 @@ import type {
     WorkspaceDeletedResponse,
     WorkspaceMemberAddedResponse,
     WorkspaceMemberRemovedResponse,
+    WorkspaceMemberRoleChangedResponse,
+    WorkspaceMemberResponse,
 } from '../../types/workspaceTypes'
 
 import {
@@ -14,6 +16,7 @@ import {
 } from '../../types/signalREvents'
 
 export function useRealtimeWorkspaces(
+    currentUserId: string | null,
     selectedWorkspaceId: string | null,
     onWorkspaceAccessLost: (workspaceId: string) => void,
 ) {
@@ -172,6 +175,95 @@ export function useRealtimeWorkspaces(
             }
         }
 
+        const handleWorkspaceMemberRoleChanged = (
+            response: WorkspaceMemberRoleChangedResponse,
+        ) => {
+            queryClient.setQueryData<
+                WorkspaceMemberResponse[]
+            >(
+                [
+                    'workspace-members',
+                    response.workspaceId,
+                ],
+                (
+                    current,
+                ) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.map(
+                        (
+                            member,
+                        ) =>
+                            member.userId ===
+                                response.userId
+                                ? {
+                                    ...member,
+                                    role:
+                                        response.role,
+                                }
+                                : member,
+                    )
+                },
+            )
+
+            if (response.userId !== currentUserId) {
+                return
+            }
+
+            queryClient.setQueryData<
+                WorkspaceResponse[]
+            >(
+                ['workspaces'],
+                (
+                    current,
+                ) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.map(
+                        (
+                            workspace,
+                        ) =>
+                            workspace.id ===
+                                response.workspaceId
+                                ? {
+                                    ...workspace,
+                                    currentUserRole:
+                                        response.role,
+                                }
+                                : workspace,
+                    )
+                },
+            )
+
+            const currentWorkspace =
+                queryClient.getQueryData<WorkspaceResponse>(
+                    [
+                        'workspace',
+                        response.workspaceId,
+                    ],
+                )
+
+            if (!currentWorkspace) {
+                return
+            }
+
+            queryClient.setQueryData<WorkspaceResponse>(
+                [
+                    'workspace',
+                    response.workspaceId,
+                ],
+                {
+                    ...currentWorkspace,
+                    currentUserRole:
+                        response.role,
+                },
+            )
+        }
+
         connection.on(
             SignalREvents.WorkspaceUpdated,
             handleWorkspaceUpdated,
@@ -190,6 +282,11 @@ export function useRealtimeWorkspaces(
         connection.on(
             SignalREvents.WorkspaceMemberRemoved,
             handleWorkspaceMemberRemoved,
+        )
+
+        connection.on(
+            SignalREvents.WorkspaceMemberRoleChanged,
+            handleWorkspaceMemberRoleChanged,
         )
 
         return () => {
@@ -212,9 +309,15 @@ export function useRealtimeWorkspaces(
                 SignalREvents.WorkspaceMemberRemoved,
                 handleWorkspaceMemberRemoved,
             )
+
+            connection.off(
+                SignalREvents.WorkspaceMemberRoleChanged,
+                handleWorkspaceMemberRoleChanged,
+            )
         }
     }, [
         connection,
+        currentUserId,
         onWorkspaceAccessLost,
         queryClient,
         selectedWorkspaceId,
