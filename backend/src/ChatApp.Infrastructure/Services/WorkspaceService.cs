@@ -428,7 +428,8 @@ public class WorkspaceService : IWorkspaceService
         }
 
         var current = workspace.Members
-            .FirstOrDefault(x => x.UserId == currentUserId);
+            .FirstOrDefault(x =>
+                x.UserId == currentUserId);
 
         if (current == null)
         {
@@ -460,9 +461,32 @@ public class WorkspaceService : IWorkspaceService
             throw new ConflictException("Cannot modify workspace owner");
         }
 
-        member.Role = request.Role.ToDomain();
+        var newRole = request.Role.ToDomain();
+
+        if (member.Role == newRole)
+        {
+            return;
+        }
+
+        member.Role = newRole;
 
         await _dbContext.SaveChangesAsync();
+
+        var memberIds = workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
+        var response = new WorkspaceMemberRoleChangedResponseDto
+        {
+            WorkspaceId = workspace.Id,
+            UserId = member.UserId,
+            Role = request.Role,
+        };
+
+        await _workspaceNotifier
+            .WorkspaceMemberRoleChangedAsync(
+                memberIds,
+                response);
     }
 
     public async Task TransferOwnershipAsync(
