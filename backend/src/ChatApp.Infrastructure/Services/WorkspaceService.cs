@@ -505,7 +505,8 @@ public class WorkspaceService : IWorkspaceService
         }
 
         var owner = workspace.Members
-            .FirstOrDefault(x => x.UserId == currentUserId);
+            .FirstOrDefault(x =>
+                x.UserId == currentUserId);
 
         if (owner == null)
         {
@@ -533,9 +534,24 @@ public class WorkspaceService : IWorkspaceService
         }
 
         owner.Role = WorkspaceRole.Admin;
-
         newOwner.Role = WorkspaceRole.Owner;
 
         await _dbContext.SaveChangesAsync();
+
+        var memberIds = workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
+        var response = new WorkspaceOwnershipTransferredResponseDto
+        {
+            WorkspaceId = workspace.Id,
+            PreviousOwnerUserId = owner.UserId,
+            NewOwnerUserId = newOwner.UserId,
+        };
+
+        await _workspaceNotifier
+            .WorkspaceOwnershipTransferredAsync(
+                memberIds,
+                response);
     }
 }
