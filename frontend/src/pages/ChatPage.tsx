@@ -41,6 +41,7 @@ function ChatPage() {
     } = useChatNavigation()
 
     const workspace = useWorkspaceController(
+        user?.id ?? null,
         selectedWorkspaceId,
         clearSelectedWorkspace,
     )
