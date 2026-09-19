@@ -36,6 +36,9 @@ public static class SignalREvents
     public const string WorkspaceMemberRoleChanged =
         nameof(WorkspaceMemberRoleChanged);
 
+    public const string WorkspaceOwnershipTransferred =
+        nameof(WorkspaceOwnershipTransferred);
+
 
     public const string ChannelCreated =
         nameof(ChannelCreated);
