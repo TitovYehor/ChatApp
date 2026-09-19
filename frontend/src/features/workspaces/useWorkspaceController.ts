@@ -15,10 +15,12 @@ import {
 } from './useRealtimeWorkspaces'
 
 export function useWorkspaceController(
+    currentUserId: string | null,
     selectedWorkspaceId: string | null,
     onWorkspaceAccessLost: (workspaceId: string) => void,
 ) {
     useRealtimeWorkspaces(
+        currentUserId,
         selectedWorkspaceId,
         onWorkspaceAccessLost,
     )
