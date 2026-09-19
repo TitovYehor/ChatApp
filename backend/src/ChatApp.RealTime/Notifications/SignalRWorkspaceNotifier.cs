@@ -73,4 +73,15 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 SignalREvents.WorkspaceMemberRoleChanged,
                 response);
     }
+
+    public async Task WorkspaceOwnershipTransferredAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        WorkspaceOwnershipTransferredResponseDto response)
+    {
+        await _hubContext.Clients
+            .Users(memberIds.Select(x => x.ToString()))
+            .SendAsync(
+                SignalREvents.WorkspaceOwnershipTransferred,
+                response);
+    }
 }

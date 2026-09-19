@@ -23,4 +23,8 @@ public interface IWorkspaceNotifier
     Task WorkspaceMemberRoleChangedAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberRoleChangedResponseDto response);
+
+    Task WorkspaceOwnershipTransferredAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        WorkspaceOwnershipTransferredResponseDto response);
 }
