@@ -13,11 +13,11 @@ public interface IWorkspaceNotifier
         WorkspaceUpdatedResponseDto response);
 
     Task WorkspaceMemberAddedAsync(
-        Guid userId,
+        IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberAddedResponseDto response);
 
     Task WorkspaceMemberRemovedAsync(
-        Guid userId,
+        IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberRemovedResponseDto response);
 
     Task WorkspaceMemberRoleChangedAsync(

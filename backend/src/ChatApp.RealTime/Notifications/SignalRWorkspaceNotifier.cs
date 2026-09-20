@@ -42,22 +42,22 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
     }
 
     public async Task WorkspaceMemberAddedAsync(
-        Guid userId,
+        IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberAddedResponseDto response)
     {
         await _hubContext.Clients
-            .User(userId.ToString())
+            .Users(memberIds.Select(x => x.ToString()))
             .SendAsync(
                 SignalREvents.WorkspaceMemberAdded,
                 response);
     }
 
     public async Task WorkspaceMemberRemovedAsync(
-        Guid userId,
+        IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberRemovedResponseDto response)
     {
         await _hubContext.Clients
-            .User(userId.ToString())
+            .Users(memberIds.Select(x => x.ToString()))
             .SendAsync(
                 SignalREvents.WorkspaceMemberRemoved,
                 response);
