@@ -55,13 +55,19 @@ export interface WorkspaceMemberAddedResponse {
     workspaceId: string
     name: string
     description: string
-    currentUserRole: WorkspaceRole
+    userId: string
+    username: string
+    email: string
+    role: WorkspaceRole
     createdAt: string
+    joinedAt: string
     addedByUsername: string
 }
 
 export interface WorkspaceMemberRemovedResponse {
     workspaceId: string
+    userId: string
+    username: string
     workspaceName: string
 }
 
