@@ -71,4 +71,14 @@ export interface WorkspaceMemberRoleChangedResponse {
     role: WorkspaceRole
 }
 
+export interface WorkspaceOwnershipTransferredResponse {
+    workspaceId: string
+
+    previousOwnerUserId: string
+    previousOwnerUsername: string
+
+    newOwnerUserId: string
+    newOwnerUsername: string
+}
+
 export type WorkspaceRole = 1 | 2 | 3
