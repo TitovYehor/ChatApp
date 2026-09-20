@@ -9,6 +9,7 @@ import type {
     WorkspaceMemberRemovedResponse,
     WorkspaceMemberRoleChangedResponse,
     WorkspaceMemberResponse,
+    WorkspaceOwnershipTransferredResponse,
 } from '../../types/workspaceTypes'
 
 import {
@@ -264,6 +265,106 @@ export function useRealtimeWorkspaces(
             )
         }
 
+        const handleWorkspaceOwnershipTransferred = (
+            response: WorkspaceOwnershipTransferredResponse,
+        ) => {
+            queryClient.setQueryData<WorkspaceMemberResponse[]>(
+                [
+                    'workspace-members',
+                    response.workspaceId,
+                ],
+                (current) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.map(
+                        (member) => {
+                            if (
+                                member.userId ===
+                                response.previousOwnerUserId
+                            ) {
+                                return {
+                                    ...member,
+                                    role: 2,
+                                }
+                            }
+
+                            if (
+                                member.userId ===
+                                response.newOwnerUserId
+                            ) {
+                                return {
+                                    ...member,
+                                    role: 1,
+                                }
+                            }
+
+                            return member
+                        },
+                    )
+                },
+            )
+
+            if (
+                currentUserId !==
+                response.previousOwnerUserId &&
+                currentUserId !==
+                response.newOwnerUserId
+            ) {
+                return
+            }
+
+            const currentUserRole =
+                currentUserId ===
+                    response.newOwnerUserId
+                    ? 1
+                    : 2
+
+            queryClient.setQueryData<WorkspaceResponse[]>(
+                ['workspaces'],
+                (current) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.map(
+                        (workspace) =>
+                            workspace.id ===
+                                response.workspaceId
+                                ? {
+                                    ...workspace,
+                                    currentUserRole,
+                                }
+                                : workspace,
+                    )
+                },
+            )
+
+            const currentWorkspace =
+                queryClient.getQueryData<WorkspaceResponse>(
+                    [
+                        'workspace',
+                        response.workspaceId,
+                    ],
+                )
+
+            if (!currentWorkspace) {
+                return
+            }
+
+            queryClient.setQueryData<WorkspaceResponse>(
+                [
+                    'workspace',
+                    response.workspaceId,
+                ],
+                {
+                    ...currentWorkspace,
+                    currentUserRole,
+                },
+            )
+        }
+
         connection.on(
             SignalREvents.WorkspaceUpdated,
             handleWorkspaceUpdated,
@@ -287,6 +388,11 @@ export function useRealtimeWorkspaces(
         connection.on(
             SignalREvents.WorkspaceMemberRoleChanged,
             handleWorkspaceMemberRoleChanged,
+        )
+
+        connection.on(
+            SignalREvents.WorkspaceOwnershipTransferred,
+            handleWorkspaceOwnershipTransferred,
         )
 
         return () => {
@@ -313,6 +419,11 @@ export function useRealtimeWorkspaces(
             connection.off(
                 SignalREvents.WorkspaceMemberRoleChanged,
                 handleWorkspaceMemberRoleChanged,
+            )
+
+            connection.off(
+                SignalREvents.WorkspaceOwnershipTransferred,
+                handleWorkspaceOwnershipTransferred,
             )
         }
     }, [
