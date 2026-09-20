@@ -233,15 +233,23 @@ public class WorkspaceService : IWorkspaceService
 
         await _dbContext.SaveChangesAsync();
 
+        var memberIds = workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
         await _workspaceNotifier.WorkspaceMemberAddedAsync(
-            user.Id,
+            memberIds,
             new WorkspaceMemberAddedResponseDto
             {
                 WorkspaceId = workspace.Id,
                 Name = workspace.Name,
                 Description = workspace.Description,
-                CurrentUserRole = WorkspaceRoleDto.Member,
+                UserId = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Role = WorkspaceRoleDto.Member,
                 CreatedAt = workspace.CreatedAt,
+                JoinedAt = newMember.JoinedAt,
                 AddedByUsername = currentMembership.User.Username
             });
     }
@@ -399,15 +407,21 @@ public class WorkspaceService : IWorkspaceService
             throw new ConflictException("Workspace owner cannot be removed");
         }
 
+        var memberIds = workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
         _dbContext.WorkspaceMembers.Remove(membership);
 
         await _dbContext.SaveChangesAsync();
 
         await _workspaceNotifier.WorkspaceMemberRemovedAsync(
-            user.Id,
+            memberIds,
             new WorkspaceMemberRemovedResponseDto
             {
                 WorkspaceId = workspace.Id,
+                UserId = user.Id,
+                Username = user.Username,
                 WorkspaceName = workspace.Name
             });
     }
