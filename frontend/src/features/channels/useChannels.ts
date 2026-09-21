@@ -69,6 +69,19 @@ export function useChannels(
                             ]
                         }
 
+                        const alreadyExists =
+                            current.some(
+                                (
+                                    item,
+                                ) =>
+                                    item.id ===
+                                    channel.id,
+                            )
+
+                        if (alreadyExists) {
+                            return current
+                        }
+
                         return [
                             ...current,
                             channel,
