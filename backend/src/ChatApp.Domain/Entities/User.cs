@@ -17,4 +17,7 @@ public class User
 
     public ICollection<Message> Messages { get; set; }
         = new List<Message>();
+
+    public ICollection<RefreshToken> RefreshTokens { get; set; }
+        = new List<RefreshToken>();
 }
