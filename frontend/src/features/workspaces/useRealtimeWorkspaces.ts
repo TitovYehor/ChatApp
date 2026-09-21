@@ -105,6 +105,43 @@ export function useRealtimeWorkspaces(
         const handleWorkspaceMemberAdded = (
             response: WorkspaceMemberAddedResponse,
         ) => {
+            queryClient.setQueryData<WorkspaceMemberResponse[]>(
+                [
+                    'workspace-members',
+                    response.workspaceId,
+                ],
+                (current) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    const alreadyExists = current.some(
+                        (member) =>
+                            member.userId ===
+                            response.userId,
+                    )
+
+                    if (alreadyExists) {
+                        return current
+                    }
+
+                    return [
+                        ...current,
+                        {
+                            userId: response.userId,
+                            username: response.username,
+                            email: response.email,
+                            role: response.role,
+                            joinedAt: response.joinedAt,
+                        },
+                    ]
+                },
+            )
+
+            if (response.userId !== currentUserId) {
+                return
+            }
+
             queryClient.setQueryData<WorkspaceResponse[]>(
                 ['workspaces'],
                 (current) => {
@@ -115,15 +152,17 @@ export function useRealtimeWorkspaces(
                                 name: response.name,
                                 description: response.description,
                                 currentUserRole:
-                                    response.currentUserRole,
-                                createdAt: response.createdAt,
+                                    response.role,
+                                createdAt:
+                                    response.createdAt,
                             },
                         ]
                     }
 
                     const alreadyExists = current.some(
                         (workspace) =>
-                            workspace.id === response.workspaceId,
+                            workspace.id ===
+                            response.workspaceId,
                     )
 
                     if (alreadyExists) {
@@ -137,8 +176,9 @@ export function useRealtimeWorkspaces(
                             name: response.name,
                             description: response.description,
                             currentUserRole:
-                                response.currentUserRole,
-                            createdAt: response.createdAt,
+                                response.role,
+                            createdAt:
+                                response.createdAt,
                         },
                     ]
                 },
@@ -148,20 +188,50 @@ export function useRealtimeWorkspaces(
         const handleWorkspaceMemberRemoved = (
             response: WorkspaceMemberRemovedResponse,
         ) => {
+            if (response.userId !== currentUserId) {
+                queryClient.setQueryData<
+                    WorkspaceMemberResponse[]
+                >(
+                    [
+                        'workspace-members',
+                        response.workspaceId,
+                    ],
+                    (current) => {
+                        if (!current) {
+                            return current
+                        }
+
+                        return current.filter(
+                            (member) =>
+                                member.userId !==
+                                response.userId,
+                        )
+                    },
+                )
+
+                return
+            }
+
             queryClient.setQueryData<WorkspaceResponse[]>(
                 ['workspaces'],
                 (current) => {
-                    if (!current) return current
+                    if (!current) {
+                        return current
+                    }
 
                     return current.filter(
                         (workspace) =>
-                            workspace.id !== response.workspaceId,
+                            workspace.id !==
+                            response.workspaceId,
                     )
                 },
             )
 
             queryClient.removeQueries({
-                queryKey: ['workspace', response.workspaceId],
+                queryKey: [
+                    'workspace',
+                    response.workspaceId,
+                ],
             })
 
             queryClient.removeQueries({
@@ -171,8 +241,13 @@ export function useRealtimeWorkspaces(
                 ],
             })
 
-            if (selectedWorkspaceId === response.workspaceId) {
-                onWorkspaceAccessLost(response.workspaceId)
+            if (
+                selectedWorkspaceId ===
+                response.workspaceId
+            ) {
+                onWorkspaceAccessLost(
+                    response.workspaceId,
+                )
             }
         }
 
