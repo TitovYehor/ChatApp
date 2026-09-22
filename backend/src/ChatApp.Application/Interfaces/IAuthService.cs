@@ -1,11 +1,15 @@
-﻿using ChatApp.Contracts.Authentication.Requests;
-using ChatApp.Contracts.Authentication.Responses;
+﻿using ChatApp.Application.Authentication;
+using ChatApp.Contracts.Authentication.Requests;
 
 namespace ChatApp.Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request);
+    Task<AuthResult> RegisterAsync(RegisterRequestDto request);
 
-    Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
+    Task<AuthResult> LoginAsync(LoginRequestDto request);
+
+    Task<AuthResult> RefreshAsync(string refreshToken);
+
+    Task LogoutAsync(string refreshToken);
 }
