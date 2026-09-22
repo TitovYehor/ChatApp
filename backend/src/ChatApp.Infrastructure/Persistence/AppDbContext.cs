@@ -25,6 +25,9 @@ public class AppDbContext : DbContext
     public DbSet<Message> Messages
         => Set<Message>();
 
+    public DbSet<RefreshToken> RefreshTokens
+        => Set<RefreshToken>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
