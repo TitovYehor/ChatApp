@@ -1,4 +1,5 @@
 import { apiRequest } from './client'
+
 import type {
     AuthResponse,
     LoginRequest,
@@ -13,6 +14,7 @@ export function register(
         {
             method: 'POST',
             body: JSON.stringify(request),
+            credentials: 'include',
         },
     )
 }
@@ -25,6 +27,27 @@ export function login(
         {
             method: 'POST',
             body: JSON.stringify(request),
+            credentials: 'include',
+        },
+    )
+}
+
+export function refresh(): Promise<AuthResponse> {
+    return apiRequest<AuthResponse>(
+        '/auth/refresh',
+        {
+            method: 'POST',
+            credentials: 'include',
+        },
+    )
+}
+
+export function logout(): Promise<void> {
+    return apiRequest<void>(
+        '/auth/logout',
+        {
+            method: 'POST',
+            credentials: 'include',
         },
     )
 }
