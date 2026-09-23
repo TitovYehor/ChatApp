@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useMemo,
     useState,
     type ReactNode,
@@ -17,6 +18,14 @@ import {
     type AuthContextValue,
 } from './AuthContext'
 
+import {
+    refreshAccessToken,
+} from '../../api/authRefresh'
+
+import {
+    logout as logoutApi,
+} from '../../api/authApi'
+
 interface AuthProviderProps {
     children: ReactNode
 }
@@ -24,47 +33,119 @@ interface AuthProviderProps {
 export function AuthProvider({
     children,
 }: AuthProviderProps) {
-    const [user, setUser] =
-        useState(
-            getAuthenticatedUser(),
-        )
+    const [user, setUser] = useState(
+        getAuthenticatedUser(),
+    )
 
-    const [token, setToken] =
-        useState(
-            getAccessToken(),
-        )
+    const [token, setToken] = useState(
+        getAccessToken(),
+    )
 
-    const value = useMemo<AuthContextValue>(
-        () => ({
-            user,
+    const [isInitializing, setIsInitializing] =
+        useState(true)
 
-            isAuthenticated:
-                token !== null &&
-                user !== null,
+    useEffect(() => {
+        let mounted = true
 
-            login: (
-                accessToken: string,
-                authenticatedUser,
-            ) => {
-                setAccessToken(accessToken)
+        async function initializeAuthentication() {
+            const existingToken = getAccessToken()
 
-                setAuthenticatedUser(
-                    authenticatedUser,
+            const existingUser = getAuthenticatedUser()
+
+            if (!existingToken ||
+                !existingUser
+            ) {
+                if (mounted) {
+                    setIsInitializing(false)
+                }
+
+                return
+            }
+
+            try {
+                const newToken = await refreshAccessToken()
+
+                if (!mounted) {
+                    return
+                }
+
+                setToken(newToken)
+
+                setUser(
+                    getAuthenticatedUser(),
                 )
+            } catch {
+                if (!mounted) {
+                    return
+                }
 
-                setToken(accessToken)
-                setUser(authenticatedUser)
-            },
-
-            logout: () => {
                 clearAuthentication()
 
                 setToken(null)
                 setUser(null)
-            },
-        }),
-        [token, user],
-    )
+            } finally {
+                if (mounted) {
+                    setIsInitializing(false)
+                }
+            }
+        }
+
+        void initializeAuthentication()
+
+        return () => {
+            mounted = false
+        }
+    }, [])
+
+    const value =
+        useMemo<AuthContextValue>(
+            () => ({
+                user,
+
+                isAuthenticated:
+                    token !== null &&
+                    user !== null,
+
+                isInitializing,
+
+                login: (
+                    accessToken,
+                    authenticatedUser,
+                ) => {
+                    setAccessToken(
+                        accessToken,
+                    )
+
+                    setAuthenticatedUser(
+                        authenticatedUser,
+                    )
+
+                    setToken(
+                        accessToken,
+                    )
+
+                    setUser(
+                        authenticatedUser,
+                    )
+                },
+
+                logout: async () => {
+                    try {
+                        await logoutApi()
+                    } finally {
+                        clearAuthentication()
+
+                        setToken(null)
+                        setUser(null)
+                    }
+                },
+            }),
+            [
+                token,
+                user,
+                isInitializing,
+            ],
+        )
 
     return (
         <AuthContext.Provider value={value}>
