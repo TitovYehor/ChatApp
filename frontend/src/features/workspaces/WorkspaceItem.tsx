@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/WorkspaceItem.css'
+
 import type {
     WorkspaceResponse,
 } from '../../types/workspaceTypes'
@@ -123,10 +125,11 @@ function WorkspaceItem({
     }
 
     return (
-        <li>
+        <li className="workspace-item">
             {isEditing ? (
                 <>
                     <input
+                        className="workspace-item__input"
                         type="text"
                         value={
                             editingName
@@ -146,6 +149,7 @@ function WorkspaceItem({
                     />
 
                     <textarea
+                        className="workspace-item__textarea"
                         value={
                             editingDescription
                         }
@@ -163,6 +167,7 @@ function WorkspaceItem({
                     />
 
                     <button
+                        className="workspace-item__action"
                         type="button"
                         onClick={() => {
                             void handleSaveEditing()
@@ -177,6 +182,7 @@ function WorkspaceItem({
                     </button>
 
                     <button
+                        className="workspace-item__action"
                         type="button"
                         onClick={
                             handleCancelEditing
@@ -189,7 +195,7 @@ function WorkspaceItem({
                     </button>
 
                     {updateError && (
-                        <p>
+                        <p className="workspace-item__error">
                             {
                                 updateError
                             }
@@ -199,6 +205,11 @@ function WorkspaceItem({
             ) : (
                 <>
                     <button
+                        className={`workspace-item__select ${
+                            isSelected
+                                ? 'workspace-item__select--selected'
+                                : ''
+                        }`}
                         type="button"
                         onClick={() =>
                             onSelect(
@@ -220,6 +231,7 @@ function WorkspaceItem({
                     {canManageWorkspace && (
                         <>
                             <button
+                                className="workspace-item__action"
                                 type="button"
                                 onClick={
                                     handleStartEditing
@@ -233,6 +245,7 @@ function WorkspaceItem({
                             </button>
 
                             <button
+                                className="workspace-item__action workspace-item__action--danger"
                                 type="button"
                                 onClick={() => {
                                     void handleDelete()
@@ -248,7 +261,7 @@ function WorkspaceItem({
                             </button>
 
                             {deleteError && (
-                                <p>
+                                <p className="workspace-item__error">
                                     {deleteError}
                                 </p>
                             )}
