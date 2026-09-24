@@ -1,0 +1,70 @@
+.workspace-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: #20232c;
+    border: 1px solid #2d313b;
+    border-radius: 8px;
+}
+
+.workspace-create-form__title {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #e7eaf0;
+}
+
+.workspace-create-form__input,
+.workspace-create-form__textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid #363b47;
+    border-radius: 6px;
+    background: #15171e;
+    color: #e7eaf0;
+    font: inherit;
+}
+
+.workspace-create-form__textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+    .workspace-create-form__input::placeholder,
+    .workspace-create-form__textarea::placeholder {
+        color: #777d8a;
+    }
+
+    .workspace-create-form__input:focus,
+    .workspace-create-form__textarea:focus {
+        outline: none;
+        border-color: #5865f2;
+    }
+
+.workspace-create-form__button {
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: #5865f2;
+    color: white;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .workspace-create-form__button:hover:not(:disabled) {
+        background: #4752c4;
+    }
+
+    .workspace-create-form__button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+.workspace-create-form__error {
+    margin: 4px 0 0;
+    color: #f28b82;
+    font-size: 13px;
+}
