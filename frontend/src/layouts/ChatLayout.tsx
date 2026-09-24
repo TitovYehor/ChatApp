@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import './ChatLayout.css'
+
 interface ChatLayoutProps {
     workspaces: ReactNode
     channels: ReactNode
