@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/WorkspaceCreateForm.css'
+
 interface WorkspaceCreateFormProps {
     isCreating: boolean
     createError: string | null
@@ -53,15 +55,15 @@ function WorkspaceCreateForm({
 
     return (
         <form
-            onSubmit={
-                handleSubmit
-            }
+            className="workspace-create-form"
+            onSubmit={handleSubmit}
         >
-            <h3>
+            <h3 className="workspace-create-form__title">
                 Create workspace
             </h3>
 
             <input
+                className="workspace-create-form__input"
                 type="text"
                 value={name}
                 onChange={(
@@ -79,6 +81,7 @@ function WorkspaceCreateForm({
             />
 
             <textarea
+                className="workspace-create-form__textarea"
                 value={
                     description
                 }
@@ -96,6 +99,7 @@ function WorkspaceCreateForm({
             />
 
             <button
+                className="workspace-create-form__button"
                 type="submit"
                 disabled={
                     isCreating ||
@@ -110,7 +114,7 @@ function WorkspaceCreateForm({
             </button>
 
             {createError && (
-                <p>
+                <p className="workspace-create-form__error">
                     {createError}
                 </p>
             )}
