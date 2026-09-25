@@ -1,0 +1,31 @@
+.channel-sidebar {
+    min-height: 100%;
+    padding: 16px 12px;
+    box-sizing: border-box;
+    color: #e7eaf0;
+}
+
+.channel-sidebar__header {
+    margin-bottom: 16px;
+}
+
+.channel-sidebar__header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.channel-sidebar__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.channel-sidebar__empty {
+    margin: 16px 0;
+    color: #9298a6;
+    font-size: 14px;
+}
