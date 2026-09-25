@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/ChannelItem.css'
+
 import type {
     ChannelResponse,
 } from '../../types/channelTypes'
@@ -101,10 +103,11 @@ function ChannelItem({
     }
 
     return (
-        <li>
+        <li className="channel-item">
             {isEditing ? (
                 <>
                     <input
+                        className="channel-item__input"
                         type="text"
                         value={editingName}
                         onChange={(
@@ -121,6 +124,7 @@ function ChannelItem({
                     />
 
                     <button
+                        className="channel-item__action"
                         type="button"
                         onClick={() => {
                             void handleSaveEditing()
@@ -140,6 +144,7 @@ function ChannelItem({
                     </button>
 
                     <button
+                        className="channel-item__action"
                         type="button"
                         onClick={
                             handleCancelEditing
@@ -152,7 +157,7 @@ function ChannelItem({
                     </button>
 
                     {updateChannelError && (
-                        <p>
+                        <p className="channel-item__error">
                             {
                                 updateChannelError
                             }
@@ -162,6 +167,11 @@ function ChannelItem({
             ) : (
                 <>
                     <button
+                        className={`channel-item__select ${
+                            isSelected
+                                ? 'channel-item__select--selected'
+                                : ''
+                        }`}
                         type="button"
                         onClick={() =>
                             onSelect(
@@ -185,6 +195,7 @@ function ChannelItem({
                     {canManageChannels && (
                         <>
                             <button
+                                className="channel-item__action"
                                 type="button"
                                 onClick={
                                     handleStartEditing
@@ -198,6 +209,7 @@ function ChannelItem({
                             </button>
 
                             <button
+                                className="channel-item__action channel-item__action--danger"
                                 type="button"
                                 onClick={() => {
                                     void handleDelete()
@@ -213,7 +225,7 @@ function ChannelItem({
                             </button>
 
                             {deleteChannelError && (
-                                <p>
+                                <p className="channel-item__error">
                                     {
                                         deleteChannelError
                                     }
