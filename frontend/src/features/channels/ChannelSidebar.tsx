@@ -1,6 +1,8 @@
 import ChannelCreateForm from './ChannelCreateForm'
 import ChannelItem from './ChannelItem'
 
+import './css/ChannelSidebar.css'
+
 import type {
     ChannelResponse,
 } from '../../types/channelTypes'
@@ -58,10 +60,12 @@ function ChannelSidebar({
     onDeleteChannel,
 }: ChannelSidebarProps) {
     return (
-        <div>
-            <h2>
-                Channels
-            </h2>
+        <div className="channel-sidebar">
+            <div className="channel-sidebar__header">
+                <h2>
+                    Channels
+                </h2>
+            </div>
 
             {canManageChannels && (
                 <ChannelCreateForm
@@ -79,11 +83,11 @@ function ChannelSidebar({
 
             {channels.length ===
                 0 ? (
-                <p>
+                <p className="channel-sidebar__empty">
                     No channels
                 </p>
             ) : (
-                <ul>
+                <ul className="channel-sidebar__list">
                     {channels.map(
                         (
                             channel,
