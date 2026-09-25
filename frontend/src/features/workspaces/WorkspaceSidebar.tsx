@@ -1,6 +1,8 @@
 import WorkspaceCreateForm from './WorkspaceCreateForm'
 import WorkspaceItem from './WorkspaceItem'
 
+import './css/WorkspaceSidebar.css'
+
 import type {
     WorkspaceResponse,
 } from '../../types/workspaceTypes'
@@ -57,10 +59,12 @@ function WorkspaceSidebar({
     onDeleteWorkspace
 }: WorkspaceSidebarProps) {
     return (
-        <div>
-            <h2>
-                Workspaces
-            </h2>
+        <div className="workspace-sidebar">
+            <div className="workspace-sidebar__header">
+                <h2>
+                    Workspaces
+                </h2>
+            </div>
 
             <WorkspaceCreateForm
                 isCreating={
@@ -76,11 +80,11 @@ function WorkspaceSidebar({
 
             {workspaces.length ===
                 0 ? (
-                <p>
+                <p className="workspace-sidebar__empty">
                     No workspaces
                 </p>
             ) : (
-                <ul>
+                <ul className="workspace-sidebar__list">
                     {workspaces.map(
                         (
                             workspace,
