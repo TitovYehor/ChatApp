@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/ChannelCreateForm.css'
+
 interface ChannelCreateFormProps {
     isCreating: boolean
     createError: string | null
@@ -42,11 +44,13 @@ function ChannelCreateForm({
 
     return (
         <form
+            className="channel-create-form"
             onSubmit={
                 handleSubmit
             }
         >
             <input
+                className="channel-create-form__input"
                 type="text"
                 value={name}
                 onChange={(
@@ -64,6 +68,7 @@ function ChannelCreateForm({
             />
 
             <button
+                className="channel-create-form__button"
                 type="submit"
                 disabled={
                     isCreating ||
@@ -78,7 +83,7 @@ function ChannelCreateForm({
             </button>
 
             {createError && (
-                <p>
+                <p className="channel-create-form__error">
                     {createError}
                 </p>
             )}
