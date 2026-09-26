@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/WorkspaceOwnershipTransfer.css'
+
 import type {
     WorkspaceMemberResponse,
 } from '../../types/workspaceTypes'
@@ -78,15 +80,17 @@ function WorkspaceOwnershipTransfer({
 
     return (
         <form
+            className="workspace-ownership-transfer"
             onSubmit={
                 handleSubmit
             }
         >
-            <h4>
+            <h4 className="workspace-ownership-transfer__title">
                 Transfer ownership
             </h4>
 
             <select
+                className="workspace-ownership-transfer__select"
                 value={
                     selectedUsername
                 }
@@ -126,6 +130,7 @@ function WorkspaceOwnershipTransfer({
             </select>
 
             <button
+                className="workspace-ownership-transfer__button"
                 type="submit"
                 disabled={
                     isTransferring ||
@@ -139,7 +144,7 @@ function WorkspaceOwnershipTransfer({
 
             {transferringMember &&
                 transferError && (
-                    <p>
+                    <p className="workspace-ownership-transfer__error">
                         {
                             transferError
                         }

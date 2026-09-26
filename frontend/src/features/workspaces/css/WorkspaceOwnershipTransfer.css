@@ -1,0 +1,69 @@
+.workspace-ownership-transfer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-bottom: 12px;
+    padding: 12px;
+
+    background: #1b1e26;
+    border: 1px solid #292d36;
+    border-radius: 8px;
+}
+
+.workspace-ownership-transfer__title {
+    margin: 0;
+
+    color: #cdd1da;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace-ownership-transfer__select {
+    width: 100%;
+
+    padding: 8px 10px;
+
+    border: 1px solid #363b47;
+    border-radius: 6px;
+
+    background: #15171e;
+    color: #e7eaf0;
+
+    font: inherit;
+}
+
+.workspace-ownership-transfer__select:focus {
+    outline: none;
+    border-color: #5865f2;
+}
+
+.workspace-ownership-transfer__button {
+    padding: 8px 10px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #2b2f3a;
+    color: #e7eaf0;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace-ownership-transfer__button:hover:not(:disabled) {
+    background: #363b47;
+}
+
+.workspace-ownership-transfer__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.workspace-ownership-transfer__error {
+    margin: 0;
+
+    color: #f28b82;
+    font-size: 12px;
+}
