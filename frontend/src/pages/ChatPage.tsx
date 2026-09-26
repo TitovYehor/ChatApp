@@ -3,6 +3,7 @@ import type {
 } from '../types/workspaceTypes'
 
 import ChatLayout from '../layouts/ChatLayout'
+import './css/ChatMessages.css'
 
 import WorkspaceSidebar from '../features/workspaces/WorkspaceSidebar'
 import ChannelSidebar from '../features/channels/ChannelSidebar'
@@ -433,25 +434,27 @@ function ChatPage() {
                     </p>
                 </div>
             ) : (
-                <section>
-                    <h2>
-                        Messages
-                    </h2>
+                <section className="chat-messages">
+                    <div className="chat-messages__header">
+                        <h2>
+                            Messages
+                        </h2>
+                    </div>
 
                     {chat.isMessagesLoading ? (
-                        <p>
+                        <p className="chat-messages__status">
                             Loading
                             messages...
                         </p>
                     ) : chat.messagesError ? (
-                        <p>
+                        <p className="chat-messages__error">
                             {
                                 chat.messagesError
                             }
                         </p>
                     ) : chat.messages.length ===
                         0 ? (
-                        <p>
+                        <p className="chat-messages__status">
                             No messages yet
                         </p>
                     ) : (
