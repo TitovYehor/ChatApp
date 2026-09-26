@@ -1,0 +1,79 @@
+.workspace-member-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-bottom: 12px;
+    padding: 12px;
+
+    background: #1b1e26;
+    border: 1px solid #292d36;
+    border-radius: 8px;
+}
+
+.workspace-member-add-form__title {
+    margin: 0;
+
+    color: #cdd1da;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace-member-add-form__row {
+    display: flex;
+    gap: 8px;
+}
+
+.workspace-member-add-form__input {
+    flex: 1;
+    min-width: 0;
+
+    padding: 8px 10px;
+
+    border: 1px solid #363b47;
+    border-radius: 6px;
+
+    background: #15171e;
+    color: #e7eaf0;
+
+    font: inherit;
+}
+
+.workspace-member-add-form__input::placeholder {
+    color: #777d8a;
+}
+
+.workspace-member-add-form__input:focus {
+    outline: none;
+    border-color: #5865f2;
+}
+
+.workspace-member-add-form__button {
+    padding: 8px 10px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #5865f2;
+    color: #ffffff;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace-member-add-form__button:hover:not(:disabled) {
+    background: #4752c4;
+}
+
+.workspace-member-add-form__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.workspace-member-add-form__error {
+    margin: 0;
+
+    color: #f28b82;
+    font-size: 12px;
+}

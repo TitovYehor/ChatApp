@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/WorkspaceMemberAddForm.css'
+
 interface WorkspaceMemberAddFormProps {
     isAdding: boolean
     addError: string | null
@@ -42,49 +44,54 @@ function WorkspaceMemberAddForm({
 
     return (
         <form
+            className="workspace-member-add-form"
             onSubmit={
                 handleSubmit
             }
         >
-            <h4>
+            <h4 className="workspace-member-add-form__title">
                 Add member
             </h4>
 
-            <input
-                type="text"
-                value={
-                    usernameOrEmail
-                }
-                onChange={(
-                    event,
-                ) =>
-                    setUsernameOrEmail(
-                        event.target
-                            .value,
-                    )
-                }
-                placeholder="Username or email..."
-                disabled={
-                    isAdding
-                }
-            />
+            <div className="workspace-member-add-form__row">
+                <input
+                    className="workspace-member-add-form__input"
+                    type="text"
+                    value={
+                        usernameOrEmail
+                    }
+                    onChange={(
+                        event,
+                    ) =>
+                        setUsernameOrEmail(
+                            event.target
+                                .value,
+                        )
+                    }
+                    placeholder="Username or email..."
+                    disabled={
+                        isAdding
+                    }
+                />
 
-            <button
-                type="submit"
-                disabled={
-                    isAdding ||
-                    usernameOrEmail
-                        .trim()
-                        .length === 0
-                }
-            >
-                {isAdding
-                    ? 'Adding...'
-                    : 'Add member'}
-            </button>
+                <button
+                    className="workspace-member-add-form__button"
+                    type="submit"
+                    disabled={
+                        isAdding ||
+                        usernameOrEmail
+                            .trim()
+                            .length === 0
+                    }
+                >
+                    {isAdding
+                        ? 'Adding...'
+                        : 'Add member'}
+                </button>
+            </div>
 
             {addError && (
-                <p>
+                <p className="workspace-member-add-form__error">
                     {addError}
                 </p>
             )}
