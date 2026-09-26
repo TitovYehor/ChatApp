@@ -2,6 +2,8 @@ import type {
     WorkspaceRole,
 } from '../../types/workspaceTypes'
 
+import './css/WorkspaceMemberRoleSelect.css'
+
 interface WorkspaceMemberRoleSelectProps {
     role: WorkspaceRole
     isChanging: boolean
@@ -36,6 +38,7 @@ function WorkspaceMemberRoleSelect({
 
     return (
         <select
+            className="workspace-member-role-select"
             value={role}
             onChange={
                 handleChange

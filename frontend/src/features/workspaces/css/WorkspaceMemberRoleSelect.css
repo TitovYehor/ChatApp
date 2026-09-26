@@ -1,0 +1,21 @@
+.workspace-member-role-select {
+    padding: 6px 8px;
+
+    border: 1px solid #363b47;
+    border-radius: 6px;
+
+    background: #15171e;
+    color: #cdd1da;
+
+    font: inherit;
+    font-size: 12px;
+}
+
+.workspace-member-role-select:focus {
+    outline: none;
+    border-color: #5865f2;
+}
+
+.workspace-member-role-select:disabled {
+    opacity: 0.5;
+}
