@@ -257,7 +257,7 @@ function ChatPage() {
                         }
                     </p>
                 ) : (
-                    <>
+                    <div className="chat-page__channels-section">
                         <ChannelSidebar
                             channels={
                                 channel.channels
@@ -399,7 +399,7 @@ function ChatPage() {
                                 handleLeaveWorkspace
                             }
                         />
-                    </>
+                    </div>
                 )
             }
         >
