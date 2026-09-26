@@ -1,0 +1,54 @@
+.workspace-leave {
+    margin-bottom: 12px;
+    padding: 12px;
+
+    background: #1b1e26;
+    border: 1px solid #292d36;
+    border-radius: 8px;
+}
+
+.workspace-leave__title {
+    margin: 0 0 8px;
+
+    color: #cdd1da;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace-leave__info {
+    margin: 0;
+
+    color: #9298a6;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.workspace-leave__button {
+    padding: 8px 10px;
+
+    border: 1px solid #493136;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #f28b82;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.workspace-leave__button:hover:not(:disabled) {
+    background: #3a2429;
+}
+
+.workspace-leave__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.workspace-leave__error {
+    margin: 8px 0 0;
+
+    color: #f28b82;
+    font-size: 12px;
+}

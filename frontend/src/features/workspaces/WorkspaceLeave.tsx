@@ -3,6 +3,8 @@ import type {
     WorkspaceRole,
 } from '../../types/workspaceTypes'
 
+import './css/WorkspaceLeave.css'
+
 interface WorkspaceLeaveProps {
     workspaceName: string
     currentUserId: string | null
@@ -33,12 +35,12 @@ function WorkspaceLeave({
 
     if (isOwner) {
         return (
-            <div>
-                <h4>
+            <div className="workspace-leave">
+                <h4 className="workspace-leave__title">
                     Leave workspace
                 </h4>
 
-                <p>
+                <p className="workspace-leave__info">
                     You are the owner of
                     this workspace. Transfer
                     ownership before leaving.
@@ -49,12 +51,12 @@ function WorkspaceLeave({
 
     if (isOnlyMember) {
         return (
-            <div>
-                <h4>
+            <div className="workspace-leave">
+                <h4 className="workspace-leave__title">
                     Leave workspace
                 </h4>
 
-                <p>
+                <p className="workspace-leave__info">
                     You cannot leave a
                     workspace when you are
                     the only member.
@@ -77,12 +79,13 @@ function WorkspaceLeave({
     }
 
     return (
-        <div>
-            <h4>
+        <div className="workspace-leave">
+            <h4 className="workspace-leave__title">
                 Leave workspace
             </h4>
 
             <button
+                className="workspace-leave__button"
                 type="button"
                 onClick={() => {
                     void handleLeave()
@@ -97,7 +100,7 @@ function WorkspaceLeave({
             </button>
 
             {leaveError && (
-                <p>
+                <p className="workspace-leave__error">
                     {leaveError}
                 </p>
             )}
