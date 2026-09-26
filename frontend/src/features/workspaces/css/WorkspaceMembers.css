@@ -1,0 +1,158 @@
+.workspace-members {
+    min-width: 0;
+    color: #e7eaf0;
+}
+
+.workspace-members__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 16px;
+}
+
+.workspace-members__header h3 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.workspace-members__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    background: #2b2f3a;
+    color: #aeb4c0;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.workspace-members__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    margin: 16px 0 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.workspace-members__member {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    background: #1b1e26;
+    border: 1px solid #292d36;
+    border-radius: 8px;
+}
+
+.workspace-members__identity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    min-width: 0;
+}
+
+.workspace-members__status {
+    flex: 0 0 auto;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+}
+
+.workspace-members__status--online {
+    background: #3ba55c;
+}
+
+.workspace-members__status--offline {
+    background: #626875;
+}
+
+.workspace-members__username {
+    overflow: hidden;
+
+    color: #f0f2f5;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-members__you {
+    padding: 2px 6px;
+
+    border-radius: 4px;
+
+    background: #2b2f3a;
+    color: #aeb4c0;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.workspace-members__role {
+    color: #9298a6;
+    font-size: 13px;
+}
+
+.workspace-members__actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-left: auto;
+}
+
+.workspace-members__remove {
+    padding: 6px 9px;
+
+    border: 1px solid #493136;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #f28b82;
+
+    font: inherit;
+    font-size: 12px;
+}
+
+.workspace-members__remove:hover:not(:disabled) {
+    background: #3a2429;
+}
+
+.workspace-members__remove:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.workspace-members__error {
+    width: 100%;
+
+    margin: 0;
+
+    color: #f28b82;
+    font-size: 12px;
+}
+
+.workspace-members__empty {
+    margin: 16px 0;
+
+    color: #9298a6;
+    font-size: 14px;
+}

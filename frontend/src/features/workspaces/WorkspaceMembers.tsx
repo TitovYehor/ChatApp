@@ -3,6 +3,8 @@ import WorkspaceMemberRoleSelect from './WorkspaceMemberRoleSelect'
 import WorkspaceOwnershipTransfer from './WorkspaceOwnershipTransfer'
 import WorkspaceLeave from './WorkspaceLeave'
 
+import './css/WorkspaceMembers.css'
+
 import type {
     WorkspaceMemberResponse,
     WorkspaceRole,
@@ -151,10 +153,16 @@ function WorkspaceMembers({
     }
 
     return (
-        <div>
-            <h3>
-                Members
-            </h3>
+        <div className="workspace-members">
+            <div className="workspace-members__header">
+                <h3>
+                    Members
+                </h3>
+
+                <span className="workspace-members__count">
+                    {members.length}
+                </span>
+            </div>
 
             {canManageMembers && (
                 <WorkspaceMemberAddForm
@@ -219,11 +227,11 @@ function WorkspaceMembers({
 
             {members.length ===
                 0 ? (
-                <p>
+                <p className="workspace-members__empty">
                     No members
                 </p>
             ) : (
-                <ul>
+                <ul className="workspace-members__list">
                     {members.map(
                         (
                             member,
@@ -248,46 +256,49 @@ function WorkspaceMembers({
 
                             return (
                                 <li
+                                    className="workspace-members__member"
                                     key={
                                         member.userId
                                     }
                                 >
-                                    <span>
-                                        {isOnline
-                                            ? '🟢'
-                                            : '⚪'}
-                                    </span>{' '}
+                                    <div className="workspace-members__identity">
+                                        <span
+                                            className={`workspace-members__status ${
+                                                isOnline
+                                                    ? 'workspace-members__status--online'
+                                                    : 'workspace-members__status--offline'
+                                            }`}
+                                            title={
+                                                isOnline
+                                                    ? 'Online'
+                                                    : 'Offline'
+                                            }
+                                        />
 
-                                    <strong>
-                                        {
-                                            member.username
-                                        }
-                                    </strong>
+                                        <strong className="workspace-members__username">
+                                            {
+                                                member.username
+                                            }
+                                        </strong>
 
-                                    {isCurrentUser && (
-                                        <span>
-                                            {' '}
-                                            (You)
-                                        </span>
-                                    )}
+                                        {isCurrentUser && (
+                                            <span className="workspace-members__you">
+                                                You
+                                            </span>
+                                        )}
 
-                                    <span>
-                                        {' '}
-                                        —{' '}
-                                        {
-                                            getRoleName(
+                                        <span className="workspace-members__role">
+                                            {getRoleName(
                                                 member.role,
-                                            )
-                                        }
-                                    </span>
+                                            )}
+                                        </span>
+                                    </div>
 
                                     {canManageMembers &&
                                         !isCurrentUser &&
                                         member.role !==
                                         1 && (
-                                            <>
-                                                {' '}
-
+                                            <div className="workspace-members__actions">
                                                 <WorkspaceMemberRoleSelect
                                                     role={
                                                         member.role
@@ -305,9 +316,8 @@ function WorkspaceMembers({
                                                     }
                                                 />
 
-                                                {' '}
-
                                                 <button
+                                                    className="workspace-members__remove"
                                                     type="button"
                                                     onClick={() =>
                                                         void handleRemoveMember(
@@ -323,12 +333,12 @@ function WorkspaceMembers({
                                                         ? 'Removing...'
                                                         : 'Remove'}
                                                 </button>
-                                            </>
+                                            </div>
                                         )}
 
                                     {isThisMemberBeingRemoved &&
                                         removeError && (
-                                            <p>
+                                            <p className="workspace-members__error">
                                                 {
                                                     removeError
                                                 }
@@ -337,7 +347,7 @@ function WorkspaceMembers({
 
                                     {isThisMemberChangingRole &&
                                         changeMemberRoleError && (
-                                            <p>
+                                            <p className="workspace-members__error">
                                                 {
                                                     changeMemberRoleError
                                                 }
