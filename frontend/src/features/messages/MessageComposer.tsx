@@ -4,6 +4,13 @@ import {
     useState,
 } from 'react'
 
+import type {
+    FormEvent,
+    KeyboardEvent,
+} from 'react'
+
+import './css/MessageComposer.css'
+
 interface MessageComposerProps {
     isSending: boolean
     sendError: string | null
@@ -23,135 +30,125 @@ function MessageComposer({
     onStartTyping,
     onStopTyping,
 }: MessageComposerProps) {
-    const [
-        content,
-        setContent,
-    ] = useState('')
+    const [content, setContent] = useState('')
+
+    const formRef = useRef<HTMLFormElement>(null)
 
     const typingTimeoutRef =
-        useRef<ReturnType<
-            typeof setTimeout
-        > | null>(null)
+        useRef<ReturnType<typeof setTimeout> | null>(null)
 
     useEffect(() => {
         return () => {
-            if (
-                typingTimeoutRef.current
-            ) {
-                clearTimeout(
-                    typingTimeoutRef.current,
-                )
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current)
             }
 
             void onStopTyping()
         }
-    }, [
-        onStopTyping,
-    ])
+    }, [onStopTyping])
 
-    function handleChange(
-        value: string,
-    ) {
+    function clearTypingTimeout() {
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current)
+            typingTimeoutRef.current = null
+        }
+    }
+
+    function handleChange(value: string) {
         setContent(value)
 
         if (!value.trim()) {
+            clearTypingTimeout()
             void onStopTyping()
             return
         }
 
         void onStartTyping()
 
-        if (
-            typingTimeoutRef.current
-        ) {
-            clearTimeout(
-                typingTimeoutRef.current,
-            )
-        }
+        clearTypingTimeout()
 
-        typingTimeoutRef.current =
-            setTimeout(() => {
-                void onStopTyping()
-                typingTimeoutRef.current =
-                    null
-            }, 1500)
+        typingTimeoutRef.current = setTimeout(() => {
+            void onStopTyping()
+            typingTimeoutRef.current = null
+        }, 1500)
+    }
+
+    function handleKeyDown(
+        event: KeyboardEvent<HTMLTextAreaElement>,
+    ) {
+        if (
+            event.key === 'Enter' &&
+            !event.shiftKey &&
+            !event.nativeEvent.isComposing
+        ) {
+            event.preventDefault()
+
+            if (!isSending && content.trim()) {
+                formRef.current?.requestSubmit()
+            }
+        }
     }
 
     async function handleSubmit(
-        event: React.SubmitEvent,
+        event: FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
 
-        const trimmedContent =
-            content.trim()
+        const trimmedContent = content.trim()
 
-        if (!trimmedContent) {
+        if (!trimmedContent || isSending) {
             return
         }
 
-        if (
-            typingTimeoutRef.current
-        ) {
-            clearTimeout(
-                typingTimeoutRef.current,
-            )
-
-            typingTimeoutRef.current =
-                null
-        }
+        clearTypingTimeout()
 
         await onStopTyping()
 
-        await onSend(
-            trimmedContent,
-        )
+        await onSend(trimmedContent)
 
         setContent('')
     }
 
     return (
         <form
-            onSubmit={
-                handleSubmit
-            }
+            ref={formRef}
+            className="message-composer"
+            onSubmit={handleSubmit}
         >
-            <input
-                type="text"
-                value={content}
-                onChange={(
-                    event,
-                ) =>
-                    handleChange(
-                        event.target
-                            .value,
-                    )
-                }
-                placeholder="Write a message..."
-                disabled={
-                    isSending
-                }
-            />
+            <div className="message-composer__container">
+                <textarea
+                    className="message-composer__input"
+                    value={content}
+                    onChange={(event) => {
+                        handleChange(event.target.value)
+                    }}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Write a message..."
+                    rows={1}
+                    disabled={isSending}
+                />
 
-            <button
-                type="submit"
-                disabled={
-                    isSending ||
-                    content
-                        .trim()
-                        .length ===
-                    0
-                }
-            >
-                {isSending
-                    ? 'Sending...'
-                    : 'Send'}
-            </button>
+                <button
+                    type="submit"
+                    className="message-composer__button"
+                    disabled={
+                        isSending ||
+                        content.trim().length === 0
+                    }
+                >
+                    {isSending ? 'Sending...' : 'Send'}
+                </button>
+            </div>
 
             {sendError && (
-                <p>
+                <p className="message-composer__error">
                     {sendError}
                 </p>
             )}
+
+            <p className="message-composer__hint">
+                Enter to send · Shift + Enter for a new line
+            </p>
         </form>
     )
 }
