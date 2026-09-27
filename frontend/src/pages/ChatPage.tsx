@@ -2,6 +2,7 @@ import type {
     WorkspaceRole,
 } from '../types/workspaceTypes'
 
+import ChatHeader from '../layouts/ChatHeader'
 import ChatLayout from '../layouts/ChatLayout'
 import './css/ChatMessages.css'
 
@@ -174,6 +175,12 @@ function ChatPage() {
 
     return (
         <ChatLayout
+            header={
+                <ChatHeader
+                    username={user?.username ?? 'User'}
+                    onLogout={logout}
+                />
+            }
             workspaces={
                 <WorkspaceSidebar
                     workspaces={
@@ -404,24 +411,6 @@ function ChatPage() {
                 )
             }
         >
-            <div>
-                <p>
-                    Logged in as{' '}
-                    {
-                        user?.username
-                    }
-                </p>
-
-                <button
-                    type="button"
-                    onClick={
-                        logout
-                    }
-                >
-                    Logout
-                </button>
-            </div>
-
             {selectedChannelId === null ? (
                 <div>
                     <h1>
