@@ -1,0 +1,93 @@
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex: 0 0 60px;
+    min-width: 0;
+
+    padding: 0 24px;
+
+    background: #15171e;
+    border-bottom: 1px solid #292d36;
+
+    color: #e7eaf0;
+}
+
+.chat-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-header__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    border-radius: 8px;
+
+    background: #5865f2;
+    color: #fff;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.chat-header__title {
+    color: #f0f2f5;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.chat-header__user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-header__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 auto;
+
+    border-radius: 50%;
+
+    background: #2b2f3a;
+    color: #cdd1da;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.chat-header__username {
+    color: #cdd1da;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.chat-header__logout {
+    padding: 7px 12px;
+
+    border: 1px solid #363b47;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #cdd1da;
+
+    font: inherit;
+    font-size: 13px;
+}
+
+.chat-header__logout:hover {
+    background: #2b2f3a;
+    color: #fff;
+}
