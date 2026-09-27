@@ -1,5 +1,7 @@
 import MessageItem from './MessageItem'
 
+import './css/MessageList.css'
+
 import type {
     MessageResponse,
 } from '../../types/messageTypes'
@@ -42,7 +44,7 @@ function MessageList({
     onDelete,
 }: MessageListProps) {
     return (
-        <ul>
+        <ul className="message-list">
             {messages.map(
                 (message) => (
                     <MessageItem
