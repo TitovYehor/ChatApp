@@ -173,6 +173,11 @@ function ChatPage() {
         )
     }
 
+    const selectedChannel =
+        channel.channels.find(
+            (item) => item.id === selectedChannelId,
+        ) ?? null
+
     return (
         <ChatLayout
             header={
@@ -425,9 +430,15 @@ function ChatPage() {
             ) : (
                 <section className="chat-messages">
                     <div className="chat-messages__header">
-                        <h2>
-                            Messages
-                        </h2>
+                        <div className="chat-messages__channel-icon">
+                            #
+                        </div>
+
+                        <div className="chat-messages__channel-info">
+                            <h2 className="chat-messages__channel-name">
+                                {selectedChannel?.name ?? 'Channel'}
+                            </h2>
+                        </div>
                     </div>
 
                     {chat.isMessagesLoading ? (
