@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/MessageItem.css'
+
 import type {
     MessageResponse,
 } from '../../types/messageTypes'
@@ -94,117 +96,120 @@ function MessageItem({
     }
 
     return (
-        <li>
+        <li className="message-item">
             {isEditing ? (
-                <>
-                    <strong>
+                <div className="message-item__editing">
+                    <strong className="message-item__username">
                         {message.username}
                     </strong>
 
                     <input
+                        className="message-item__edit-input"
                         type="text"
-                        value={
-                            editingContent
-                        }
+                        value={editingContent}
                         onChange={(event) => {
                             setEditingContent(
                                 event.target.value,
                             )
                         }}
-                        disabled={
-                            isUpdating
-                        }
+                        disabled={isUpdating}
                     />
 
-                    <button
-                        type="button"
-                        onClick={() => {
-                            void handleSaveEditing()
-                        }}
-                        disabled={
-                            isUpdating ||
-                            editingContent
-                                .trim()
-                                .length === 0
-                        }
-                    >
-                        {isUpdating
-                            ? 'Saving...'
-                            : 'Save'}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={
-                            handleCancelEditing
-                        }
-                        disabled={
-                            isUpdating
-                        }
-                    >
-                        Cancel
-                    </button>
-
-                    {updateError && (
-                        <p>
-                            {
-                                updateError
-                            }
-                        </p>
-                    )}
-                </>
-            ) : (
-                <>
-                    <strong>
-                        {message.username}
-                    </strong>
-                    : {message.content}
-
-                    {message.updatedAt && (
-                        <span>
-                            {' '}
-                            (edited)
-                        </span>
-                    )}
-
-                    {canEditMessage && (
+                    <div className="message-item__actions">
                         <button
                             type="button"
-                            onClick={
-                                handleStartEditing
-                            }
+                            className="message-item__action message-item__action--primary"
+                            onClick={() => {
+                                void handleSaveEditing()
+                            }}
                             disabled={
-                                isDeleting
+                                isUpdating ||
+                                editingContent
+                                    .trim()
+                                    .length === 0
                             }
                         >
-                            Edit
+                            {isUpdating
+                                ? 'Saving...'
+                                : 'Save'}
                         </button>
+
+                        <button
+                            type="button"
+                            className="message-item__action"
+                            onClick={
+                                handleCancelEditing
+                            }
+                            disabled={isUpdating}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+
+                    {updateError && (
+                        <p className="message-item__error">
+                            {updateError}
+                        </p>
+                    )}
+                </div>
+            ) : (
+                <>
+                    <div className="message-item__header">
+                        <strong className="message-item__username">
+                            {message.username}
+                        </strong>
+
+                        {message.updatedAt && (
+                            <span className="message-item__edited">
+                                edited
+                            </span>
+                        )}
+                    </div>
+
+                    <p className="message-item__content">
+                        {message.content}
+                    </p>
+
+                    {(canEditMessage || canDeleteMessage) && (
+                        <div className="message-item__actions">
+                            {canEditMessage && (
+                                <button
+                                    type="button"
+                                    className="message-item__action"
+                                    onClick={
+                                        handleStartEditing
+                                    }
+                                    disabled={
+                                        isDeleting
+                                    }
+                                >
+                                    Edit
+                                </button>
+                            )}
+
+                            {canDeleteMessage && (
+                                <button
+                                    type="button"
+                                    className="message-item__action message-item__action--danger"
+                                    onClick={() => {
+                                        void handleDelete()
+                                    }}
+                                    disabled={
+                                        isDeleting
+                                    }
+                                >
+                                    {isDeleting
+                                        ? 'Deleting...'
+                                        : 'Delete'}
+                                </button>
+                            )}
+                        </div>
                     )}
 
-                    {canDeleteMessage && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    void handleDelete()
-                                }}
-                                disabled={
-                                    isDeleting
-                                }
-                            >
-                                {isDeleting
-                                    ? 'Deleting...'
-                                    : 'Delete'}
-                            </button>
-
-                            {deleteError && (
-                                <p>
-                                    {
-                                        deleteError
-                                    }
-                                </p>
-                            )}
-                        </>
+                    {deleteError && (
+                        <p className="message-item__error">
+                            {deleteError}
+                        </p>
                     )}
                 </>
             )}
