@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { login } from '../api/authApi'
 import { useAuth } from '../features/auth/useAuth'
 import { ApiError } from '../api/ApiError'
+
+import './css/AuthPages.css'
 
 function LoginPage() {
     const navigate = useNavigate()
@@ -19,7 +22,7 @@ function LoginPage() {
     }
 
     async function handleSubmit(
-        event: React.SubmitEvent,
+        event: FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
 
@@ -43,13 +46,9 @@ function LoginPage() {
                 error instanceof ApiError &&
                 error.status === 401
             ) {
-                setError(
-                    'Invalid email or password',
-                )
+                setError('Invalid email or password')
             } else {
-                setError(
-                    'Unable to connect to the server',
-                )
+                setError('Unable to connect to the server')
             }
         } finally {
             setIsSubmitting(false)
@@ -57,66 +56,90 @@ function LoginPage() {
     }
 
     return (
-        <main>
-            <h1>Login</h1>
+        <main className="auth-page">
+            <section className="auth-card">
+                <div className="auth-card__brand">
+                    <div className="auth-card__logo">
+                        C
+                    </div>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">
-                        Email
-                    </label>
-
-                    <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(event) =>
-                            setEmail(event.target.value)
-                        }
-                        required
-                        autoComplete="email"
-                    />
+                    <span>Chat App</span>
                 </div>
 
-                <div>
-                    <label htmlFor="password">
-                        Password
-                    </label>
-
-                    <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(event) =>
-                            setPassword(event.target.value)
-                        }
-                        required
-                        autoComplete="current-password"
-                    />
-                </div>
-
-                {error && (
-                    <p role="alert">
-                        {error}
+                <div className="auth-card__heading">
+                    <h1>Welcome back</h1>
+                    <p>
+                        Log in to continue to your conversations.
                     </p>
-                )}
+                </div>
 
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
+                <form
+                    className="auth-form"
+                    onSubmit={handleSubmit}
                 >
-                    {isSubmitting
-                        ? 'Logging in...'
-                        : 'Login'}
-                </button>
-            </form>
+                    <div className="auth-form__field">
+                        <label htmlFor="email">
+                            Email
+                        </label>
 
-            <p>
-                Don't have an account?{' '}
-                <Link to="/register">
-                    Register
-                </Link>
-            </p>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(event) =>
+                                setEmail(event.target.value)
+                            }
+                            placeholder="you@example.com"
+                            required
+                            autoComplete="email"
+                        />
+                    </div>
+
+                    <div className="auth-form__field">
+                        <label htmlFor="password">
+                            Password
+                        </label>
+
+                        <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
+                            placeholder="Enter your password"
+                            required
+                            autoComplete="current-password"
+                        />
+                    </div>
+
+                    {error && (
+                        <p
+                            className="auth-form__error"
+                            role="alert"
+                        >
+                            {error}
+                        </p>
+                    )}
+
+                    <button
+                        className="auth-form__submit"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting
+                            ? 'Logging in...'
+                            : 'Login'}
+                    </button>
+                </form>
+
+                <p className="auth-card__footer">
+                    Don't have an account?{' '}
+                    <Link to="/register">
+                        Register
+                    </Link>
+                </p>
+            </section>
         </main>
     )
 }
