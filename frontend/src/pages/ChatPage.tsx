@@ -239,12 +239,14 @@ function ChatPage() {
 
             channels={
                 selectedWorkspaceId === null ? (
-                    <p>
-                        Select a workspace
-                    </p>
+                    <div className="chat-empty">
+                        <p>
+                            Select a workspace
+                        </p>
+                    </div>
                 ) : workspace.isLoadingMembers ||
                     channel.isLoadingChannels ? (
-                    <>
+                    <div className="chat-empty">
                         {channel.isLoadingChannels && (
                             <p>
                                 Loading channels...
@@ -256,15 +258,15 @@ function ChatPage() {
                                 Loading members...
                             </p>
                         )}
-                    </>
+                    </div>
                 ) : channel.channelsError ? (
-                    <p>
+                    <p className="chat-messages__error">
                         {
                             channel.channelsError
                         }
                     </p>
                 ) : workspace.membersError ? (
-                    <p>
+                    <p className="chat-messages__error">
                         {
                             workspace.membersError
                         }
@@ -417,14 +419,13 @@ function ChatPage() {
             }
         >
             {selectedChannelId === null ? (
-                <div>
-                    <h1>
-                        Chat
-                    </h1>
+                <div className="chat-empty">
+                    <div className="chat-empty__icon">#</div>
+
+                    <h1>Chat</h1>
 
                     <p>
-                        Select a channel to
-                        start chatting
+                        Select a channel to start chatting
                     </p>
                 </div>
             ) : (
