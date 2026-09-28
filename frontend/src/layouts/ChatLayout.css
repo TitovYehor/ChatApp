@@ -13,7 +13,8 @@
 
 .chat-layout {
     display: grid;
-    grid-template-columns: 280px 260px minmax(0, 1fr);
+
+    grid-template-columns: 280px 6px 260px 6px minmax(0, 1fr);
 
     flex: 1;
     min-width: 0;
@@ -23,6 +24,29 @@
 
     background: #101218;
     color: #e7eaf0;
+}
+
+.chat-layout__resizer {
+    position: relative;
+    z-index: 2;
+
+    width: 6px;
+    height: 100%;
+
+    background: #292d36;
+
+    cursor: col-resize;
+    touch-action: none;
+
+    transition: background 0.15s ease;
+}
+
+.chat-layout__resizer:hover {
+    background: #5865f2;
+}
+
+.chat-layout__resizer:active {
+    background: #5865f2;
 }
 
 .chat-layout__workspaces {
