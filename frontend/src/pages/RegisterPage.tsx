@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 import { register } from '../api/authApi'
 import { useAuth } from '../features/auth/useAuth'
 import { ApiError } from '../api/ApiError'
+
+import './css/AuthPages.css'
 
 function RegisterPage() {
     const navigate = useNavigate()
@@ -20,7 +23,7 @@ function RegisterPage() {
     }
 
     async function handleSubmit(
-        event: React.SubmitEvent,
+        event: FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
 
@@ -59,85 +62,110 @@ function RegisterPage() {
     }
 
     return (
-        <main>
-            <h1>Register</h1>
+        <main className="auth-page">
+            <section className="auth-card">
+                <div className="auth-card__brand">
+                    <div className="auth-card__logo">
+                        C
+                    </div>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="username">
-                        Username
-                    </label>
-
-                    <input
-                        id="username"
-                        type="text"
-                        value={username}
-                        onChange={(event) =>
-                            setUsername(event.target.value)
-                        }
-                        required
-                        maxLength={50}
-                        autoComplete="username"
-                    />
+                    <span>Chat App</span>
                 </div>
 
-                <div>
-                    <label htmlFor="email">
-                        Email
-                    </label>
-
-                    <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(event) =>
-                            setEmail(event.target.value)
-                        }
-                        required
-                        autoComplete="email"
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="password">
-                        Password
-                    </label>
-
-                    <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(event) =>
-                            setPassword(event.target.value)
-                        }
-                        required
-                        minLength={6}
-                        autoComplete="new-password"
-                    />
-                </div>
-
-                {error && (
-                    <p role="alert">
-                        {error}
+                <div className="auth-card__heading">
+                    <h1>Create your account</h1>
+                    <p>
+                        Join the conversation and connect with your team.
                     </p>
-                )}
+                </div>
 
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
+                <form
+                    className="auth-form"
+                    onSubmit={handleSubmit}
                 >
-                    {isSubmitting
-                        ? 'Creating account...'
-                        : 'Register'}
-                </button>
-            </form>
+                    <div className="auth-form__field">
+                        <label htmlFor="username">
+                            Username
+                        </label>
 
-            <p>
-                Already have an account?{' '}
-                <Link to="/login">
-                    Login
-                </Link>
-            </p>
+                        <input
+                            id="username"
+                            type="text"
+                            value={username}
+                            onChange={(event) =>
+                                setUsername(event.target.value)
+                            }
+                            placeholder="Choose a username"
+                            required
+                            maxLength={50}
+                            autoComplete="username"
+                        />
+                    </div>
+
+                    <div className="auth-form__field">
+                        <label htmlFor="email">
+                            Email
+                        </label>
+
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(event) =>
+                                setEmail(event.target.value)
+                            }
+                            placeholder="you@example.com"
+                            required
+                            autoComplete="email"
+                        />
+                    </div>
+
+                    <div className="auth-form__field">
+                        <label htmlFor="password">
+                            Password
+                        </label>
+
+                        <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
+                            placeholder="At least 6 characters"
+                            required
+                            minLength={6}
+                            autoComplete="new-password"
+                        />
+                    </div>
+
+                    {error && (
+                        <p
+                            className="auth-form__error"
+                            role="alert"
+                        >
+                            {error}
+                        </p>
+                    )}
+
+                    <button
+                        className="auth-form__submit"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting
+                            ? 'Creating account...'
+                            : 'Create account'}
+                    </button>
+                </form>
+
+                <p className="auth-card__footer">
+                    Already have an account?{' '}
+                    <Link to="/login">
+                        Login
+                    </Link>
+                </p>
+            </section>
         </main>
     )
 }
