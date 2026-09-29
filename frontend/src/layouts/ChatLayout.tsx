@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type {
     PointerEvent as ReactPointerEvent,
     ReactNode,
@@ -21,6 +21,39 @@ const MAX_CHANNEL_WIDTH = 450
 
 const MIN_MESSAGE_WIDTH = 320
 
+function getSavedWidth(
+    key: string,
+    defaultWidth: number,
+    minWidth: number,
+    maxWidth: number,
+): number {
+    try {
+        const savedWidth = localStorage.getItem(key)
+
+        if (savedWidth === null) {
+            return defaultWidth
+        }
+
+        const width = Number(savedWidth)
+
+        if (!Number.isFinite(width)) {
+            return defaultWidth
+        }
+
+        return Math.max(
+            minWidth,
+            Math.min(width, maxWidth),
+        )
+    } catch (error) {
+        console.error(
+            `Failed to load saved width for "${key}":`,
+            error,
+        )
+
+        return defaultWidth
+    }
+}
+
 interface ResizeState {
     divider: 'workspaces' | 'channels'
     startX: number
@@ -34,8 +67,51 @@ function ChatLayout({
     channels,
     children,
 }: ChatLayoutProps) {
-    const [workspaceWidth, setWorkspaceWidth] = useState(280)
-    const [channelWidth, setChannelWidth] = useState(260)
+    const [workspaceWidth, setWorkspaceWidth] = useState(() =>
+        getSavedWidth(
+            'chat-workspace-width',
+            280,
+            MIN_WORKSPACE_WIDTH,
+            MAX_WORKSPACE_WIDTH,
+        ),
+    )
+
+    const [channelWidth, setChannelWidth] = useState(() =>
+        getSavedWidth(
+            'chat-channel-width',
+            260,
+            MIN_CHANNEL_WIDTH,
+            MAX_CHANNEL_WIDTH,
+        ),
+    )
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(
+                'chat-workspace-width',
+                String(workspaceWidth),
+            )
+        } catch (error) {
+            console.error(
+                'Failed to save workspace panel width:',
+                error,
+            )
+        }
+    }, [workspaceWidth])
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(
+                'chat-channel-width',
+                String(channelWidth),
+            )
+        } catch (error) {
+            console.error(
+                'Failed to save channel panel width:',
+                error,
+            )
+        }
+    }, [channelWidth])
 
     const layoutRef = useRef<HTMLDivElement>(null)
     const resizeRef = useRef<ResizeState | null>(null)
