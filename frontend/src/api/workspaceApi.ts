@@ -8,12 +8,30 @@ import type {
     UpdateWorkspaceRequest,
     WorkspaceMemberResponse,
     WorkspaceResponse,
+    WorkspaceSearchRequest,
 } from '../types/workspaceTypes'
 
 export function getAll():
     Promise<WorkspaceResponse[]> {
     return apiRequest<WorkspaceResponse[]>(
         '/workspaces',
+    )
+}
+
+export function search(
+    request: WorkspaceSearchRequest,
+): Promise<WorkspaceResponse[]> {
+    const params = new URLSearchParams()
+
+    if (request.query) {
+        params.set(
+            'query',
+            request.query,
+        )
+    }
+
+    return apiRequest<WorkspaceResponse[]>(
+        `/workspaces/search?${params.toString()}`,
     )
 }
 
