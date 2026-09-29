@@ -13,6 +13,10 @@ public interface IWorkspaceService
         Guid workspaceId,
         Guid userId);
 
+    Task<IReadOnlyCollection<WorkspaceResponseDto>> SearchAsync(
+        Guid userId,
+        WorkspaceSearchRequestDto request);
+
     Task<IReadOnlyCollection<WorkspaceResponseDto>> GetAllAsync(
         Guid userId);
 

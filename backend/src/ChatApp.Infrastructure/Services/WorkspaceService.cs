@@ -75,6 +75,30 @@ public class WorkspaceService : IWorkspaceService
         return workspace.ToDto(membership.Role);
     }
 
+    public async Task<IReadOnlyCollection<WorkspaceResponseDto>> SearchAsync(
+        Guid userId,
+        WorkspaceSearchRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Query))
+        {
+            return Array.Empty<WorkspaceResponseDto>();
+        }
+
+        var query = request.Query.Trim();
+
+        var memberships = await _dbContext.WorkspaceMembers
+            .AsNoTracking()
+            .Include(x => x.Workspace)
+            .Where(x =>
+                x.UserId == userId &&
+                x.Workspace.Name.Contains(query))
+            .ToListAsync();
+
+        return memberships
+            .Select(x => x.Workspace.ToDto(x.Role))
+            .ToList();
+    }
+
     public async Task<IReadOnlyCollection<WorkspaceResponseDto>> GetAllAsync(
         Guid userId)
     {
