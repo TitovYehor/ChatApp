@@ -11,6 +11,10 @@ export interface WorkspaceResponse {
     currentUserRole: WorkspaceRole | null
 }
 
+export interface WorkspaceSearchRequest {
+    query?: string
+}
+
 export interface UpdateWorkspaceRequest {
     name: string
     description: string
