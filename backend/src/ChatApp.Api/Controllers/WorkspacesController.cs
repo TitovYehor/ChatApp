@@ -52,6 +52,19 @@ public class WorkspacesController : ControllerBase
         return Ok(workspace);
     }
 
+    [HttpGet("search")]
+    public async Task<ActionResult<IReadOnlyCollection<WorkspaceResponseDto>>> Search(
+        [FromQuery] WorkspaceSearchRequestDto request)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var workspaces = await _workspaceService.SearchAsync(
+            userId,
+            request);
+
+        return Ok(workspaces);
+    }
+
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<WorkspaceResponseDto>>> GetAll()
     {
