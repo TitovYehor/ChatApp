@@ -84,14 +84,14 @@ public class WorkspaceService : IWorkspaceService
             return Array.Empty<WorkspaceResponseDto>();
         }
 
-        var query = request.Query.Trim();
+        var normalizedQuery = request.Query.Trim().ToLower();
 
         var memberships = await _dbContext.WorkspaceMembers
             .AsNoTracking()
             .Include(x => x.Workspace)
             .Where(x =>
                 x.UserId == userId &&
-                x.Workspace.Name.Contains(query))
+                x.Workspace.Name.ToLower().Contains(normalizedQuery))
             .ToListAsync();
 
         return memberships
