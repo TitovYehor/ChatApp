@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 import type {
     WorkspaceRole,
 } from '../types/workspaceTypes'
@@ -42,10 +44,29 @@ function ChatPage() {
         clearCurrentWorkspace,
     } = useChatNavigation()
 
+    const [workspaceSearch, setWorkspaceSearch] =
+        useState('')
+
+    const [debouncedWorkspaceSearch, setDebouncedWorkspaceSearch] =
+        useState('')
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setDebouncedWorkspaceSearch(
+                workspaceSearch.trim(),
+            )
+        }, 300)
+
+        return () => {
+            clearTimeout(timeoutId)
+        }
+    }, [workspaceSearch])
+
     const workspace = useWorkspaceController(
         user?.id ?? null,
         selectedWorkspaceId,
         clearSelectedWorkspace,
+        debouncedWorkspaceSearch,
     )
 
     const channel = useChannelController(
@@ -188,11 +209,16 @@ function ChatPage() {
             }
             workspaces={
                 <WorkspaceSidebar
-                    workspaces={
-                        workspace.workspaces
-                    }
                     selectedWorkspaceId={
                         selectedWorkspaceId
+                    }
+
+                    searchQuery={workspaceSearch}
+                    searchError={workspace.searchError}
+                    displayWorkspaces={
+                        debouncedWorkspaceSearch
+                            ? workspace.searchResults
+                            : workspace.workspaces
                     }
 
                     isCreating={
@@ -224,6 +250,9 @@ function ChatPage() {
 
                     onSelectWorkspace={
                         selectWorkspace
+                    }
+                    onSearchChange={
+                        setWorkspaceSearch
                     }
                     onCreateWorkspace={
                         handleCreateWorkspace
