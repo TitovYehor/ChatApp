@@ -14,19 +14,34 @@ import {
     remove,
     update,
     leave,
+    search,
 } from '../../api/workspaceApi'
 
 import type {
     WorkspaceResponse,
 } from '../../types/workspaceTypes'
 
-export function useWorkspaces() {
-    const queryClient =
-        useQueryClient()
+export function useWorkspaces(
+    searchQuery: string,
+) {
+    const queryClient = useQueryClient()
 
     const query = useQuery({
         queryKey: ['workspaces'],
         queryFn: getAll,
+    })
+
+    const searchQueryResult = useQuery({
+        queryKey: [
+            'workspaces',
+            'search',
+            searchQuery.trim(),
+        ],
+        queryFn: () =>
+            search({
+                query: searchQuery.trim(),
+            }),
+        enabled: searchQuery.trim().length > 0,
     })
 
     const createMutation =
@@ -282,6 +297,20 @@ export function useWorkspaces() {
     return {
         workspaces:
             query.data ?? [],
+
+        searchResults:
+            searchQuery.trim().length > 0
+                ? searchQueryResult.data ?? []
+                : [],
+
+        isSearching:
+            searchQuery.trim().length > 0 &&
+            searchQueryResult.isFetching,
+
+        searchError:
+            searchQueryResult.isError
+                ? 'Failed to search workspaces'
+                : null,
 
         isLoading:
             query.isLoading,
