@@ -100,6 +100,35 @@ public class ChannelService : IChannelService
         return channel.ToDto();
     }
 
+    public async Task<IReadOnlyCollection<ChannelResponseDto>> SearchAsync(
+        Guid workspaceId,
+        Guid userId,
+        ChannelSearchRequestDto request)
+    {
+        await _workspaceAuthorization
+            .EnsureCanAccessWorkspaceAsync(
+                workspaceId,
+                userId);
+
+        if (string.IsNullOrWhiteSpace(request.Query))
+        {
+            return Array.Empty<ChannelResponseDto>();
+        }
+
+        var normalizedQuery = request.Query.Trim().ToLower();
+
+        var channels = await _dbContext.Channels
+            .AsNoTracking()
+            .Where(x => x.WorkspaceId == workspaceId)
+            .Where(x => x.Name.ToLower().Contains(normalizedQuery))
+            .OrderBy(x => x.Name)
+            .ToListAsync();
+
+        return channels
+            .Select(x => x.ToDto())
+            .ToList();
+    }
+
     public async Task<IReadOnlyCollection<ChannelResponseDto>> GetByWorkspaceIdAsync(
         Guid workspaceId,
         Guid userId)

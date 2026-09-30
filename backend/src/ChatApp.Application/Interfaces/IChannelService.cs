@@ -14,6 +14,11 @@ public interface IChannelService
         Guid channelId,
         Guid userId);
 
+    Task<IReadOnlyCollection<ChannelResponseDto>> SearchAsync(
+        Guid workspaceId,
+        Guid userId,
+        ChannelSearchRequestDto request);
+
     Task<IReadOnlyCollection<ChannelResponseDto>> GetByWorkspaceIdAsync(
         Guid workspaceId,
         Guid userId);
