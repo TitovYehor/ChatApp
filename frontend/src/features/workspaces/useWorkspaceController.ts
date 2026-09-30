@@ -18,6 +18,7 @@ export function useWorkspaceController(
     currentUserId: string | null,
     selectedWorkspaceId: string | null,
     onWorkspaceAccessLost: (workspaceId: string) => void,
+    searchQuery: string,
 ) {
     useRealtimeWorkspaces(
         currentUserId,
@@ -27,6 +28,9 @@ export function useWorkspaceController(
 
     const {
         workspaces,
+        searchResults,
+        isSearching,
+        searchError,
         isLoading: isLoadingWorkspaces,
         error: workspacesError,
 
@@ -48,7 +52,7 @@ export function useWorkspaceController(
         isLeaving,
         leavingWorkspaceId,
         leaveWorkspaceError,
-    } = useWorkspaces()
+    } = useWorkspaces(searchQuery)
 
     const selectedWorkspace =
         workspaces.find(
@@ -147,6 +151,9 @@ export function useWorkspaceController(
 
     return {
         workspaces,
+        searchResults,
+        isSearching,
+        searchError,
         isLoadingWorkspaces,
         workspacesError,
 
