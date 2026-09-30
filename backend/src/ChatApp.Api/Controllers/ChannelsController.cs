@@ -53,6 +53,21 @@ public class ChannelsController : ControllerBase
         return Ok(channel);
     }
 
+    [HttpGet("workspaces/{workspaceId:guid}/channels/search")]
+    public async Task<ActionResult<IReadOnlyCollection<ChannelResponseDto>>> Search(
+        Guid workspaceId,
+        [FromQuery] ChannelSearchRequestDto request)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var channels = await _channelService.SearchAsync(
+            workspaceId,
+            userId,
+            request);
+
+        return Ok(channels);
+    }
+
     [HttpGet("workspaces/{workspaceId:guid}/channels")]
     public async Task<ActionResult<IReadOnlyCollection<ChannelResponseDto>>> GetByWorkspaceId(
         Guid workspaceId)
