@@ -8,8 +8,11 @@ import type {
 } from '../../types/workspaceTypes'
 
 interface WorkspaceSidebarProps {
-    workspaces: WorkspaceResponse[]
     selectedWorkspaceId: string | null
+
+    searchQuery: string
+    searchError: string | null
+    displayWorkspaces: WorkspaceResponse[]
 
     isCreating: boolean
     createError: string | null
@@ -24,6 +27,10 @@ interface WorkspaceSidebarProps {
 
     onSelectWorkspace: (
         workspaceId: string,
+    ) => void
+
+    onSearchChange: (
+        value: string
     ) => void
 
     onCreateWorkspace: (
@@ -43,8 +50,10 @@ interface WorkspaceSidebarProps {
 }
 
 function WorkspaceSidebar({
-    workspaces,
     selectedWorkspaceId,
+    searchQuery,
+    searchError,
+    displayWorkspaces,
     isCreating,
     createError,
     updatingWorkspaceId,
@@ -54,6 +63,7 @@ function WorkspaceSidebar({
     deleteWorkspaceError,
     deleteErrorWorkspaceId,
     onSelectWorkspace,
+    onSearchChange,
     onCreateWorkspace,
     onUpdateWorkspace,
     onDeleteWorkspace
@@ -64,6 +74,24 @@ function WorkspaceSidebar({
                 <h2>
                     Workspaces
                 </h2>
+            </div>
+
+            <div className="workspace-sidebar__search">
+                <input
+                    type="search"
+                    placeholder="Search workspaces..."
+                    value={searchQuery}
+                    onChange={(event) =>
+                        onSearchChange(event.target.value)
+                    }
+                    aria-label="Search workspaces"
+                />
+
+                {searchError && (
+                    <p className="workspace-sidebar__search-error">
+                        {searchError}
+                    </p>
+                )}
             </div>
 
             <WorkspaceCreateForm
@@ -78,17 +106,15 @@ function WorkspaceSidebar({
                 }
             />
 
-            {workspaces.length ===
-                0 ? (
+            {displayWorkspaces.length === 0 ? (
                 <p className="workspace-sidebar__empty">
-                    No workspaces
+                    {searchQuery.trim()
+                        ? 'No matching workspaces'
+                        : 'No workspaces'}
                 </p>
             ) : (
                 <ul className="workspace-sidebar__list">
-                    {workspaces.map(
-                        (
-                            workspace,
-                        ) => {
+                    {displayWorkspaces.map((workspace) => {
                             const isSelected =
                                 workspace.id ===
                                 selectedWorkspaceId

@@ -29,3 +29,33 @@
     color: #9298a6;
     font-size: 14px;
 }
+
+.workspace-sidebar__search {
+    padding: 12px 16px;
+}
+
+.workspace-sidebar__search input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #292d36;
+    border-radius: 8px;
+    background: #101218;
+    color: #e7eaf0;
+    font-size: 14px;
+    outline: none;
+}
+
+.workspace-sidebar__search input:focus {
+    border-color: #5865f2;
+}
+
+.workspace-sidebar__search input::placeholder {
+    color: #9298a6;
+}
+
+.workspace-sidebar__search-error {
+    margin: 8px 0 0;
+    color: #f87171;
+    font-size: 13px;
+}
