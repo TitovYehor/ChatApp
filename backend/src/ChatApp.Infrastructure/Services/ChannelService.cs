@@ -119,8 +119,9 @@ public class ChannelService : IChannelService
 
         var channels = await _dbContext.Channels
             .AsNoTracking()
-            .Where(x => x.WorkspaceId == workspaceId)
-            .Where(x => x.Name.ToLower().Contains(normalizedQuery))
+            .Where(x => 
+                x.WorkspaceId == workspaceId &&
+                x.Name.ToLower().Contains(normalizedQuery))
             .OrderBy(x => x.Name)
             .ToListAsync();
 
