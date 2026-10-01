@@ -28,3 +28,24 @@
     color: #9298a6;
     font-size: 14px;
 }
+
+.channel-sidebar__header input {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 12px;
+    padding: 8px 10px;
+    border: 1px solid #3a3f4b;
+    border-radius: 6px;
+    background: #20232b;
+    color: #e7eaf0;
+    font-size: 14px;
+    outline: none;
+}
+
+.channel-sidebar__header input::placeholder {
+    color: #777e8c;
+}
+
+.channel-sidebar__header input:focus {
+    border-color: #5a6272;
+}

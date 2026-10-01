@@ -11,6 +11,10 @@ interface ChannelSidebarProps {
     channels: ChannelResponse[]
     selectedChannelId: string | null
 
+    searchQuery: string
+    searchError: string | null
+    displayChannels: ChannelResponse[]
+
     canManageChannels: boolean
 
     isCreating: boolean
@@ -26,6 +30,10 @@ interface ChannelSidebarProps {
 
     onSelectChannel: (
         channelId: string,
+    ) => void
+
+    onSearchChange: (
+        value: string,
     ) => void
 
     onCreateChannel: (
@@ -45,6 +53,9 @@ interface ChannelSidebarProps {
 function ChannelSidebar({
     channels,
     selectedChannelId,
+    searchQuery,
+    searchError,
+    displayChannels,
     canManageChannels,
     isCreating,
     createError,
@@ -55,6 +66,7 @@ function ChannelSidebar({
     deleteChannelError,
     deleteErrorChannelId,
     onSelectChannel,
+    onSearchChange,
     onCreateChannel,
     onUpdateChannel,
     onDeleteChannel,
@@ -65,6 +77,18 @@ function ChannelSidebar({
                 <h2>
                     Channels
                 </h2>
+
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) =>
+                        onSearchChange(
+                            event.target.value,
+                        )
+                    }
+                    placeholder="Search channels..."
+                    aria-label="Search channels"
+                />
             </div>
 
             {canManageChannels && (
@@ -81,14 +105,20 @@ function ChannelSidebar({
                 />
             )}
 
-            {channels.length ===
+            {searchError ? (
+                <p className="channel-sidebar__empty">
+                    {searchError}
+                </p>
+            ) : displayChannels.length ===
                 0 ? (
                 <p className="channel-sidebar__empty">
-                    No channels
+                    {searchQuery
+                        ? 'No matching channels'
+                        : 'No channels'}
                 </p>
             ) : (
                 <ul className="channel-sidebar__list">
-                    {channels.map(
+                    {displayChannels.map(
                         (
                             channel,
                         ) => (
