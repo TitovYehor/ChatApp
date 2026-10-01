@@ -11,6 +11,7 @@ import {
 import {
     create,
     getByWorkspaceId,
+    search,
     update,
     remove,
 } from '../../api/channelApi'
@@ -21,9 +22,9 @@ import type {
 
 export function useChannels(
     workspaceId: string | null,
+    searchQuery: string,
 ) {
-    const queryClient =
-        useQueryClient()
+    const queryClient = useQueryClient()
 
     const query = useQuery({
         queryKey: [
@@ -36,6 +37,27 @@ export function useChannels(
             ),
         enabled:
             workspaceId !== null,
+    })
+
+    const normalizedSearchQuery = searchQuery.trim()
+
+    const searchQueryResult = useQuery({
+        queryKey: [
+            'channels',
+            workspaceId,
+            'search',
+            normalizedSearchQuery,
+        ],
+        queryFn: () =>
+            search(
+                workspaceId!,
+                {
+                    query: normalizedSearchQuery,
+                },
+            ),
+        enabled:
+            workspaceId !== null &&
+            normalizedSearchQuery.length > 0,
     })
 
     const createMutation =
@@ -246,6 +268,20 @@ export function useChannels(
 
         reload:
             query.refetch,
+
+        searchResults:
+            normalizedSearchQuery.length > 0
+                ? searchQueryResult.data ?? []
+                : [],
+
+        isSearching:
+            normalizedSearchQuery.length > 0 &&
+            searchQueryResult.isFetching,
+
+        searchError:
+            searchQueryResult.isError
+                ? 'Failed to search channels'
+                : null,
 
         createChannel:
             createMutation.mutateAsync,
