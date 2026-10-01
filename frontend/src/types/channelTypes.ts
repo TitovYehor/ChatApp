@@ -14,6 +14,10 @@ export interface ChannelResponse {
     createdAt: string
 }
 
+export interface ChannelSearchRequest {
+    query?: string
+}
+
 export interface ChannelDeletedResponse {
     channelId: string
     workspaceId: string
