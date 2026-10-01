@@ -12,6 +12,7 @@ export function useChannelController(
     onChannelDeleted: (
         channelId: string,
     ) => void,
+    searchQuery: string,
 ) {
     useRealtimeChannels(
         workspaceId,
@@ -23,6 +24,10 @@ export function useChannelController(
         channels,
         isLoading: isLoadingChannels,
         error: channelsError,
+
+        searchResults,
+        isSearching,
+        searchError,
 
         createChannel,
         isCreating,
@@ -39,6 +44,7 @@ export function useChannelController(
         deleteErrorChannelId,
     } = useChannels(
         workspaceId,
+        searchQuery,
     )
 
     async function createChannelAndReturn(
@@ -71,6 +77,10 @@ export function useChannelController(
         channels,
         isLoadingChannels,
         channelsError,
+
+        searchResults,
+        isSearching,
+        searchError,
 
         createChannelAndReturn,
         isCreating,
