@@ -4,6 +4,7 @@ import type {
     ChannelResponse,
     CreateChannelRequest,
     UpdateChannelRequest,
+    ChannelSearchRequest,
 } from '../types/channelTypes'
 
 export function getByWorkspaceId(
@@ -19,6 +20,21 @@ export function getById(
 ): Promise<ChannelResponse> {
     return apiRequest<ChannelResponse>(
         `/channels/${channelId}`,
+    )
+}
+
+export function search(
+    workspaceId: string,
+    request: ChannelSearchRequest,
+): Promise<ChannelResponse[]> {
+    const params = new URLSearchParams()
+
+    if (request.query) {
+        params.set('query', request.query)
+    }
+
+    return apiRequest<ChannelResponse[]>(
+        `/workspaces/${workspaceId}/channels/search?${params.toString()}`,
     )
 }
 
