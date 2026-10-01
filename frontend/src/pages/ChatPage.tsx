@@ -50,6 +50,12 @@ function ChatPage() {
     const [debouncedWorkspaceSearch, setDebouncedWorkspaceSearch] =
         useState('')
 
+    const [channelSearch, setChannelSearch] =
+        useState('')
+
+    const [debouncedChannelSearch, setDebouncedChannelSearch] =
+        useState('')
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setDebouncedWorkspaceSearch(
@@ -62,6 +68,18 @@ function ChatPage() {
         }
     }, [workspaceSearch])
 
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setDebouncedChannelSearch(
+                channelSearch.trim(),
+            )
+        }, 300)
+
+        return () => {
+            clearTimeout(timeoutId)
+        }
+    }, [channelSearch])
+
     const workspace = useWorkspaceController(
         user?.id ?? null,
         selectedWorkspaceId,
@@ -73,6 +91,7 @@ function ChatPage() {
         selectedWorkspaceId,
         selectedChannelId,
         clearSelectedChannel,
+        debouncedChannelSearch,
     )
 
     const chat = useChatController(
@@ -199,6 +218,11 @@ function ChatPage() {
             (item) => item.id === selectedChannelId,
         ) ?? null
 
+    const displayChannels =
+        debouncedChannelSearch
+            ? channel.searchResults
+            : channel.channels
+
     return (
         <ChatLayout
             header={
@@ -309,6 +333,18 @@ function ChatPage() {
                             selectedChannelId={
                                 selectedChannelId
                             }
+                            searchQuery={
+                                channelSearch
+                            }
+
+                            searchError={
+                                channel.searchError
+                            }
+
+                            displayChannels={
+                                displayChannels
+                            }
+
                             canManageChannels={
                                 workspace.canManageChannels
                             }
@@ -342,6 +378,9 @@ function ChatPage() {
 
                             onSelectChannel={
                                 selectChannel
+                            }
+                            onSearchChange={
+                                setChannelSearch
                             }
                             onCreateChannel={
                                 handleCreateChannel
