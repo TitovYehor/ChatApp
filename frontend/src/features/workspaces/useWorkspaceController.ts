@@ -19,6 +19,7 @@ export function useWorkspaceController(
     selectedWorkspaceId: string | null,
     onWorkspaceAccessLost: (workspaceId: string) => void,
     searchQuery: string,
+    memberSearchQuery: string,
 ) {
     useRealtimeWorkspaces(
         currentUserId,
@@ -63,6 +64,11 @@ export function useWorkspaceController(
 
     const {
         members,
+
+        searchResults: memberSearchResults,
+        isSearching: isSearchingMembers,
+        searchError: memberSearchError,
+
         isLoading: isLoadingMembers,
         error: membersError,
 
@@ -86,6 +92,7 @@ export function useWorkspaceController(
         transferOwnershipError,
     } = useWorkspaceMembers(
         selectedWorkspaceId,
+        memberSearchQuery
     )
 
     const canManageChannels =
@@ -183,6 +190,11 @@ export function useWorkspaceController(
         leaveWorkspaceError,
 
         members,
+
+        memberSearchResults,
+        isSearchingMembers,
+        memberSearchError,
+    
         isLoadingMembers,
         membersError,
 
