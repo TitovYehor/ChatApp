@@ -10,6 +10,7 @@ import {
     getMembers,
     removeMember,
     transferOwnership,
+    searchMembers,
 } from '../../api/workspaceApi'
 
 import type {
@@ -18,9 +19,9 @@ import type {
 
 export function useWorkspaceMembers(
     workspaceId: string | null,
+    searchQuery: string,
 ) {
-    const queryClient =
-        useQueryClient()
+    const queryClient = useQueryClient()
 
     const query = useQuery({
         queryKey: [
@@ -33,6 +34,27 @@ export function useWorkspaceMembers(
             ),
         enabled:
             workspaceId !== null,
+    })
+
+    const normalizedSearchQuery = searchQuery.trim()
+
+    const searchQueryResult = useQuery({
+        queryKey: [
+            'workspace-members',
+            workspaceId,
+            'search',
+            normalizedSearchQuery,
+        ],
+        queryFn: () =>
+            searchMembers(
+                workspaceId!,
+                {
+                    query: normalizedSearchQuery,
+                },
+            ),
+        enabled:
+            workspaceId !== null &&
+            normalizedSearchQuery.length > 0,
     })
 
     const addMemberMutation =
@@ -146,6 +168,20 @@ export function useWorkspaceMembers(
     return {
         members:
             query.data ?? [],
+
+        searchResults:
+            normalizedSearchQuery.length > 0
+                ? searchQueryResult.data ?? []
+                : [],
+
+        isSearching:
+            normalizedSearchQuery.length > 0 &&
+            searchQueryResult.isFetching,
+
+        searchError:
+            searchQueryResult.isError
+                ? 'Failed to search workspace members'
+                : null,
 
         isLoading:
             query.isLoading,
