@@ -9,6 +9,7 @@ import type {
     WorkspaceMemberResponse,
     WorkspaceResponse,
     WorkspaceSearchRequest,
+    WorkspaceMemberSearchRequest
 } from '../types/workspaceTypes'
 
 export function getAll():
@@ -97,6 +98,21 @@ export function getMembers(
 ): Promise<WorkspaceMemberResponse[]> {
     return apiRequest<WorkspaceMemberResponse[]>(
         `/workspaces/${workspaceId}/members`,
+    )
+}
+
+export function searchMembers(
+    workspaceId: string,
+    request: WorkspaceMemberSearchRequest,
+): Promise<WorkspaceMemberResponse[]> {
+    const params = new URLSearchParams()
+
+    if (request.query) {
+        params.set('query', request.query)
+    }
+
+    return apiRequest<WorkspaceMemberResponse[]>(
+        `/workspaces/${workspaceId}/members/search?${params.toString()}`,
     )
 }
 
