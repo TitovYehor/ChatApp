@@ -38,6 +38,11 @@ public interface IWorkspaceService
         Guid workspaceId,
         Guid userId);
 
+    Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> SearchMembersAsync(
+        Guid workspaceId,
+        Guid userId,
+        WorkspaceMemberSearchRequestDto request);
+
     Task JoinAsync(
         Guid workspaceId,
         Guid userId);

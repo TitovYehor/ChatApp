@@ -311,6 +311,48 @@ public class WorkspaceService : IWorkspaceService
         return members;
     }
 
+    public async Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> SearchMembersAsync(
+        Guid workspaceId,
+        Guid userId,
+        WorkspaceMemberSearchRequestDto request)
+    {
+        var isMember = await _dbContext.WorkspaceMembers
+            .AnyAsync(x =>
+                x.WorkspaceId == workspaceId &&
+                x.UserId == userId);
+
+        if (!isMember)
+        {
+            throw new ForbiddenException("Workspace is forbidden for non members");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Query))
+        {
+            return Array.Empty<WorkspaceMemberResponseDto>();
+        }
+
+        var query = request.Query.Trim().ToLower();
+
+        var members = await _dbContext.WorkspaceMembers
+            .AsNoTracking()
+            .Where(x => x.WorkspaceId == workspaceId)
+            .Include(x => x.User)
+            .Where(x => x.User.Username.ToLower().Contains(query))
+            .OrderBy(x => x.Role)
+            .ThenBy(x => x.User.Username)
+            .Select(x => new WorkspaceMemberResponseDto
+            {
+                UserId = x.UserId,
+                Username = x.User.Username,
+                Email = x.User.Email,
+                Role = (WorkspaceRoleDto)x.Role,
+                JoinedAt = x.JoinedAt
+            })
+            .ToListAsync();
+
+        return members;
+    }
+
     public async Task JoinAsync(
         Guid workspaceId,
         Guid userId)
