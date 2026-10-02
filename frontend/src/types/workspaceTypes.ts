@@ -15,6 +15,10 @@ export interface WorkspaceSearchRequest {
     query?: string
 }
 
+export interface WorkspaceMemberSearchRequest {
+    query?: string
+}
+
 export interface UpdateWorkspaceRequest {
     name: string
     description: string
