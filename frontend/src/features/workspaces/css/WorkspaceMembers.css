@@ -5,6 +5,7 @@
 
 .workspace-members__header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
 
@@ -16,6 +17,32 @@
 
     font-size: 18px;
     font-weight: 600;
+}
+
+.workspace-members__header input {
+    width: 100%;
+    box-sizing: border-box;
+    flex: 0 0 100%;
+
+    margin-top: 4px;
+    padding: 8px 10px;
+
+    border: 1px solid #3a3f4b;
+    border-radius: 6px;
+
+    background: #20232b;
+    color: #e7eaf0;
+
+    font-size: 14px;
+    outline: none;
+}
+
+.workspace-members__header input::placeholder {
+    color: #777e8c;
+}
+
+.workspace-members__header input:focus {
+    border-color: #5a6272;
 }
 
 .workspace-members__count {
@@ -41,7 +68,7 @@
     flex-direction: column;
     gap: 6px;
 
-    margin: 16px 0 0;
+    margin: 16px 0 16px;
     padding: 0;
 
     list-style: none;

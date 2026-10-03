@@ -17,6 +17,11 @@ import type {
 interface WorkspaceMembersProps {
     members: WorkspaceMemberResponse[]
     onlineUsers: OnlineUserResponse[]
+    displayMembers: WorkspaceMemberResponse[]
+
+    searchQuery: string
+    searchError: string | null
+
     currentUserId: string | null
 
     workspaceName: string
@@ -42,6 +47,10 @@ interface WorkspaceMembersProps {
     isLeaving: boolean
     leaveError: string | null
 
+    onSearchChange: (
+        value: string,
+    ) => void
+
     onAddMember: (
         usernameOrEmail: string,
     ) => Promise<void>
@@ -65,6 +74,12 @@ interface WorkspaceMembersProps {
 function WorkspaceMembers({
     members,
     onlineUsers,
+    displayMembers,
+
+    searchQuery,
+    searchError,
+    onSearchChange,
+
     currentUserId,
 
     workspaceName,
@@ -162,77 +177,34 @@ function WorkspaceMembers({
                 <span className="workspace-members__count">
                     {members.length}
                 </span>
+
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) =>
+                        onSearchChange(
+                            event.target.value,
+                        )
+                    }
+                    placeholder="Search members..."
+                    aria-label="Search members"
+                />
             </div>
 
-            {canManageMembers && (
-                <WorkspaceMemberAddForm
-                    isAdding={
-                        isAdding
-                    }
-                    addError={
-                        addError
-                    }
-                    onAdd={
-                        onAddMember
-                    }
-                />
-            )}
-
-            {canManageMembers && (
-                <WorkspaceOwnershipTransfer
-                    members={
-                        members
-                    }
-                    currentUserId={
-                        currentUserId
-                    }
-                    isTransferring={
-                        isTransferringOwnership
-                    }
-                    transferringMember={
-                        transferringOwnership
-                    }
-                    transferError={
-                        transferOwnershipError
-                    }
-                    onTransfer={
-                        onTransferOwnership
-                    }
-                />
-            )}
-
-            <WorkspaceLeave
-                workspaceName={
-                    workspaceName
-                }
-                currentUserId={
-                    currentUserId
-                }
-                currentUserRole={
-                    currentUserRole
-                }
-                members={
-                    members
-                }
-                isLeaving={
-                    isLeaving
-                }
-                leaveError={
-                    leaveError
-                }
-                onLeave={
-                    onLeaveWorkspace
-                }
-            />
-
-            {members.length ===
+            {searchError ? (
+                <p className="workspace-members__empty">
+                    {searchError}
+                </p>
+            ) : displayMembers.length ===
                 0 ? (
                 <p className="workspace-members__empty">
-                    No members
+                    {searchQuery
+                        ? 'No matching members'
+                        : 'No members'}
                 </p>
             ) : (
                 <ul className="workspace-members__list">
-                    {members.map(
+                    {displayMembers.map(
                         (
                             member,
                         ) => {
@@ -359,6 +331,67 @@ function WorkspaceMembers({
                     )}
                 </ul>
             )}
+
+            {canManageMembers && (
+                <WorkspaceMemberAddForm
+                    isAdding={
+                        isAdding
+                    }
+                    addError={
+                        addError
+                    }
+                    onAdd={
+                        onAddMember
+                    }
+                />
+            )}
+
+            {canManageMembers && (
+                <WorkspaceOwnershipTransfer
+                    members={
+                        members
+                    }
+                    currentUserId={
+                        currentUserId
+                    }
+                    isTransferring={
+                        isTransferringOwnership
+                    }
+                    transferringMember={
+                        transferringOwnership
+                    }
+                    transferError={
+                        transferOwnershipError
+                    }
+                    onTransfer={
+                        onTransferOwnership
+                    }
+                />
+            )}
+
+            <WorkspaceLeave
+                workspaceName={
+                    workspaceName
+                }
+                currentUserId={
+                    currentUserId
+                }
+                currentUserRole={
+                    currentUserRole
+                }
+                members={
+                    members
+                }
+                isLeaving={
+                    isLeaving
+                }
+                leaveError={
+                    leaveError
+                }
+                onLeave={
+                    onLeaveWorkspace
+                }
+            />
         </div>
     )
 }
