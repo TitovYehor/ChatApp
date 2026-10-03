@@ -10,6 +10,7 @@ import type {
     WorkspaceMemberRoleChangedResponse,
     WorkspaceMemberResponse,
     WorkspaceOwnershipTransferredResponse,
+    WorkspaceRole
 } from '../../types/workspaceTypes'
 
 import {
@@ -22,51 +23,183 @@ export function useRealtimeWorkspaces(
     onWorkspaceAccessLost: (workspaceId: string) => void,
 ) {
     const queryClient = useQueryClient()
+
     const connection = getChatConnection()
+
+    const updateWorkspaceSearchCaches = (
+        workspace: WorkspaceResponse,
+    ) => {
+        const searchQueries =
+            queryClient.getQueriesData<
+                WorkspaceResponse[]
+            >({
+                queryKey: [
+                    'workspaces',
+                    'search',
+                ],
+            })
+
+        searchQueries.forEach(
+            ([queryKey, current]) => {
+                if (!current) {
+                    return
+                }
+
+                const searchQuery =
+                    String(
+                        queryKey[2] ?? '',
+                    )
+                        .trim()
+                        .toLowerCase()
+
+                if (!searchQuery) {
+                    return
+                }
+
+                const matches =
+                    workspace.name
+                        .toLowerCase()
+                        .includes(searchQuery)
+
+                const exists =
+                    current.some(
+                        (item) =>
+                            item.id ===
+                            workspace.id,
+                    )
+
+                if (!matches) {
+                    queryClient.setQueryData<
+                        WorkspaceResponse[]
+                    >(
+                        queryKey,
+                        current.filter(
+                            (item) =>
+                                item.id !==
+                                workspace.id,
+                        ),
+                    )
+
+                    return
+                }
+
+                if (exists) {
+                    queryClient.setQueryData<
+                        WorkspaceResponse[]
+                    >(
+                        queryKey,
+                        current.map(
+                            (item) =>
+                                item.id ===
+                                    workspace.id
+                                    ? workspace
+                                    : item,
+                        ),
+                    )
+
+                    return
+                }
+
+                queryClient.setQueryData<
+                    WorkspaceResponse[]
+                >(
+                    queryKey,
+                    [
+                        ...current,
+                        workspace,
+                    ],
+                )
+            },
+        )
+    }
+
+    const removeWorkspaceFromSearchCaches = (
+        workspaceId: string,
+    ) => {
+        const searchQueries =
+            queryClient.getQueriesData<
+                WorkspaceResponse[]
+            >({
+                queryKey: [
+                    'workspaces',
+                    'search',
+                ],
+            })
+
+        searchQueries.forEach(
+            ([queryKey, current]) => {
+                if (!current) {
+                    return
+                }
+
+                queryClient.setQueryData<
+                    WorkspaceResponse[]
+                >(
+                    queryKey,
+                    current.filter(
+                        (workspace) =>
+                            workspace.id !==
+                            workspaceId,
+                    ),
+                )
+            },
+        )
+    }
 
     useEffect(() => {
         const handleWorkspaceUpdated = (
             response: WorkspaceUpdatedResponse,
         ) => {
-            queryClient.setQueryData<WorkspaceResponse[]>(
+            queryClient.setQueryData<
+                WorkspaceResponse[]
+            >(
                 ['workspaces'],
                 (current) => {
-                    if (!current) return current
-
-                    const workspaceExists = current.some(
-                        (workspace) =>
-                            workspace.id === response.workspaceId,
-                    )
-
-                    if (!workspaceExists) {
+                    if (!current) {
                         return current
                     }
 
-                    return current.map((workspace) =>
-                        workspace.id === response.workspaceId
-                            ? {
-                                ...workspace,
-                                name: response.name,
-                                description: response.description,
-                            }
-                            : workspace,
+                    return current.map(
+                        (workspace) =>
+                            workspace.id ===
+                                response.workspaceId
+                                ? {
+                                    ...workspace,
+                                    name: response.name,
+                                    description:
+                                        response.description,
+                                }
+                                : workspace,
                     )
                 },
             )
 
             const currentWorkspace =
                 queryClient.getQueryData<WorkspaceResponse>(
-                    ['workspace', response.workspaceId],
+                    [
+                        'workspace',
+                        response.workspaceId,
+                    ],
                 )
 
             if (currentWorkspace) {
+                const updatedWorkspace = {
+                    ...currentWorkspace,
+                    name: response.name,
+                    description:
+                        response.description,
+                }
+
                 queryClient.setQueryData<WorkspaceResponse>(
-                    ['workspace', response.workspaceId],
-                    {
-                        ...currentWorkspace,
-                        name: response.name,
-                        description: response.description,
-                    },
+                    [
+                        'workspace',
+                        response.workspaceId,
+                    ],
+                    updatedWorkspace,
+                )
+
+                updateWorkspaceSearchCaches(
+                    updatedWorkspace,
                 )
             }
         }
@@ -100,6 +233,10 @@ export function useRealtimeWorkspaces(
             if (selectedWorkspaceId === response.workspaceId) {
                 onWorkspaceAccessLost(response.workspaceId)
             }
+
+            removeWorkspaceFromSearchCaches(
+                response.workspaceId,
+            )
         }
 
         const handleWorkspaceMemberAdded = (
@@ -142,21 +279,19 @@ export function useRealtimeWorkspaces(
                 return
             }
 
+            const addedWorkspace: WorkspaceResponse = {
+                id: response.workspaceId,
+                name: response.name,
+                description: response.description,
+                currentUserRole: response.role,
+                createdAt: response.createdAt,
+            }
+
             queryClient.setQueryData<WorkspaceResponse[]>(
                 ['workspaces'],
                 (current) => {
                     if (!current) {
-                        return [
-                            {
-                                id: response.workspaceId,
-                                name: response.name,
-                                description: response.description,
-                                currentUserRole:
-                                    response.role,
-                                createdAt:
-                                    response.createdAt,
-                            },
-                        ]
+                        return [addedWorkspace]
                     }
 
                     const alreadyExists = current.some(
@@ -171,17 +306,13 @@ export function useRealtimeWorkspaces(
 
                     return [
                         ...current,
-                        {
-                            id: response.workspaceId,
-                            name: response.name,
-                            description: response.description,
-                            currentUserRole:
-                                response.role,
-                            createdAt:
-                                response.createdAt,
-                        },
+                        addedWorkspace,
                     ]
                 },
+            )
+
+            updateWorkspaceSearchCaches(
+                addedWorkspace,
             )
         }
 
@@ -225,6 +356,10 @@ export function useRealtimeWorkspaces(
                             response.workspaceId,
                     )
                 },
+            )
+
+            removeWorkspaceFromSearchCaches(
+                response.workspaceId,
             )
 
             queryClient.removeQueries({
@@ -327,16 +462,22 @@ export function useRealtimeWorkspaces(
                 return
             }
 
+            const updatedWorkspace = {
+                ...currentWorkspace,
+                currentUserRole:
+                    response.role,
+            }
+
             queryClient.setQueryData<WorkspaceResponse>(
                 [
                     'workspace',
                     response.workspaceId,
                 ],
-                {
-                    ...currentWorkspace,
-                    currentUserRole:
-                        response.role,
-                },
+                updatedWorkspace,
+            )
+
+            updateWorkspaceSearchCaches(
+                updatedWorkspace,
             )
         }
 
@@ -390,7 +531,7 @@ export function useRealtimeWorkspaces(
                 return
             }
 
-            const currentUserRole =
+            const currentUserRole: WorkspaceRole =
                 currentUserId ===
                     response.newOwnerUserId
                     ? 1
@@ -428,15 +569,21 @@ export function useRealtimeWorkspaces(
                 return
             }
 
+            const updatedWorkspace = {
+                ...currentWorkspace,
+                currentUserRole,
+            }
+
             queryClient.setQueryData<WorkspaceResponse>(
                 [
                     'workspace',
                     response.workspaceId,
                 ],
-                {
-                    ...currentWorkspace,
-                    currentUserRole,
-                },
+                updatedWorkspace,
+            )
+
+            updateWorkspaceSearchCaches(
+                updatedWorkspace,
             )
         }
 
