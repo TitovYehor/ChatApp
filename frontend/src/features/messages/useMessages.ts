@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useState,
 } from 'react'
 
@@ -16,18 +17,42 @@ import {
 
 export function useMessages(
     channelId: string | null,
+    searchQuery: string,
 ) {
+    const pageSize = 50
+
+    const [
+        pageNumber,
+        setPageNumber,
+    ] = useState(1)
+
+    const normalizedSearchQuery =
+        searchQuery.trim()
+
+    useEffect(() => {
+        setPageNumber(1)
+    }, [
+        channelId,
+        normalizedSearchQuery,
+    ])
+
     const query = useQuery({
         queryKey: [
             'messages',
             channelId,
+            pageNumber,
+            pageSize,
+            normalizedSearchQuery,
         ],
         queryFn: () =>
             getByChannelId(
                 channelId!,
                 {
-                    pageNumber: 1,
-                    pageSize: 50,
+                    pageNumber,
+                    pageSize,
+                    search:
+                        normalizedSearchQuery ||
+                        undefined,
                 },
             ),
         enabled:
@@ -120,12 +145,62 @@ export function useMessages(
         },
     })
 
+    const totalCount =
+        query.data?.totalCount ?? 0
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalCount /
+                pageSize,
+            ),
+        )
+
     return {
         messages:
             query.data?.items ?? [],
 
+        pageNumber,
+
+        pageSize,
+
+        totalCount,
+
+        totalPages,
+
+        hasPreviousPage:
+            pageNumber > 1,
+
+        hasNextPage:
+            pageNumber <
+            totalPages,
+
+        goToPreviousPage: () => {
+            setPageNumber(
+                (current) =>
+                    Math.max(
+                        1,
+                        current - 1,
+                    ),
+            )
+        },
+
+        goToNextPage: () => {
+            setPageNumber(
+                (current) =>
+                    Math.min(
+                        totalPages,
+                        current + 1,
+                    ),
+            )
+        },
+
         isLoading:
             query.isLoading,
+
+        isFetching:
+            query.isFetching,
 
         error: query.error
             ? 'Failed to load messages'
@@ -161,7 +236,7 @@ export function useMessages(
             updateMutation.error
                 ? 'Failed to update message'
                 : null,
-        
+
         deleteMessage:
             deleteMutation.mutateAsync,
 
