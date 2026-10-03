@@ -21,9 +21,21 @@ import {
 export function useChatController(
     channelId: string | null,
     currentUserId: string | null,
+    searchQuery: string,
 ) {
     const {
         messages,
+
+        pageNumber,
+        pageSize,
+        totalCount,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
+        goToPreviousPage,
+        goToNextPage,
+        isFetching: isMessagesFetching,
+
         isLoading: isMessagesLoading,
         error: messagesError,
 
@@ -42,6 +54,7 @@ export function useChatController(
         deleteErrorMessageId,
     } = useMessages(
         channelId,
+        searchQuery,
     )
 
     useChannelSignalR(
@@ -94,6 +107,17 @@ export function useChatController(
 
     return {
         messages,
+
+        pageNumber,
+        pageSize,
+        totalCount,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
+        goToPreviousPage,
+        goToNextPage,
+        isMessagesFetching,
+
         isMessagesLoading,
         messagesError,
 
