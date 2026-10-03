@@ -62,6 +62,12 @@ function ChatPage() {
     const [debouncedMemberSearch, setDebouncedMemberSearch] =
         useState('')
 
+    const [messageSearch, setMessageSearch] =
+        useState('')
+
+    const [debouncedMessageSearch, setDebouncedMessageSearch] =
+        useState('')
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setDebouncedWorkspaceSearch(
@@ -98,6 +104,18 @@ function ChatPage() {
         }
     }, [memberSearch])
 
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setDebouncedMessageSearch(
+                messageSearch.trim(),
+            )
+        }, 300)
+
+        return () => {
+            clearTimeout(timeoutId)
+        }
+    }, [messageSearch])
+
     const workspace = useWorkspaceController(
         user?.id ?? null,
         selectedWorkspaceId,
@@ -116,6 +134,7 @@ function ChatPage() {
     const chat = useChatController(
         selectedChannelId,
         user?.id ?? null,
+        debouncedMessageSearch,
     )
 
     const {
@@ -547,65 +566,112 @@ function ChatPage() {
                                 {selectedChannel?.name ?? 'Channel'}
                             </h2>
                         </div>
+
+                        <div className="chat-messages__search">
+                            <input
+                                type="text"
+                                value={messageSearch}
+                                onChange={(event) => {
+                                    setMessageSearch(
+                                        event.target.value,
+                                    )
+                                }}
+                                placeholder="Search messages..."
+                                aria-label="Search messages"
+                            />
+                        </div>
                     </div>
 
                     {chat.isMessagesLoading ? (
                         <p className="chat-messages__status">
-                            Loading
-                            messages...
+                            Loading messages...
                         </p>
                     ) : chat.messagesError ? (
                         <p className="chat-messages__error">
-                            {
-                                chat.messagesError
-                            }
+                            {chat.messagesError}
                         </p>
-                    ) : chat.messages.length ===
-                        0 ? (
+                    ) : chat.messages.length === 0 ? (
                         <p className="chat-messages__status">
-                            No messages yet
+                            {debouncedMessageSearch
+                                ? 'No matching messages'
+                                : 'No messages yet'}
                         </p>
                     ) : (
-                        <MessageList
-                            messages={
-                                chat.messages
-                            }
-                            currentUserId={
-                                user?.id ??
-                                null
-                            }
-                            canManageMessages={
-                                workspace.canManageMessages
-                            }
+                        <>
+                            <MessageList
+                                messages={
+                                    chat.messages
+                                }
+                                currentUserId={
+                                    user?.id ??
+                                    null
+                                }
+                                canManageMessages={
+                                    workspace.canManageMessages
+                                }
 
-                            updatingMessageId={
-                                chat.updatingMessageId
-                            }
-                            deletingMessageId={
-                                chat.deletingMessageId
-                            }
+                                updatingMessageId={
+                                    chat.updatingMessageId
+                                }
+                                deletingMessageId={
+                                    chat.deletingMessageId
+                                }
 
-                            updateError={
-                                chat.updateError
-                            }
-                            updateErrorMessageId={
-                                chat.updateErrorMessageId
-                            }
+                                updateError={
+                                    chat.updateError
+                                }
+                                updateErrorMessageId={
+                                    chat.updateErrorMessageId
+                                }
 
-                            deleteError={
-                                chat.deleteError
-                            }
-                            deleteErrorMessageId={
-                                chat.deleteErrorMessageId
-                            }
+                                deleteError={
+                                    chat.deleteError
+                                }
+                                deleteErrorMessageId={
+                                    chat.deleteErrorMessageId
+                                }
 
-                            onUpdate={
-                                chat.updateChatMessage
-                            }
-                            onDelete={
-                                chat.deleteMessage
-                            }
-                        />
+                                onUpdate={
+                                    chat.updateChatMessage
+                                }
+                                onDelete={
+                                    chat.deleteMessage
+                                }
+                            />
+
+                            <div className="chat-messages__pagination">
+                                <button
+                                    type="button"
+                                    onClick={
+                                        chat.goToPreviousPage
+                                    }
+                                    disabled={
+                                        !chat.hasPreviousPage ||
+                                        chat.isMessagesFetching
+                                    }
+                                >
+                                    Previous
+                                </button>
+
+                                <span>
+                                    Page {chat.pageNumber} of{' '}
+                                    {chat.totalPages}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={
+                                        chat.goToNextPage
+                                    }
+                                    disabled={
+                                        !chat.hasNextPage ||
+                                        chat.isMessagesFetching
+                                    }
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </>
                     )}
 
                     <TypingIndicator
