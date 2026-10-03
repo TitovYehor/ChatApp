@@ -8,7 +8,6 @@ import type {
 } from '../../types/channelTypes'
 
 interface ChannelSidebarProps {
-    channels: ChannelResponse[]
     selectedChannelId: string | null
 
     searchQuery: string
@@ -51,7 +50,6 @@ interface ChannelSidebarProps {
 }
 
 function ChannelSidebar({
-    channels,
     selectedChannelId,
     searchQuery,
     searchError,

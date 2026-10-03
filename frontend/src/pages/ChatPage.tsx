@@ -370,9 +370,6 @@ function ChatPage() {
                 ) : (
                     <div className="chat-page__channels-section">
                         <ChannelSidebar
-                            channels={
-                                channel.channels
-                            }
                             selectedChannelId={
                                 selectedChannelId
                             }
