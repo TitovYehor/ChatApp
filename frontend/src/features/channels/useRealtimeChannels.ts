@@ -30,6 +30,128 @@ export function useRealtimeChannels(
 
     const connection = getChatConnection()
 
+    const updateChannelSearchCaches = (
+        updatedChannel: ChannelResponse,
+    ) => {
+        const searchQueries =
+            queryClient.getQueriesData<
+                ChannelResponse[]
+            >({
+                queryKey: [
+                    'channels',
+                    workspaceId,
+                    'search',
+                ],
+            })
+
+        searchQueries.forEach(
+            ([queryKey, current]) => {
+                if (!current) {
+                    return
+                }
+
+                const searchQuery =
+                    String(
+                        queryKey[3] ?? '',
+                    )
+                        .trim()
+                        .toLowerCase()
+
+                if (!searchQuery) {
+                    return
+                }
+
+                const matches =
+                    updatedChannel.name
+                        .toLowerCase()
+                        .includes(searchQuery)
+
+                const exists =
+                    current.some(
+                        (channel) =>
+                            channel.id ===
+                            updatedChannel.id,
+                    )
+
+                if (!matches) {
+                    queryClient.setQueryData<
+                        ChannelResponse[]
+                    >(
+                        queryKey,
+                        current.filter(
+                            (channel) =>
+                                channel.id !==
+                                updatedChannel.id,
+                        ),
+                    )
+
+                    return
+                }
+
+                if (exists) {
+                    queryClient.setQueryData<
+                        ChannelResponse[]
+                    >(
+                        queryKey,
+                        current.map(
+                            (channel) =>
+                                channel.id ===
+                                    updatedChannel.id
+                                    ? updatedChannel
+                                    : channel,
+                        ),
+                    )
+
+                    return
+                }
+
+                queryClient.setQueryData<
+                    ChannelResponse[]
+                >(
+                    queryKey,
+                    [
+                        ...current,
+                        updatedChannel,
+                    ],
+                )
+            },
+        )
+    }
+
+    const removeChannelFromSearchCaches = (
+        channelId: string,
+    ) => {
+        const searchQueries =
+            queryClient.getQueriesData<
+                ChannelResponse[]
+            >({
+                queryKey: [
+                    'channels',
+                    workspaceId,
+                    'search',
+                ],
+            })
+
+        searchQueries.forEach(
+            ([queryKey, current]) => {
+                if (!current) {
+                    return
+                }
+
+                queryClient.setQueryData<
+                    ChannelResponse[]
+                >(
+                    queryKey,
+                    current.filter(
+                        (channel) =>
+                            channel.id !==
+                            channelId,
+                    ),
+                )
+            },
+        )
+    }
+
     useEffect(() => {
         if (!workspaceId) return
 
@@ -78,6 +200,8 @@ export function useRealtimeChannels(
                     ]
                 },
             )
+
+            updateChannelSearchCaches(channel)
         }
 
         const handleChannelUpdated = (
@@ -115,6 +239,8 @@ export function useRealtimeChannels(
                     )
                 },
             )
+
+            updateChannelSearchCaches(channel)
         }
 
         const handleChannelDeleted = (
@@ -159,6 +285,10 @@ export function useRealtimeChannels(
                     response.channelId,
                 )
             }
+
+            removeChannelFromSearchCaches(
+                response.channelId,
+            )
         }
 
         connection.on(
