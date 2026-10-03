@@ -56,6 +56,12 @@ function ChatPage() {
     const [debouncedChannelSearch, setDebouncedChannelSearch] =
         useState('')
 
+    const [memberSearch, setMemberSearch] =
+        useState('')
+
+    const [debouncedMemberSearch, setDebouncedMemberSearch] =
+        useState('')
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setDebouncedWorkspaceSearch(
@@ -80,11 +86,24 @@ function ChatPage() {
         }
     }, [channelSearch])
 
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setDebouncedMemberSearch(
+                memberSearch.trim(),
+            )
+        }, 300)
+
+        return () => {
+            clearTimeout(timeoutId)
+        }
+    }, [memberSearch])
+
     const workspace = useWorkspaceController(
         user?.id ?? null,
         selectedWorkspaceId,
         clearSelectedWorkspace,
         debouncedWorkspaceSearch,
+        debouncedMemberSearch,
     )
 
     const channel = useChannelController(
@@ -222,6 +241,11 @@ function ChatPage() {
         debouncedChannelSearch
             ? channel.searchResults
             : channel.channels
+
+    const displayMembers =
+        debouncedMemberSearch
+            ? workspace.memberSearchResults
+            : workspace.members
 
     return (
         <ChatLayout
@@ -400,6 +424,18 @@ function ChatPage() {
                             onlineUsers={
                                 onlineUsers
                             }
+                            displayMembers={
+                                displayMembers
+                            }
+
+                            searchQuery={
+                                memberSearch
+                            }
+
+                            searchError={
+                                workspace.memberSearchError
+                            }
+
                             currentUserId={
                                 user?.id ?? null
                             }
@@ -466,6 +502,9 @@ function ChatPage() {
                                     : null
                             }
 
+                            onSearchChange={
+                                setMemberSearch
+                            }
                             onAddMember={
                                 handleAddWorkspaceMember
                             }
