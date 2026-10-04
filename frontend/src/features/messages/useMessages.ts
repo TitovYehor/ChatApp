@@ -1,5 +1,4 @@
 import {
-    useEffect,
     useState,
 } from 'react'
 
@@ -18,23 +17,14 @@ import {
 export function useMessages(
     channelId: string | null,
     searchQuery: string,
+    pageNumber: number,
+    setPageNumber: (
+        pageNumber: number,
+    ) => void,
 ) {
-    const pageSize = 50
+    const pageSize = 20
 
-    const [
-        pageNumber,
-        setPageNumber,
-    ] = useState(1)
-
-    const normalizedSearchQuery =
-        searchQuery.trim()
-
-    useEffect(() => {
-        setPageNumber(1)
-    }, [
-        channelId,
-        normalizedSearchQuery,
-    ])
+    const normalizedSearchQuery = searchQuery.trim()
 
     const query = useQuery({
         queryKey: [
@@ -178,21 +168,19 @@ export function useMessages(
 
         goToPreviousPage: () => {
             setPageNumber(
-                (current) =>
-                    Math.max(
-                        1,
-                        current - 1,
-                    ),
+                Math.max(
+                    1,
+                    pageNumber - 1,
+                ),
             )
         },
 
         goToNextPage: () => {
             setPageNumber(
-                (current) =>
-                    Math.min(
-                        totalPages,
-                        current + 1,
-                    ),
+                Math.min(
+                    totalPages,
+                    pageNumber + 1,
+                ),
             )
         },
 
@@ -224,8 +212,10 @@ export function useMessages(
             updateMutation.mutateAsync,
 
         updatingMessageId:
-            updateMutation.variables
-                ?.messageId ?? null,
+            updateMutation.isPending
+                ? updateMutation.variables
+                    ?.messageId ?? null
+                : null,
 
         isUpdating:
             updateMutation.isPending,
@@ -241,8 +231,10 @@ export function useMessages(
             deleteMutation.mutateAsync,
 
         deletingMessageId:
-            deleteMutation.variables ??
-            null,
+            deleteMutation.isPending
+                ? deleteMutation.variables ??
+                    null
+                : null,
 
         isDeleting:
             deleteMutation.isPending,
