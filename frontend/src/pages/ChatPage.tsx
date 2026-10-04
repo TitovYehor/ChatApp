@@ -68,6 +68,9 @@ function ChatPage() {
     const [debouncedMessageSearch, setDebouncedMessageSearch] =
         useState('')
 
+    const [messagePageNumber, setMessagePageNumber] =
+        useState(1)
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setDebouncedWorkspaceSearch(
@@ -135,6 +138,8 @@ function ChatPage() {
         selectedChannelId,
         user?.id ?? null,
         debouncedMessageSearch,
+        messagePageNumber,
+        setMessagePageNumber,
     )
 
     const {
@@ -231,6 +236,21 @@ function ChatPage() {
         await workspace.transferOwnership(
             usernameOrEmail,
         )
+    }
+
+    function handleSelectChannel(
+        channelId: string,
+    ) {
+        setMessagePageNumber(1)
+        setMessageSearch('')
+        selectChannel(channelId)
+    }
+
+    function handleMessageSearchChange(
+        value: string,
+    ) {
+        setMessageSearch(value)
+        setMessagePageNumber(1)
     }
 
     if (workspace.isLoadingWorkspaces) {
@@ -417,7 +437,7 @@ function ChatPage() {
                             }
 
                             onSelectChannel={
-                                selectChannel
+                                handleSelectChannel
                             }
                             onSearchChange={
                                 setChannelSearch
@@ -569,7 +589,7 @@ function ChatPage() {
                                 type="text"
                                 value={messageSearch}
                                 onChange={(event) => {
-                                    setMessageSearch(
+                                    handleMessageSearchChange(
                                         event.target.value,
                                     )
                                 }}
