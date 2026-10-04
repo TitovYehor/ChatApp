@@ -15,10 +15,6 @@ import type {
     MessageDeletedResponse,
 } from '../../types/messageTypes'
 
-import type {
-    PagedResult,
-} from '../../types/pagedResultType'
-
 import {
     SignalREvents,
 } from '../../types/signalREvents'
@@ -26,15 +22,22 @@ import {
 export function useRealtimeMessages(
     channelId: string | null,
 ) {
-    const queryClient =
-        useQueryClient()
+    const queryClient = useQueryClient()
 
-    const connection =
-        getChatConnection()
+    const connection = getChatConnection()
 
     useEffect(() => {
         if (!channelId) {
             return
+        }
+
+        const invalidateChannelMessages = () => {
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'messages',
+                    channelId,
+                ],
+            })
         }
 
         const handleMessageCreated = (
@@ -47,41 +50,7 @@ export function useRealtimeMessages(
                 return
             }
 
-            queryClient.setQueryData<
-                PagedResult<MessageResponse>
-            >(
-                [
-                    'messages',
-                    channelId,
-                ],
-                (current) => {
-                    if (!current) {
-                        return current
-                    }
-
-                    const alreadyExists =
-                        current.items.some(
-                            (item) =>
-                                item.id ===
-                                message.id,
-                        )
-
-                    if (alreadyExists) {
-                        return current
-                    }
-
-                    return {
-                        ...current,
-                        items: [
-                            ...current.items,
-                            message,
-                        ],
-                        totalCount:
-                            current.totalCount +
-                            1,
-                    }
-                },
-            )
+            invalidateChannelMessages()
         }
 
         const handleMessageUpdated = (
@@ -94,31 +63,7 @@ export function useRealtimeMessages(
                 return
             }
 
-            queryClient.setQueryData<
-                PagedResult<MessageResponse>
-            >(
-                [
-                    'messages',
-                    channelId,
-                ],
-                (current) => {
-                    if (!current) {
-                        return current
-                    }
-
-                    return {
-                        ...current,
-                        items:
-                            current.items.map(
-                                (item) =>
-                                    item.id ===
-                                        message.id
-                                        ? message
-                                        : item,
-                            ),
-                    }
-                },
-            )
+            invalidateChannelMessages()
         }
 
         const handleMessageDeleted = (
@@ -131,44 +76,7 @@ export function useRealtimeMessages(
                 return
             }
 
-            queryClient.setQueryData<
-                PagedResult<MessageResponse>
-            >(
-                [
-                    'messages',
-                    channelId,
-                ],
-                (current) => {
-                    if (!current) {
-                        return current
-                    }
-
-                    const items =
-                        current.items.filter(
-                            (item) =>
-                                item.id !==
-                                response.messageId,
-                        )
-
-                    if (
-                        items.length ===
-                        current.items.length
-                    ) {
-                        return current
-                    }
-
-                    return {
-                        ...current,
-                        items,
-                        totalCount:
-                            Math.max(
-                                0,
-                                current.totalCount -
-                                1,
-                            ),
-                    }
-                },
-            )
+            invalidateChannelMessages()
         }
 
         connection.on(
