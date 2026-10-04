@@ -1,4 +1,7 @@
-import { useEffect } from 'react'
+import {
+    useEffect,
+    useCallback,
+} from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { getChatConnection } from '../../services/signalR/chatConnection'
 import type {
@@ -26,125 +29,131 @@ export function useRealtimeWorkspaces(
 
     const connection = getChatConnection()
 
-    const updateWorkspaceSearchCaches = (
-        workspace: WorkspaceResponse,
-    ) => {
-        const searchQueries =
-            queryClient.getQueriesData<
-                WorkspaceResponse[]
-            >({
-                queryKey: [
-                    'workspaces',
-                    'search',
-                ],
-            })
+    const updateWorkspaceSearchCaches = useCallback(
+        (
+            workspace: WorkspaceResponse,
+        ) => {
+            const searchQueries =
+                queryClient.getQueriesData<
+                    WorkspaceResponse[]
+                >({
+                    queryKey: [
+                        'workspaces',
+                        'search',
+                    ],
+                })
 
-        searchQueries.forEach(
-            ([queryKey, current]) => {
-                if (!current) {
-                    return
-                }
+            searchQueries.forEach(
+                ([queryKey, current]) => {
+                    if (!current) {
+                        return
+                    }
 
-                const searchQuery =
-                    String(
-                        queryKey[2] ?? '',
+                    const searchQuery =
+                        String(
+                            queryKey[2] ?? '',
+                        )
+                            .trim()
+                            .toLowerCase()
+
+                    if (!searchQuery) {
+                        return
+                    }
+
+                    const matches =
+                        workspace.name
+                            .toLowerCase()
+                            .includes(searchQuery)
+
+                    const exists =
+                        current.some(
+                            (item) =>
+                                item.id ===
+                                workspace.id,
+                        )
+
+                    if (!matches) {
+                        queryClient.setQueryData<
+                            WorkspaceResponse[]
+                        >(
+                            queryKey,
+                            current.filter(
+                                (item) =>
+                                    item.id !==
+                                    workspace.id,
+                            ),
+                        )
+
+                        return
+                    }
+
+                    if (exists) {
+                        queryClient.setQueryData<
+                            WorkspaceResponse[]
+                        >(
+                            queryKey,
+                            current.map(
+                                (item) =>
+                                    item.id ===
+                                        workspace.id
+                                        ? workspace
+                                        : item,
+                            ),
+                        )
+
+                        return
+                    }
+
+                    queryClient.setQueryData<
+                        WorkspaceResponse[]
+                    >(
+                        queryKey,
+                        [
+                            ...current,
+                            workspace,
+                        ],
                     )
-                        .trim()
-                        .toLowerCase()
+                },
+            )
+        },
+        [queryClient],
+    )
 
-                if (!searchQuery) {
-                    return
-                }
+    const removeWorkspaceFromSearchCaches = useCallback(
+        (
+            workspaceId: string,
+        ) => {
+            const searchQueries =
+                queryClient.getQueriesData<
+                    WorkspaceResponse[]
+                >({
+                    queryKey: [
+                        'workspaces',
+                        'search',
+                    ],
+                })
 
-                const matches =
-                    workspace.name
-                        .toLowerCase()
-                        .includes(searchQuery)
+            searchQueries.forEach(
+                ([queryKey, current]) => {
+                    if (!current) {
+                        return
+                    }
 
-                const exists =
-                    current.some(
-                        (item) =>
-                            item.id ===
-                            workspace.id,
-                    )
-
-                if (!matches) {
                     queryClient.setQueryData<
                         WorkspaceResponse[]
                     >(
                         queryKey,
                         current.filter(
-                            (item) =>
-                                item.id !==
-                                workspace.id,
+                            (workspace) =>
+                                workspace.id !==
+                                workspaceId,
                         ),
                     )
-
-                    return
-                }
-
-                if (exists) {
-                    queryClient.setQueryData<
-                        WorkspaceResponse[]
-                    >(
-                        queryKey,
-                        current.map(
-                            (item) =>
-                                item.id ===
-                                    workspace.id
-                                    ? workspace
-                                    : item,
-                        ),
-                    )
-
-                    return
-                }
-
-                queryClient.setQueryData<
-                    WorkspaceResponse[]
-                >(
-                    queryKey,
-                    [
-                        ...current,
-                        workspace,
-                    ],
-                )
-            },
-        )
-    }
-
-    const removeWorkspaceFromSearchCaches = (
-        workspaceId: string,
-    ) => {
-        const searchQueries =
-            queryClient.getQueriesData<
-                WorkspaceResponse[]
-            >({
-                queryKey: [
-                    'workspaces',
-                    'search',
-                ],
-            })
-
-        searchQueries.forEach(
-            ([queryKey, current]) => {
-                if (!current) {
-                    return
-                }
-
-                queryClient.setQueryData<
-                    WorkspaceResponse[]
-                >(
-                    queryKey,
-                    current.filter(
-                        (workspace) =>
-                            workspace.id !==
-                            workspaceId,
-                    ),
-                )
-            },
-        )
-    }
+                },
+            )
+        },
+        [queryClient],
+    )
 
     useEffect(() => {
         const handleWorkspaceUpdated = (
@@ -654,5 +663,7 @@ export function useRealtimeWorkspaces(
         onWorkspaceAccessLost,
         queryClient,
         selectedWorkspaceId,
+        updateWorkspaceSearchCaches,
+        removeWorkspaceFromSearchCaches,
     ])
 }
