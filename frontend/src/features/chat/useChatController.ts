@@ -22,11 +22,15 @@ export function useChatController(
     channelId: string | null,
     currentUserId: string | null,
     searchQuery: string,
+    pageNumber: number,
+    setPageNumber: (
+        pageNumber: number,
+    ) => void,
 ) {
     const {
         messages,
 
-        pageNumber,
+        pageNumber: messagesPageNumber,
         pageSize,
         totalCount,
         totalPages,
@@ -55,6 +59,8 @@ export function useChatController(
     } = useMessages(
         channelId,
         searchQuery,
+        pageNumber,
+        setPageNumber,
     )
 
     useChannelSignalR(
@@ -108,7 +114,7 @@ export function useChatController(
     return {
         messages,
 
-        pageNumber,
+        pageNumber: messagesPageNumber,
         pageSize,
         totalCount,
         totalPages,
