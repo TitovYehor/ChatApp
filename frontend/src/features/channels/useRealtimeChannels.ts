@@ -1,5 +1,6 @@
 import {
     useEffect,
+    useCallback,
 } from 'react'
 
 import {
@@ -30,9 +31,10 @@ export function useRealtimeChannels(
 
     const connection = getChatConnection()
 
-    const updateChannelSearchCaches = (
-        updatedChannel: ChannelResponse,
-    ) => {
+    const updateChannelSearchCaches = useCallback(
+        (
+            updatedChannel: ChannelResponse,
+        ) => {
         const searchQueries =
             queryClient.getQueriesData<
                 ChannelResponse[]
@@ -116,41 +118,46 @@ export function useRealtimeChannels(
                 )
             },
         )
-    }
+        },
+        [queryClient, workspaceId],
+    )
 
-    const removeChannelFromSearchCaches = (
-        channelId: string,
-    ) => {
-        const searchQueries =
-            queryClient.getQueriesData<
-                ChannelResponse[]
-            >({
-                queryKey: [
-                    'channels',
-                    workspaceId,
-                    'search',
-                ],
-            })
-
-        searchQueries.forEach(
-            ([queryKey, current]) => {
-                if (!current) {
-                    return
-                }
-
-                queryClient.setQueryData<
+    const removeChannelFromSearchCaches = useCallback(
+        (
+            channelId: string,
+        ) => {
+            const searchQueries =
+                queryClient.getQueriesData<
                     ChannelResponse[]
-                >(
-                    queryKey,
-                    current.filter(
-                        (channel) =>
-                            channel.id !==
-                            channelId,
-                    ),
-                )
-            },
-        )
-    }
+                >({
+                    queryKey: [
+                        'channels',
+                        workspaceId,
+                        'search',
+                    ],
+                })
+
+            searchQueries.forEach(
+                ([queryKey, current]) => {
+                    if (!current) {
+                        return
+                    }
+
+                    queryClient.setQueryData<
+                        ChannelResponse[]
+                    >(
+                        queryKey,
+                        current.filter(
+                            (channel) =>
+                                channel.id !==
+                                channelId,
+                        ),
+                    )
+                },
+            )
+        },
+        [queryClient, workspaceId],
+    )
 
     useEffect(() => {
         if (!workspaceId) return
@@ -328,5 +335,7 @@ export function useRealtimeChannels(
         workspaceId,
         selectedChannelId,
         onChannelDeleted,
+        updateChannelSearchCaches,
+        removeChannelFromSearchCaches,
     ])
 }
