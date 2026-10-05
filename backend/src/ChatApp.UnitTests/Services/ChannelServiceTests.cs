@@ -12,10 +12,13 @@ namespace ChatApp.UnitTests.Services;
 
 public class ChannelServiceTests
 {
+    private readonly Mock<IChannelNotifier> _channelNotifierMock;
+
     private readonly Mock<IWorkspaceAuthorizationService> _workspaceAuthorizationMock;
 
     public ChannelServiceTests()
     {
+        _channelNotifierMock = new Mock<IChannelNotifier>();
         _workspaceAuthorizationMock = new Mock<IWorkspaceAuthorizationService>();
     }
 
@@ -187,6 +190,189 @@ public class ChannelServiceTests
             service.GetByIdAsync(
                 channelId,
                 nonMemberId));
+    }
+
+    [Fact]
+    public async Task SearchAsync_ShouldReturnMatchingChannelsForWorkspace()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = CreateChannelService(dbContext);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId);
+
+        dbContext.Workspaces.Add(workspace);
+
+        var matchingChannel = TestDataFactory.CreateChannel(
+            Guid.NewGuid(),
+            workspaceId,
+            "Development");
+
+        var otherChannel = TestDataFactory.CreateChannel(
+            Guid.NewGuid(),
+            workspaceId,
+            "general");
+
+        dbContext.Channels.AddRange(
+            matchingChannel,
+            otherChannel);
+
+        await dbContext.SaveChangesAsync();
+
+        _workspaceAuthorizationMock
+            .Setup(x => x.EnsureCanAccessWorkspaceAsync(
+                workspaceId,
+                userId))
+            .Returns(Task.CompletedTask);
+
+        var request = new ChannelSearchRequestDto
+        {
+            Query = "development"
+        };
+
+        var result = await service.SearchAsync(
+            workspaceId,
+            userId,
+            request);
+
+        var channel = Assert.Single(result);
+
+        Assert.Equal(
+            matchingChannel.Id,
+            channel.Id);
+
+        Assert.Equal(
+            workspaceId,
+            channel.WorkspaceId);
+
+        Assert.Equal(
+            "Development",
+            channel.Name);
+
+        _workspaceAuthorizationMock.Verify(
+            x => x.EnsureCanAccessWorkspaceAsync(
+                workspaceId,
+                userId),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task SearchAsync_ShouldNotReturnChannelsFromAnotherWorkspace()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = CreateChannelService(dbContext);
+
+        var workspaceId = Guid.NewGuid();
+        var otherWorkspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId);
+
+        var otherWorkspace = TestDataFactory.CreateWorkspace(
+            otherWorkspaceId,
+            userId);
+
+        dbContext.Workspaces.AddRange(
+            workspace,
+            otherWorkspace);
+
+        var channelInRequestedWorkspace =
+            TestDataFactory.CreateChannel(
+                Guid.NewGuid(),
+                workspaceId,
+                "Development");
+
+        var channelInOtherWorkspace =
+            TestDataFactory.CreateChannel(
+                Guid.NewGuid(),
+                otherWorkspaceId,
+                "Development");
+
+        dbContext.Channels.AddRange(
+            channelInRequestedWorkspace,
+            channelInOtherWorkspace);
+
+        await dbContext.SaveChangesAsync();
+
+        _workspaceAuthorizationMock
+            .Setup(x => x.EnsureCanAccessWorkspaceAsync(
+                workspaceId,
+                userId))
+            .Returns(Task.CompletedTask);
+
+        var request = new ChannelSearchRequestDto
+        {
+            Query = "development"
+        };
+
+        var result = await service.SearchAsync(
+            workspaceId,
+            userId,
+            request);
+
+        var channel = Assert.Single(result);
+
+        Assert.Equal(
+            channelInRequestedWorkspace.Id,
+            channel.Id);
+    }
+
+    [Fact]
+    public async Task SearchAsync_ShouldReturnEmptyResultForEmptyQuery()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = CreateChannelService(dbContext);
+
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            workspaceId,
+            userId);
+
+        dbContext.Workspaces.Add(workspace);
+
+        var channel = TestDataFactory.CreateChannel(
+            Guid.NewGuid(),
+            workspaceId,
+            "general");
+
+        dbContext.Channels.Add(channel);
+
+        await dbContext.SaveChangesAsync();
+
+        _workspaceAuthorizationMock
+            .Setup(x => x.EnsureCanAccessWorkspaceAsync(
+                workspaceId,
+                userId))
+            .Returns(Task.CompletedTask);
+
+        var request = new ChannelSearchRequestDto
+        {
+            Query = "   "
+        };
+
+        var result = await service.SearchAsync(
+            workspaceId,
+            userId,
+            request);
+
+        Assert.Empty(result);
+
+        _workspaceAuthorizationMock.Verify(
+            x => x.EnsureCanAccessWorkspaceAsync(
+                workspaceId,
+                userId),
+            Times.Once);
     }
 
     [Fact]
@@ -482,6 +668,7 @@ public class ChannelServiceTests
     {
         return new ChannelService(
             dbContext,
+            _channelNotifierMock.Object,
             _workspaceAuthorizationMock.Object);
     }
 }
