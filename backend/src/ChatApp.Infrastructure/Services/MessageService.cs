@@ -116,10 +116,10 @@ public class MessageService : IMessageService
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
-            var search = query.Search.Trim();
+            var search = query.Search.Trim().ToLower();
 
             messagesQuery = messagesQuery.Where(m =>
-                m.Content.Contains(search));
+                m.Content.ToLower().Contains(search));
         }
 
         var totalCount = await messagesQuery.CountAsync();
