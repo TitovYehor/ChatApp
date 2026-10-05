@@ -139,6 +139,123 @@ public class WorkspaceServiceTests
     }
 
     [Fact]
+    public async Task SearchAsync_ShouldReturnMatchingWorkspacesForUser()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+
+        var matchingWorkspaceId = Guid.NewGuid();
+        var otherWorkspaceId = Guid.NewGuid();
+
+        var matchingWorkspace = TestDataFactory.CreateWorkspace(
+            matchingWorkspaceId,
+            userId,
+            WorkspaceRole.Member);
+
+        matchingWorkspace.Name =
+            "My Development Workspace";
+
+        var otherWorkspace = TestDataFactory.CreateWorkspace(
+            otherWorkspaceId,
+            userId,
+            WorkspaceRole.Member);
+
+        otherWorkspace.Name =
+            "Something Else";
+
+        await dbContext.Workspaces.AddRangeAsync(
+            matchingWorkspace,
+            otherWorkspace);
+
+        await dbContext.SaveChangesAsync();
+
+        var request = new WorkspaceSearchRequestDto
+        {
+            Query = "development"
+        };
+
+        var result = await service.SearchAsync(
+            userId,
+            request);
+
+        var workspace = Assert.Single(result);
+
+        Assert.Equal(
+            matchingWorkspaceId,
+            workspace.Id);
+
+        Assert.Equal(
+            "My Development Workspace",
+            workspace.Name);
+
+        Assert.Equal(
+            WorkspaceRoleDto.Member,
+            workspace.CurrentUserRole);
+    }
+
+    [Fact]
+    public async Task SearchAsync_ShouldNotReturnWorkspaceUserIsNotMemberOf()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            Guid.NewGuid(),
+            otherUserId);
+
+        workspace.Name = "Private Development Workspace";
+
+        await dbContext.Workspaces.AddAsync(workspace);
+        await dbContext.SaveChangesAsync();
+
+        var request = new WorkspaceSearchRequestDto
+        {
+            Query = "development"
+        };
+
+        var result = await service.SearchAsync(
+            userId,
+            request);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task SearchAsync_ShouldReturnEmptyResultForEmptyQuery()
+    {
+        await using var dbContext = TestDataFactory.CreateDbContext();
+
+        var service = CreateService(dbContext);
+
+        var userId = Guid.NewGuid();
+
+        var workspace = TestDataFactory.CreateWorkspace(
+            Guid.NewGuid(),
+            userId);
+
+        await dbContext.Workspaces.AddAsync(workspace);
+        await dbContext.SaveChangesAsync();
+
+        var request = new WorkspaceSearchRequestDto
+        {
+            Query = "   "
+        };
+
+        var result = await service.SearchAsync(
+            userId,
+            request);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
     public async Task GetAllAsync_ShouldReturnAllUserWorkspaces()
     {
         await using var dbContext = TestDataFactory.CreateDbContext();
