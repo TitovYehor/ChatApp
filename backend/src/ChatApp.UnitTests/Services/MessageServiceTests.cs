@@ -622,13 +622,13 @@ public class MessageServiceTests
             Content = "Changed content"
         };
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
             () => service.UpdateAsync(
                 messageId,
                 otherUserId,
                 request));
 
-        Assert.Equal("Message not found", exception.Message);
+        Assert.Equal("You can only edit your own messages", exception.Message);
 
         _chatNotifierMock.Verify(
             x => x.MessageUpdatedAsync(
@@ -817,12 +817,12 @@ public class MessageServiceTests
 
         await dbContext.SaveChangesAsync();
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(
             () => service.DeleteAsync(
                 messageId,
                 otherUserId));
 
-        Assert.Equal("Message not found", exception.Message);
+        Assert.Equal("User is not a member of this workspace", exception.Message);
 
         var savedMessage = await dbContext.Messages
             .FirstOrDefaultAsync(x => x.Id == messageId);
