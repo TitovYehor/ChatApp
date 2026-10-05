@@ -155,6 +155,20 @@ export function useRealtimeWorkspaces(
         [queryClient],
     )
 
+    const invalidateWorkspaceMemberSearchCaches =
+        useCallback(
+            (workspaceId: string) => {
+                void queryClient.invalidateQueries({
+                    queryKey: [
+                        'workspace-members',
+                        workspaceId,
+                        'search',
+                    ],
+                })
+            },
+            [queryClient],
+        )
+
     useEffect(() => {
         const handleWorkspaceUpdated = (
             response: WorkspaceUpdatedResponse,
@@ -174,7 +188,8 @@ export function useRealtimeWorkspaces(
                                 response.workspaceId
                                 ? {
                                     ...workspace,
-                                    name: response.name,
+                                    name:
+                                        response.name,
                                     description:
                                         response.description,
                                 }
@@ -206,11 +221,14 @@ export function useRealtimeWorkspaces(
                     ],
                     updatedWorkspace,
                 )
-
-                updateWorkspaceSearchCaches(
-                    updatedWorkspace,
-                )
             }
+
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'workspaces',
+                    'search',
+                ],
+            })
         }
 
         const handleWorkspaceDeleted = (
@@ -284,6 +302,10 @@ export function useRealtimeWorkspaces(
                 },
             )
 
+            invalidateWorkspaceMemberSearchCaches(
+                response.workspaceId,
+            )
+
             if (response.userId !== currentUserId) {
                 return
             }
@@ -320,35 +342,40 @@ export function useRealtimeWorkspaces(
                 },
             )
 
-            updateWorkspaceSearchCaches(
-                addedWorkspace,
-            )
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'workspaces',
+                    'search',
+                ],
+            })
         }
 
         const handleWorkspaceMemberRemoved = (
             response: WorkspaceMemberRemovedResponse,
         ) => {
+            queryClient.setQueryData<WorkspaceMemberResponse[]>(
+                [
+                    'workspace-members',
+                    response.workspaceId,
+                ],
+                (current) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.filter(
+                        (member) =>
+                            member.userId !==
+                            response.userId,
+                    )
+                },
+            )
+
+            invalidateWorkspaceMemberSearchCaches(
+                response.workspaceId,
+            )
+
             if (response.userId !== currentUserId) {
-                queryClient.setQueryData<
-                    WorkspaceMemberResponse[]
-                >(
-                    [
-                        'workspace-members',
-                        response.workspaceId,
-                    ],
-                    (current) => {
-                        if (!current) {
-                            return current
-                        }
-
-                        return current.filter(
-                            (member) =>
-                                member.userId !==
-                                response.userId,
-                        )
-                    },
-                )
-
                 return
             }
 
@@ -405,17 +432,13 @@ export function useRealtimeWorkspaces(
                     'workspace-members',
                     response.workspaceId,
                 ],
-                (
-                    current,
-                ) => {
+                (current) => {
                     if (!current) {
                         return current
                     }
 
                     return current.map(
-                        (
-                            member,
-                        ) =>
+                        (member) =>
                             member.userId ===
                                 response.userId
                                 ? {
@@ -428,6 +451,10 @@ export function useRealtimeWorkspaces(
                 },
             )
 
+            invalidateWorkspaceMemberSearchCaches(
+                response.workspaceId,
+            )
+
             if (response.userId !== currentUserId) {
                 return
             }
@@ -436,17 +463,13 @@ export function useRealtimeWorkspaces(
                 WorkspaceResponse[]
             >(
                 ['workspaces'],
-                (
-                    current,
-                ) => {
+                (current) => {
                     if (!current) {
                         return current
                     }
 
                     return current.map(
-                        (
-                            workspace,
-                        ) =>
+                        (workspace) =>
                             workspace.id ===
                                 response.workspaceId
                                 ? {
@@ -467,27 +490,28 @@ export function useRealtimeWorkspaces(
                     ],
                 )
 
-            if (!currentWorkspace) {
-                return
+            if (currentWorkspace) {
+                const updatedWorkspace = {
+                    ...currentWorkspace,
+                    currentUserRole:
+                        response.role,
+                }
+
+                queryClient.setQueryData<WorkspaceResponse>(
+                    [
+                        'workspace',
+                        response.workspaceId,
+                    ],
+                    updatedWorkspace,
+                )
             }
 
-            const updatedWorkspace = {
-                ...currentWorkspace,
-                currentUserRole:
-                    response.role,
-            }
-
-            queryClient.setQueryData<WorkspaceResponse>(
-                [
-                    'workspace',
-                    response.workspaceId,
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'workspaces',
+                    'search',
                 ],
-                updatedWorkspace,
-            )
-
-            updateWorkspaceSearchCaches(
-                updatedWorkspace,
-            )
+            })
         }
 
         const handleWorkspaceOwnershipTransferred = (
@@ -529,6 +553,10 @@ export function useRealtimeWorkspaces(
                         },
                     )
                 },
+            )
+
+            invalidateWorkspaceMemberSearchCaches(
+                response.workspaceId,
             )
 
             if (
@@ -574,26 +602,27 @@ export function useRealtimeWorkspaces(
                     ],
                 )
 
-            if (!currentWorkspace) {
-                return
+            if (currentWorkspace) {
+                const updatedWorkspace = {
+                    ...currentWorkspace,
+                    currentUserRole,
+                }
+
+                queryClient.setQueryData<WorkspaceResponse>(
+                    [
+                        'workspace',
+                        response.workspaceId,
+                    ],
+                    updatedWorkspace,
+                )
             }
 
-            const updatedWorkspace = {
-                ...currentWorkspace,
-                currentUserRole,
-            }
-
-            queryClient.setQueryData<WorkspaceResponse>(
-                [
-                    'workspace',
-                    response.workspaceId,
+            void queryClient.invalidateQueries({
+                queryKey: [
+                    'workspaces',
+                    'search',
                 ],
-                updatedWorkspace,
-            )
-
-            updateWorkspaceSearchCaches(
-                updatedWorkspace,
-            )
+            })
         }
 
         connection.on(
@@ -665,5 +694,6 @@ export function useRealtimeWorkspaces(
         selectedWorkspaceId,
         updateWorkspaceSearchCaches,
         removeWorkspaceFromSearchCaches,
+        invalidateWorkspaceMemberSearchCaches,
     ])
 }
