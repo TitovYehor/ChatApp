@@ -31,13 +31,13 @@ public class AuthServiceTests
 
         var result = await service.RegisterAsync(request);
 
-        Assert.NotEqual(Guid.Empty, result.User.Id);
-        Assert.Equal("newuser", result.User.Username);
-        Assert.Equal("new@example.com", result.User.Email);
-        Assert.False(string.IsNullOrWhiteSpace(result.AccessToken));
+        Assert.NotEqual(Guid.Empty, result.Response.User.Id);
+        Assert.Equal("newuser", result.Response.User.Username);
+        Assert.Equal("new@example.com", result.Response.User.Email);
+        Assert.False(string.IsNullOrWhiteSpace(result.Response.AccessToken));
 
         var savedUser = await dbContext.Users
-            .FirstOrDefaultAsync(x => x.Id == result.User.Id);
+            .FirstOrDefaultAsync(x => x.Id == result.Response.User.Id);
 
         Assert.NotNull(savedUser);
         Assert.Equal("newuser", savedUser.Username);
@@ -54,21 +54,21 @@ public class AuthServiceTests
         var jwtSettings = CreateJwtSettings();
 
         var principal = ValidateToken(
-            result.AccessToken,
+            result.Response.AccessToken,
             jwtSettings);
 
         Assert.Equal(
-            result.User.Id.ToString(),
+            result.Response.User.Id.ToString(),
             principal.FindFirstValue(
                 ClaimTypes.NameIdentifier));
 
         Assert.Equal(
-            result.User.Username,
+            result.Response.User.Username,
             principal.FindFirstValue(
                 ClaimTypes.Name));
 
         Assert.Equal(
-            result.User.Email,
+            result.Response.User.Email,
             principal.FindFirstValue(
                 ClaimTypes.Email));
     }
@@ -169,15 +169,15 @@ public class AuthServiceTests
 
         var result = await service.LoginAsync(request);
 
-        Assert.Equal(user.Id, result.User.Id);
-        Assert.Equal(user.Username, result.User.Username);
-        Assert.Equal(user.Email, result.User.Email);
-        Assert.False(string.IsNullOrWhiteSpace(result.AccessToken));
+        Assert.Equal(user.Id, result.Response.User.Id);
+        Assert.Equal(user.Username, result.Response.User.Username);
+        Assert.Equal(user.Email, result.Response.User.Email);
+        Assert.False(string.IsNullOrWhiteSpace(result.Response.AccessToken));
 
         var jwtSettings = CreateJwtSettings();
 
         var principal = ValidateToken(
-            result.AccessToken,
+            result.Response.AccessToken,
             jwtSettings);
 
         Assert.Equal(
