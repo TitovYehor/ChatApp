@@ -1,8 +1,7 @@
 using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace ChatApp.Infrastructure.Persistence;
 
