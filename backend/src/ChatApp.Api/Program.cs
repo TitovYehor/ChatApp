@@ -105,6 +105,16 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
+
+    await DbInitializer.InitializeAsync(
+        dbContext,
+        builder.Configuration);
+}
+
 app.UseRouting();
 
 if (app.Environment.IsDevelopment())
