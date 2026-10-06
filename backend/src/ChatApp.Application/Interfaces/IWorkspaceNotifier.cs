@@ -27,4 +27,8 @@ public interface IWorkspaceNotifier
     Task WorkspaceOwnershipTransferredAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceOwnershipTransferredResponseDto response);
+
+    Task WorkspaceLeftAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        WorkspaceLeftResponseDto response);
 }
