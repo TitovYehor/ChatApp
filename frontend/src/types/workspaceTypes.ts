@@ -59,6 +59,11 @@ export interface WorkspaceDeletedResponse {
     workspaceId: string
 }
 
+export interface WorkspaceLeftResponse {
+    workspaceId: string
+    userId: string
+}
+
 export interface WorkspaceMemberAddedResponse {
     workspaceId: string
     name: string
