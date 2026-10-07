@@ -415,9 +415,21 @@ public class WorkspaceService : IWorkspaceService
             throw new ConflictException("Transfer workspace ownership before leaving the workspace");
         }
 
+        var memberIds = workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
         _dbContext.WorkspaceMembers.Remove(membership);
 
         await _dbContext.SaveChangesAsync();
+
+        await _workspaceNotifier.WorkspaceLeftAsync(
+            memberIds,
+            new WorkspaceLeftResponseDto
+            {
+                WorkspaceId = workspaceId,
+                UserId = currentUserId,
+            });
     }
 
     public async Task RemoveMemberAsync(
