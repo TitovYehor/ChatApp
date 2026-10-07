@@ -13,7 +13,8 @@ import type {
     WorkspaceMemberRoleChangedResponse,
     WorkspaceMemberResponse,
     WorkspaceOwnershipTransferredResponse,
-    WorkspaceRole
+    WorkspaceLeftResponse,
+    WorkspaceRole,
 } from '../../types/workspaceTypes'
 
 import {
@@ -625,6 +626,76 @@ export function useRealtimeWorkspaces(
             })
         }
 
+        const handleWorkspaceLeft = (
+            response: WorkspaceLeftResponse,
+        ) => {
+            queryClient.setQueryData<WorkspaceMemberResponse[]>(
+                [
+                    'workspace-members',
+                    response.workspaceId,
+                ],
+                (current) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.filter(
+                        (member) =>
+                            member.userId !== response.userId,
+                    )
+                },
+            )
+
+            invalidateWorkspaceMemberSearchCaches(
+                response.workspaceId,
+            )
+
+            if (response.userId !== currentUserId) {
+                return
+            }
+
+            queryClient.setQueryData<WorkspaceResponse[]>(
+                ['workspaces'],
+                (current) => {
+                    if (!current) {
+                        return current
+                    }
+
+                    return current.filter(
+                        (workspace) =>
+                            workspace.id !== response.workspaceId,
+                    )
+                },
+            )
+
+            removeWorkspaceFromSearchCaches(
+                response.workspaceId,
+            )
+
+            queryClient.removeQueries({
+                queryKey: [
+                    'workspace',
+                    response.workspaceId,
+                ],
+            })
+
+            queryClient.removeQueries({
+                queryKey: [
+                    'workspace-members',
+                    response.workspaceId,
+                ],
+            })
+
+            if (
+                selectedWorkspaceId ===
+                response.workspaceId
+            ) {
+                onWorkspaceAccessLost(
+                    response.workspaceId,
+                )
+            }
+        }
+
         connection.on(
             SignalREvents.WorkspaceUpdated,
             handleWorkspaceUpdated,
@@ -653,6 +724,11 @@ export function useRealtimeWorkspaces(
         connection.on(
             SignalREvents.WorkspaceOwnershipTransferred,
             handleWorkspaceOwnershipTransferred,
+        )
+
+        connection.on(
+            SignalREvents.WorkspaceLeft,
+            handleWorkspaceLeft,
         )
 
         return () => {
@@ -684,6 +760,11 @@ export function useRealtimeWorkspaces(
             connection.off(
                 SignalREvents.WorkspaceOwnershipTransferred,
                 handleWorkspaceOwnershipTransferred,
+            )
+
+            connection.off(
+                SignalREvents.WorkspaceLeft,
+                handleWorkspaceLeft,
             )
         }
     }, [
