@@ -129,6 +129,18 @@ export function AuthProvider({
                     )
                 },
 
+                updateUser: (
+                    authenticatedUser,
+                ) => {
+                    setAuthenticatedUser(
+                        authenticatedUser,
+                    )
+
+                    setUser(
+                        authenticatedUser,
+                    )
+                },
+
                 logout: async () => {
                     try {
                         await logoutApi()

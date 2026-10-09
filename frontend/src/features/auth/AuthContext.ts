@@ -16,6 +16,10 @@ export interface AuthContextValue {
         user: AuthenticatedUser,
     ) => void
 
+    updateUser: (
+        user: AuthenticatedUser,
+    ) => void
+
     logout: () => Promise<void>
 }
 
