@@ -43,17 +43,4 @@ public class UsersController : ControllerBase
 
         return Ok(profile);
     }
-
-    [HttpPut("me/password")]
-    public async Task<IActionResult> ChangePassword(
-        ChangePasswordRequestDto request)
-    {
-        var userId = _currentUserService.GetUserId();
-
-        await _userService.ChangePasswordAsync(
-            userId,
-            request);
-
-        return NoContent();
-    }
 }
