@@ -3,7 +3,6 @@ import {
 } from './client'
 
 import type {
-    ChangePasswordRequest,
     UpdateUserProfileRequest,
     UserProfileResponse,
 } from '../types/userTypes'
@@ -21,20 +20,6 @@ export function updateProfile(
 ) {
     return apiRequest<UserProfileResponse>(
         '/users/me',
-        {
-            method: 'PUT',
-            body: JSON.stringify(
-                request,
-            ),
-        },
-    )
-}
-
-export function changePassword(
-    request: ChangePasswordRequest,
-) {
-    return apiRequest<void>(
-        '/users/me/password',
         {
             method: 'PUT',
             body: JSON.stringify(
