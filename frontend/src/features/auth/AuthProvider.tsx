@@ -141,6 +141,17 @@ export function AuthProvider({
                     )
                 },
 
+
+                updateAuthentication: (
+                    accessToken,
+                    authenticatedUser,
+                ) => {
+                    setAccessToken(accessToken)
+                    setAuthenticatedUser(authenticatedUser)
+                    setToken(accessToken)
+                    setUser(authenticatedUser)
+                },
+
                 logout: async () => {
                     try {
                         await logoutApi()
