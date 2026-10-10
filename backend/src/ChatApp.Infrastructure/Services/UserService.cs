@@ -65,53 +65,6 @@ public class UserService : IUserService
         return ToProfileDto(user);
     }
 
-    public async Task ChangePasswordAsync(
-        Guid userId,
-        ChangePasswordRequestDto request)
-    {
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(x =>
-                x.Id == userId);
-
-        if (user is null)
-        {
-            throw new NotFoundException("User not found");
-        }
-
-        var currentPasswordValid = BCrypt.Net.BCrypt.Verify(
-            request.CurrentPassword,
-            user.PasswordHash);
-
-        if (!currentPasswordValid)
-        {
-            throw new InvalidCredentialsException();
-        }
-
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(
-            request.NewPassword);
-
-        await RevokeRefreshTokensAsync(userId);
-
-        await _dbContext.SaveChangesAsync();
-    }
-
-    private async Task RevokeRefreshTokensAsync(
-        Guid userId)
-    {
-        var activeRefreshTokens = await _dbContext.RefreshTokens
-            .Where(x =>
-                x.UserId == userId &&
-                x.RevokedAt == null)
-            .ToListAsync();
-
-        var revokedAt = DateTime.UtcNow;
-
-        foreach (var refreshToken in activeRefreshTokens)
-        {
-            refreshToken.RevokedAt = revokedAt;
-        }
-    }
-
     private static UserProfileResponseDto ToProfileDto(
         User user)
     {

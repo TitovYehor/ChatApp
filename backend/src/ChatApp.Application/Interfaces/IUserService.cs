@@ -11,8 +11,4 @@ public interface IUserService
     Task<UserProfileResponseDto> UpdateProfileAsync(
         Guid userId,
         UpdateUserProfileRequestDto request);
-
-    Task ChangePasswordAsync(
-        Guid userId,
-        ChangePasswordRequestDto request);
 }
