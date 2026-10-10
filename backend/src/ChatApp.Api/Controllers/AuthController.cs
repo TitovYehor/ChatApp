@@ -1,6 +1,7 @@
 ﻿using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Authentication.Requests;
 using ChatApp.Contracts.Authentication.Responses;
+using ChatApp.Contracts.Users.Requests;
 using ChatApp.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,14 +14,16 @@ namespace ChatApp.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-
+    private readonly ICurrentUserService _currentUserService;
     private readonly JwtSettings _jwtSettings;
 
     public AuthController(
         IAuthService authService,
+        ICurrentUserService currentUserService,
         IOptions<JwtSettings> jwtOptions)
     {
         _authService = authService;
+        _currentUserService = currentUserService;
         _jwtSettings = jwtOptions.Value;
     }
 
@@ -31,7 +34,7 @@ public class AuthController : ControllerBase
         var result = await _authService.RegisterAsync(request);
 
         SetRefreshTokenCookie(result.RefreshToken);
-
+        
         return Ok(result.Response);
     }
 
@@ -81,6 +84,22 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [HttpPost("change-password")]
+    public async Task<ActionResult<AuthResponseDto>> ChangePassword(
+        ChangePasswordRequestDto request)
+    {
+        var userId = _currentUserService.GetUserId();
+
+        var result = await _authService.ChangePasswordAsync(
+            userId,
+            request);
+
+        SetRefreshTokenCookie(result.RefreshToken);
+
+        return Ok(result.Response);
+    }
+
+    [Authorize]
     [HttpGet("me")]
     public IActionResult Me()
     {
@@ -91,8 +110,7 @@ public class AuthController : ControllerBase
         });
     }
 
-    private void SetRefreshTokenCookie(
-        string refreshToken)
+    private void SetRefreshTokenCookie(string refreshToken)
     {
         Response.Cookies.Append(
             AuthCookieOptions.RefreshTokenCookieName,
