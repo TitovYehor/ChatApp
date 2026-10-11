@@ -1,3 +1,4 @@
+
 import {
     useMutation,
     useQuery,
@@ -6,6 +7,9 @@ import {
 
 import {
     changePassword,
+} from '../../api/authApi'
+
+import {
     getProfile,
     updateProfile,
 } from '../../api/userApi'
@@ -28,6 +32,7 @@ export function useUserProfile() {
     const {
         user,
         updateUser,
+        updateAuthentication,
     } = useAuth()
 
     const userId = user?.id ?? null
@@ -38,88 +43,66 @@ export function useUserProfile() {
             userId,
         ],
         queryFn: () =>
-            getProfile(
-                userId!,
-            ),
-        enabled:
-            userId !== null,
+            getProfile(userId!),
+        enabled: userId !== null,
     })
 
-    const updateProfileMutation =
-        useMutation({
-            mutationFn: updateProfile,
+    const updateProfileMutation = useMutation({
+        mutationFn: updateProfile,
 
-            onSuccess: (
+        onSuccess: (profile) => {
+            queryClient.setQueryData(
+                ['user-profile', userId],
                 profile,
-            ) => {
-                queryClient.setQueryData(
-                    [
-                        'user-profile',
-                        userId,
-                    ],
-                    profile,
-                )
+            )
 
-                const authenticatedUser:
-                    AuthenticatedUser = {
-                    id: profile.id,
-                    username:
-                        profile.username,
-                    email:
-                        profile.email,
-                }
+            const authenticatedUser: AuthenticatedUser = {
+                id: profile.id,
+                username: profile.username,
+                email: profile.email,
+            }
 
-                updateUser(
-                    authenticatedUser,
-                )
-            },
-        })
+            updateUser(authenticatedUser)
+        },
+    })
 
-    const changePasswordMutation =
-        useMutation({
-            mutationFn: (
-                request: ChangePasswordRequest,
-            ) =>
-                changePassword(
-                    request,
-                ),
-        })
+    const changePasswordMutation = useMutation({
+        mutationFn: (request: ChangePasswordRequest) =>
+            changePassword(request),
+
+        onSuccess: (response) => {
+            updateAuthentication(
+                response.accessToken,
+                response.user,
+            )
+        },
+    })
 
     return {
-        profile:
-            query.data ?? null,
+        profile: query.data ?? null,
 
-        isLoading:
-            query.isLoading,
+        isLoading: query.isLoading,
 
-        error:
-            query.error
-                ? 'Failed to load profile'
-                : null,
+        error: query.error
+            ? 'Failed to load profile'
+            : null,
 
-        reload:
-            query.refetch,
+        reload: query.refetch,
 
-        updateProfile:
-            updateProfileMutation.mutateAsync,
+        updateProfile: updateProfileMutation.mutateAsync,
 
-        isUpdatingProfile:
-            updateProfileMutation.isPending,
+        isUpdatingProfile: updateProfileMutation.isPending,
 
-        updateProfileError:
-            updateProfileMutation.error
-                ? 'Failed to update profile'
-                : null,
+        updateProfileError: updateProfileMutation.error
+            ? 'Failed to update profile'
+            : null,
 
-        changePassword:
-            changePasswordMutation.mutateAsync,
+        changePassword: changePasswordMutation.mutateAsync,
 
-        isChangingPassword:
-            changePasswordMutation.isPending,
+        isChangingPassword: changePasswordMutation.isPending,
 
-        changePasswordError:
-            changePasswordMutation.error
-                ? 'Failed to change password'
-                : null,
+        changePasswordError: changePasswordMutation.error
+            ? 'Failed to change password'
+            : null,
     }
 }
