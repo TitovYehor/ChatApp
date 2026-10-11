@@ -2,6 +2,8 @@ import type {
     UserProfileResponse,
 } from '../../types/userTypes'
 
+import './css/ProfileView.css'
+
 interface ProfileViewProps {
     profile: UserProfileResponse
     isUpdating: boolean
@@ -43,63 +45,71 @@ function ProfileView({
         )
     }
 
+    
     return (
-        <section>
-            <h1>Profile</h1>
+        <section className="profile-card">
+            <div className="profile-card__heading">
+                <div className="profile-card__icon">
+                    @
+                </div>
 
-            <p>
-                <strong>Email:</strong>{' '}
-                {profile.email}
-            </p>
-
-            <p>
-                <strong>Account created:</strong>{' '}
-                {new Date(
-                    profile.createdAt,
-                ).toLocaleDateString()}
-            </p>
-
-            <form
-                onSubmit={
-                    handleSubmit
-                }
-            >
                 <div>
-                    <label htmlFor="username">
-                        Username
-                    </label>
+                    <h2>Personal information</h2>
+                    <p>Update the details associated with your account</p>
+                </div>
+            </div>
+
+            <div className="profile-card__details">
+                <div className="profile-card__detail">
+                    <span>Email address</span>
+                    <strong>{profile.email}</strong>
+                </div>
+
+                <div className="profile-card__detail">
+                    <span>Member since</span>
+                    <strong>
+                        {new Date(profile.createdAt).toLocaleDateString(
+                            undefined,
+                            {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                            },
+                        )}
+                    </strong>
+                </div>
+            </div>
+
+            <form className="profile-form" onSubmit={handleSubmit}>
+                <div className="profile-form__field">
+                    <label htmlFor="username">Username</label>
 
                     <input
                         id="username"
                         name="username"
                         type="text"
-                        defaultValue={
-                            profile.username
-                        }
+                        defaultValue={profile.username}
                         maxLength={50}
-                        disabled={
-                            isUpdating
-                        }
+                        autoComplete="username"
+                        disabled={isUpdating}
+                        required
                     />
                 </div>
 
+                {updateError && (
+                    <p className="profile-form__error" role="alert">
+                        {updateError}
+                    </p>
+                )}
+
                 <button
                     type="submit"
-                    disabled={
-                        isUpdating
-                    }
+                    className="profile-form__submit"
+                    disabled={isUpdating}
                 >
-                    {isUpdating
-                        ? 'Saving...'
-                        : 'Save username'}
+                    {isUpdating ? 'Saving changes...' : 'Save changes'}
                 </button>
             </form>
-
-            {updateError && (
-                <p>
-                    {updateError}
-                </p>
-            )}
         </section>
     )
 }
