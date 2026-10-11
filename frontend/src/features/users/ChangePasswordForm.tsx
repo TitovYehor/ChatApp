@@ -2,6 +2,8 @@ import {
     useState,
 } from 'react'
 
+import './css/ChangePasswordForm.css'
+
 interface ChangePasswordFormProps {
     isChangingPassword: boolean
     changePasswordError: string | null
@@ -90,18 +92,25 @@ function ChangePasswordForm({
         setConfirmPassword('')
     }
 
+    
     return (
-        <section>
-            <h2>
-                Change password
-            </h2>
+        <section className="password-card">
+            <div className="password-card__heading">
+                <div className="password-card__icon">
+                    *
+                </div>
+
+                <div>
+                    <h2>Security</h2>
+                    <p>Change your password to keep your account secure</p>
+                </div>
+            </div>
 
             <form
-                onSubmit={
-                    handleSubmit
-                }
+                className="password-form"
+                onSubmit={handleSubmit}
             >
-                <div>
+                <div className="password-form__field">
                     <label htmlFor="current-password">
                         Current password
                     </label>
@@ -109,24 +118,17 @@ function ChangePasswordForm({
                     <input
                         id="current-password"
                         type="password"
-                        value={
-                            currentPassword
+                        autoComplete="current-password"
+                        value={currentPassword}
+                        onChange={(event) =>
+                            setCurrentPassword(event.target.value)
                         }
-                        onChange={(
-                            event,
-                        ) =>
-                            setCurrentPassword(
-                                event.target
-                                    .value,
-                            )
-                        }
-                        disabled={
-                            isChangingPassword
-                        }
+                        disabled={isChangingPassword}
+                        required
                     />
                 </div>
 
-                <div>
+                <div className="password-form__field">
                     <label htmlFor="new-password">
                         New password
                     </label>
@@ -134,24 +136,21 @@ function ChangePasswordForm({
                     <input
                         id="new-password"
                         type="password"
-                        value={
-                            newPassword
+                        autoComplete="new-password"
+                        value={newPassword}
+                        onChange={(event) =>
+                            setNewPassword(event.target.value)
                         }
-                        onChange={(
-                            event,
-                        ) =>
-                            setNewPassword(
-                                event.target
-                                    .value,
-                            )
-                        }
-                        disabled={
-                            isChangingPassword
-                        }
+                        disabled={isChangingPassword}
+                        required
                     />
+
+                    <span className="password-form__hint">
+                        Use at least 6 characters
+                    </span>
                 </div>
 
-                <div>
+                <div className="password-form__field">
                     <label htmlFor="confirm-password">
                         Confirm new password
                     </label>
@@ -159,44 +158,36 @@ function ChangePasswordForm({
                     <input
                         id="confirm-password"
                         type="password"
-                        value={
-                            confirmPassword
+                        autoComplete="new-password"
+                        value={confirmPassword}
+                        onChange={(event) =>
+                            setConfirmPassword(event.target.value)
                         }
-                        onChange={(
-                            event,
-                        ) =>
-                            setConfirmPassword(
-                                event.target
-                                    .value,
-                            )
-                        }
-                        disabled={
-                            isChangingPassword
-                        }
+                        disabled={isChangingPassword}
+                        required
                     />
                 </div>
 
                 {validationError && (
-                    <p>
+                    <p className="password-form__error" role="alert">
                         {validationError}
                     </p>
                 )}
 
                 {changePasswordError && (
-                    <p>
+                    <p className="password-form__error" role="alert">
                         {changePasswordError}
                     </p>
                 )}
 
                 <button
                     type="submit"
-                    disabled={
-                        isChangingPassword
-                    }
+                    className="password-form__submit"
+                    disabled={isChangingPassword}
                 >
                     {isChangingPassword
-                        ? 'Changing...'
-                        : 'Change password'}
+                        ? 'Updating password...'
+                        : 'Update password'}
                 </button>
             </form>
         </section>
