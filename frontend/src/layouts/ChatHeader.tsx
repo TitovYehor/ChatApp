@@ -1,3 +1,4 @@
+import { Link, useLocation } from 'react-router-dom'
 import './ChatHeader.css'
 
 interface ChatHeaderProps {
@@ -9,9 +10,16 @@ function ChatHeader({
     username,
     onLogout,
 }: ChatHeaderProps) {
+    const location = useLocation()
+    const isProfilePage = location.pathname === '/profile'
+
     return (
         <header className="chat-header">
-            <div className="chat-header__brand">
+            <Link
+                to="/chat"
+                className="chat-header__brand"
+                aria-label="Chat App home"
+            >
                 <div className="chat-header__logo">
                     C
                 </div>
@@ -19,9 +27,21 @@ function ChatHeader({
                 <span className="chat-header__title">
                     Chat App
                 </span>
-            </div>
+            </Link>
 
             <div className="chat-header__user">
+                <Link
+                    to="/profile"
+                    className={`chat-header__profile-link${
+                        isProfilePage
+                            ? ' chat-header__profile-link--active'
+                            : ''
+                    }`}
+                    aria-current={isProfilePage ? 'page' : undefined}
+                >
+                    Profile
+                </Link>
+
                 <div className="chat-header__avatar">
                     {username.charAt(0).toUpperCase()}
                 </div>
