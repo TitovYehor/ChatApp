@@ -50,6 +50,31 @@ namespace ChatApp.Infrastructure.Migrations
                     b.ToTable("Channels");
                 });
 
+            modelBuilder.Entity("ChatApp.Domain.Entities.Friendship", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FriendUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FriendUserId");
+
+                    b.HasIndex("UserId", "FriendUserId")
+                        .IsUnique();
+
+                    b.ToTable("Friendships");
+                });
+
             modelBuilder.Entity("ChatApp.Domain.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -202,6 +227,25 @@ namespace ChatApp.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("ChatApp.Domain.Entities.Friendship", b =>
+                {
+                    b.HasOne("ChatApp.Domain.Entities.User", "FriendUser")
+                        .WithMany()
+                        .HasForeignKey("FriendUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FriendUser");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Entities.Message", b =>
