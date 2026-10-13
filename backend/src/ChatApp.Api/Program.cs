@@ -28,6 +28,7 @@ builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IChannelService, ChannelService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFriendsService, FriendsService>();
 builder.Services.AddScoped<IChannelAccessService, ChannelAccessService>();
 builder.Services.AddScoped<IWorkspaceAuthorizationService, WorkspaceAuthorizationService>();
 builder.Services.AddScoped<IWorkspaceMemberLookupService, WorkspaceMemberLookupService>();
