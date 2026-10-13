@@ -12,6 +12,7 @@ function ChatHeader({
 }: ChatHeaderProps) {
     const location = useLocation()
     const isProfilePage = location.pathname === '/profile'
+    const isFriendsPage = location.pathname === '/friends'
 
     return (
         <header className="chat-header">
@@ -29,7 +30,19 @@ function ChatHeader({
                 </span>
             </Link>
 
-            <div className="chat-header__user">
+            <div className="chat-header__user">                
+                <Link
+                    to="/friends"
+                    className={`chat-header__profile-link${
+                        isFriendsPage
+                            ? ' chat-header__profile-link--active'
+                            : ''
+                    }`}
+                    aria-current={isFriendsPage ? 'page' : undefined}
+                >
+                    Friends
+                </Link>
+
                 <Link
                     to="/profile"
                     className={`chat-header__profile-link${
