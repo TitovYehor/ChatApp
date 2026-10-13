@@ -12,6 +12,7 @@ import ChatPage from './pages/ChatPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
+import FriendsPage from './pages/FriendsPage'
 
 function App() {
     return (
@@ -33,6 +34,11 @@ function App() {
                     <Route
                         path="/chat"
                         element={<ChatPage />}
+                    />
+
+                    <Route
+                        path="/friends"
+                        element={<FriendsPage />}
                     />
 
                     <Route
