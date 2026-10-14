@@ -5,6 +5,7 @@ import {
 import type {
     UpdateUserProfileRequest,
     UserProfileResponse,
+    PublicUserProfileResponse,
 } from '../types/userTypes'
 
 export function getProfile(
@@ -12,6 +13,12 @@ export function getProfile(
 ) {
     return apiRequest<UserProfileResponse>(
         `/users/${userId}`,
+    )
+}
+
+export function getPublicProfile(userId: string) {
+    return apiRequest<PublicUserProfileResponse>(
+        `/users/${userId}/public`,
     )
 }
 
