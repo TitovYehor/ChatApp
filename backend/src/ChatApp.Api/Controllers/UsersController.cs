@@ -43,4 +43,13 @@ public class UsersController : ControllerBase
 
         return Ok(profile);
     }
+
+    [HttpGet("{id:guid}/public")]
+    public async Task<ActionResult<PublicUserProfileResponseDto>> GetPublicProfile(
+        Guid id)
+    {
+        var profile = await _userService.GetPublicProfileAsync(id);
+
+        return Ok(profile);
+    }
 }
