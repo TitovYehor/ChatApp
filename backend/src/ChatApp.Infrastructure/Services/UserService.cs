@@ -65,6 +65,28 @@ public class UserService : IUserService
         return ToProfileDto(user);
     }
 
+    public async Task<PublicUserProfileResponseDto> GetPublicProfileAsync(
+        Guid userId)
+    {
+        var user = await _dbContext.Users
+            .AsNoTracking()
+            .Where(x => x.Id == userId)
+            .Select(x => new PublicUserProfileResponseDto
+            {
+                Id = x.Id,
+                Username = x.Username,
+                CreatedAt = x.CreatedAt,
+            })
+            .FirstOrDefaultAsync();
+
+        if (user is null)
+        {
+            throw new NotFoundException("User not found");
+        }
+
+        return user;
+    }
+
     private static UserProfileResponseDto ToProfileDto(
         User user)
     {

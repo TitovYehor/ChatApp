@@ -11,4 +11,7 @@ public interface IUserService
     Task<UserProfileResponseDto> UpdateProfileAsync(
         Guid userId,
         UpdateUserProfileRequestDto request);
+
+    Task<PublicUserProfileResponseDto> GetPublicProfileAsync(
+        Guid userId);
 }
