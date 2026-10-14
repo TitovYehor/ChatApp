@@ -13,3 +13,9 @@ export interface ChangePasswordRequest {
     currentPassword: string
     newPassword: string
 }
+
+export interface PublicUserProfileResponse {
+    id: string
+    username: string
+    createdAt: string
+}
