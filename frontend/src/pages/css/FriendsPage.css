@@ -312,6 +312,26 @@
     color: #8fcaac;
 }
 
+.friends-page__username-link {
+    color: #e7eaf0;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: color 150ms ease;
+}
+
+.friends-page__username-link:hover {
+    color: #aeb5ff;
+    text-decoration: underline;
+}
+
+.friends-page__username-link:focus-visible {
+    outline: 2px solid #5865f2;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
 @media (max-width: 760px) {
     .friends-page__content {
         padding: 28px 18px 40px;

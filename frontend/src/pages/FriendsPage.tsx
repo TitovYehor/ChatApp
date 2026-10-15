@@ -2,6 +2,7 @@ import ChatHeader from '../layouts/ChatHeader'
 import { useAuth } from '../features/auth/useAuth'
 import { useFriends } from '../features/friends/useFriends'
 import type { FriendSearchResponse } from '../types/friendTypes'
+import { Link } from 'react-router-dom'
 
 import './css/FriendsPage.css'
 
@@ -32,9 +33,12 @@ function FriendsPage() {
                 </div>
 
                 <div className="friends-page__person-info">
-                    <span className="friends-page__person-name">
+                    <Link
+                        to={`/users/${friend.userId}`}
+                        className="friends-page__username-link"
+                    >
                         {friend.username}
-                    </span>
+                    </Link>
                     <span className="friends-page__person-meta">
                         {friend.isFriend ? 'Already friends' : 'Chat App user'}
                     </span>
@@ -188,9 +192,12 @@ function FriendsPage() {
                                         </div>
 
                                         <div className="friends-page__person-info">
-                                            <span className="friends-page__person-name">
+                                            <Link
+                                                to={`/users/${friend.userId}`}
+                                                className="friends-page__username-link"
+                                            >
                                                 {friend.username}
-                                            </span>
+                                            </Link>
                                             <span className="friends-page__person-meta">
                                                 Friend
                                             </span>
