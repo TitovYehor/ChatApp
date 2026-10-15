@@ -12,6 +12,7 @@ import ChatPage from './pages/ChatPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
+import UserProfilePage from './pages/UserProfilePage'
 import FriendsPage from './pages/FriendsPage'
 
 function App() {
@@ -44,6 +45,11 @@ function App() {
                     <Route
                         path="/profile"
                         element={<ProfilePage />}
+                    />
+
+                    <Route
+                        path="/users/:userId"
+                        element={<UserProfilePage />}
                     />
                 </Route>
 
