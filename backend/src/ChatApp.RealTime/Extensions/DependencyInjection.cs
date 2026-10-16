@@ -25,6 +25,8 @@ public static class DependencyInjection
 
         services.AddScoped<IChannelNotifier, SignalRChannelNotifier>();
 
+        services.AddScoped<INotificationNotifier, SignalRNotificationNotifier>();
+
         return services;
     }
 }
