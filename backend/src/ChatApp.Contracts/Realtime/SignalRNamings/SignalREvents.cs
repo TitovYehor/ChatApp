@@ -51,4 +51,8 @@ public static class SignalREvents
 
     public const string ChannelDeleted =
         nameof(ChannelDeleted);
+
+
+    public const string NotificationCreated =
+        nameof(NotificationCreated);
 }
