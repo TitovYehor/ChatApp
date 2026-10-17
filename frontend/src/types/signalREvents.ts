@@ -18,4 +18,6 @@ export const SignalREvents = {
     ChannelCreated: 'ChannelCreated',
     ChannelUpdated: 'ChannelUpdated',
     ChannelDeleted: 'ChannelDeleted',
+
+    NotificationCreated: 'NotificationCreated',
 } as const
