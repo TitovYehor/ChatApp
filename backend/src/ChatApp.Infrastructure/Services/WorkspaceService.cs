@@ -17,12 +17,16 @@ public class WorkspaceService : IWorkspaceService
 
     private readonly IWorkspaceNotifier _workspaceNotifier;
 
+    private readonly INotificationService _notificationService;
+
     public WorkspaceService(
         AppDbContext dbContext,
-        IWorkspaceNotifier workspaceNotifier)
+        IWorkspaceNotifier workspaceNotifier,
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
         _workspaceNotifier = workspaceNotifier;
+        _notificationService = notificationService;
     }
 
     public async Task<WorkspaceResponseDto> CreateAsync(
@@ -139,6 +143,8 @@ public class WorkspaceService : IWorkspaceService
         {
             throw new ForbiddenException("Only workspace owner can edit workspace");
         }
+        
+        var oldName = workspace.Name;
 
         workspace.Name = request.Name.Trim();
         workspace.Description = request.Description.Trim();
@@ -157,6 +163,19 @@ public class WorkspaceService : IWorkspaceService
                 Name = workspace.Name,
                 Description = workspace.Description
             });
+
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.Username)
+            .SingleAsync();
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            userId,
+            "WorkspaceUpdated",
+            $"{actorUsername} updated workspace '{oldName}' to '{workspace.Name}'",
+            workspace.Id,
+            workspace.Id);
 
         return workspace.ToDto(member.Role);
     }
@@ -184,13 +203,19 @@ public class WorkspaceService : IWorkspaceService
 
         if (member.Role != WorkspaceRole.Owner)
         {
-            throw new ForbiddenException(
-                "Only workspace owner can delete workspace");
+            throw new ForbiddenException("Only workspace owner can delete workspace");
         }
 
         var memberIds = workspace.Members
             .Select(x => x.UserId)
             .ToList();
+
+        var workspaceName = workspace.Name;
+
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == currentUserId)
+            .Select(x => x.Username)
+            .SingleAsync();
 
         _dbContext.Workspaces.Remove(workspace);
 
@@ -199,6 +224,14 @@ public class WorkspaceService : IWorkspaceService
         await _workspaceNotifier.WorkspaceDeletedAsync(
             workspace.Id,
             memberIds);
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            currentUserId,
+            "WorkspaceDeleted",
+            $"{actorUsername} deleted workspace '{workspaceName}'",
+            null,
+            workspaceId);
     }
 
     public async Task AddMemberAsync(
@@ -276,6 +309,19 @@ public class WorkspaceService : IWorkspaceService
                 JoinedAt = newMember.JoinedAt,
                 AddedByUsername = currentMembership.User.Username
             });
+
+        var notificationMemberIds = memberIds
+            .Append(user.Id)
+            .Distinct()
+            .ToList();
+
+        await NotifyWorkspaceMembersAsync(
+            notificationMemberIds,
+            currentUserId,
+            "WorkspaceMemberAdded",
+            $"{currentMembership.User.Username} added {user.Username} to workspace '{workspace.Name}'",
+            workspace.Id,
+            user.Id);
     }
 
     public async Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> GetMembersAsync(
@@ -419,6 +465,13 @@ public class WorkspaceService : IWorkspaceService
             .Select(x => x.UserId)
             .ToList();
 
+        var workspaceName = workspace.Name;
+
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == currentUserId)
+            .Select(x => x.Username)
+            .SingleAsync();
+
         _dbContext.WorkspaceMembers.Remove(membership);
 
         await _dbContext.SaveChangesAsync();
@@ -430,6 +483,14 @@ public class WorkspaceService : IWorkspaceService
                 WorkspaceId = workspaceId,
                 UserId = currentUserId,
             });
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            currentUserId,
+            "WorkspaceLeft",
+            $"{actorUsername} left workspace '{workspaceName}'",
+            workspaceId,
+            currentUserId);
     }
 
     public async Task RemoveMemberAsync(
@@ -502,6 +563,19 @@ public class WorkspaceService : IWorkspaceService
                 Username = user.Username,
                 WorkspaceName = workspace.Name
             });
+
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == currentUserId)
+            .Select(x => x.Username)
+            .SingleAsync();
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            currentUserId,
+            "WorkspaceMemberRemoved",
+            $"{actorUsername} removed {user.Username} from workspace '{workspace.Name}'",
+            workspace.Id,
+            user.Id);
     }
 
     public async Task ChangeMemberRoleAsync(
@@ -579,6 +653,14 @@ public class WorkspaceService : IWorkspaceService
             .WorkspaceMemberRoleChangedAsync(
                 memberIds,
                 response);
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            currentUserId,
+            "WorkspaceMemberRoleChanged",
+            $"{current.User.Username} changed {member.User.Username}'s role in workspace '{workspace.Name}' to {request.Role}",
+            workspace.Id,
+            member.UserId);
     }
 
     public async Task TransferOwnershipAsync(
@@ -645,5 +727,38 @@ public class WorkspaceService : IWorkspaceService
             .WorkspaceOwnershipTransferredAsync(
                 memberIds,
                 response);
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            currentUserId,
+            "WorkspaceOwnershipTransferred",
+            $"{owner.User.Username} transferred ownership of workspace '{workspace.Name}' to {newOwner.User.Username}",
+            workspace.Id,
+            newOwner.UserId);
+    }
+
+    private async Task NotifyWorkspaceMembersAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        Guid actorUserId,
+        string type,
+        string message,
+        Guid? workspaceId,
+        Guid entityId)
+    {
+        var recipients = memberIds
+            .Append(actorUserId)
+            .Distinct()
+            .ToList();
+
+        foreach (var recipientId in recipients)
+        {
+            await _notificationService.CreateAsync(
+                recipientId,
+                actorUserId,
+                type,
+                message,
+                workspaceId,
+                entityId);
+        }
     }
 }
