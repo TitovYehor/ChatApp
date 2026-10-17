@@ -19,14 +19,18 @@ public class ChannelService : IChannelService
 
     private readonly IWorkspaceAuthorizationService _workspaceAuthorization;
 
+    private readonly INotificationService _notificationService;
+
     public ChannelService(
         AppDbContext dbContext,
         IChannelNotifier channelNotifier,
-        IWorkspaceAuthorizationService workspaceAuthorization)
+        IWorkspaceAuthorizationService workspaceAuthorization,
+        INotificationService notificationService)
     {
         this._dbContext = dbContext;
         this._channelNotifier = channelNotifier;
         this._workspaceAuthorization = workspaceAuthorization;
+        this._notificationService = notificationService;
     }
 
     public async Task<ChannelResponseDto> CreateAsync(
@@ -71,11 +75,24 @@ public class ChannelService : IChannelService
             .Select(x => x.UserId)
             .ToListAsync();
 
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.Username)
+            .SingleAsync();
+
         var response = channel.ToDto();
 
         await _channelNotifier.ChannelCreatedAsync(
             memberIds,
             response);
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            userId,
+            "ChannelCreated",
+            $"{actorUsername} created channel #{channel.Name}",
+            workspaceId,
+            channel.Id);
 
         return response;
     }
@@ -167,6 +184,8 @@ public class ChannelService : IChannelService
             return channel.ToDto();
         }
 
+        var oldName = channel.Name;
+
         channel.Name = newName;
 
         try
@@ -192,11 +211,24 @@ public class ChannelService : IChannelService
             .Select(x => x.UserId)
             .ToListAsync();
 
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.Username)
+            .SingleAsync();
+
         var response = channel.ToDto();
 
         await _channelNotifier.ChannelUpdatedAsync(
             memberIds,
             response);
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            userId,
+            "ChannelRenamed",
+            $"{actorUsername} renamed channel #{oldName} to #{newName}",
+            channel.WorkspaceId,
+            channel.Id);
 
         return response;
     }
@@ -221,6 +253,13 @@ public class ChannelService : IChannelService
             WorkspaceId = channel.WorkspaceId,
         };
 
+        var deletedChannelName = channel.Name;
+
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.Username)
+            .SingleAsync();
+
         _dbContext.Channels.Remove(channel);
 
         await _dbContext.SaveChangesAsync();
@@ -228,5 +267,37 @@ public class ChannelService : IChannelService
         await _channelNotifier.ChannelDeletedAsync(
             memberIds,
             response);
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            userId,
+            "ChannelDeleted",
+            $"{actorUsername} deleted channel #{deletedChannelName}",
+            response.WorkspaceId,
+            response.ChannelId);
+    }
+
+    private async Task NotifyWorkspaceMembersAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        Guid actorUserId,
+        string type,
+        string message,
+        Guid workspaceId,
+        Guid entityId)
+    {
+        var recipients = memberIds
+            .Distinct()
+            .ToList();
+
+        foreach (var recipientId in recipients)
+        {
+            await _notificationService.CreateAsync(
+                recipientId,
+                actorUserId,
+                type,
+                message,
+                workspaceId,
+                entityId);
+        }
     }
 }
