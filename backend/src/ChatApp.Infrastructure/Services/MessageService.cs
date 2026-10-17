@@ -17,12 +17,16 @@ public class MessageService : IMessageService
 
     private readonly IChatNotifier _chatNotifier;
 
+    private readonly INotificationService _notificationService;
+
     public MessageService(
         AppDbContext dbContext,
-        IChatNotifier chatNotifier)
+        IChatNotifier chatNotifier,
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
         _chatNotifier = chatNotifier;
+        _notificationService = notificationService;
     }
 
     public async Task<MessageResponseDto> CreateAsync(
@@ -70,6 +74,20 @@ public class MessageService : IMessageService
         await _chatNotifier.MessageCreatedAsync(
             message.ChannelId,
             response);
+
+        var memberIds = channel.Workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
+        var actorUsername = response.Username;
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            userId,
+            "MessageCreated",
+            $"{actorUsername} sent a message in #{channel.Name}",
+            channel.WorkspaceId,
+            message.Id);
 
         return response;
     }
@@ -164,16 +182,14 @@ public class MessageService : IMessageService
 
         if (message == null)
         {
-            throw new NotFoundException(
-                "Message not found");
+            throw new NotFoundException("Message not found");
         }
 
         var isOwner = message.UserId == userId;
 
         if (!isOwner)
         {
-            throw new ForbiddenException(
-                "You can only edit your own messages");
+            throw new ForbiddenException("You can only edit your own messages");
         }
 
         var content = request.Content.Trim();
@@ -194,6 +210,18 @@ public class MessageService : IMessageService
             message.ChannelId,
             response);
 
+        var memberIds = message.Channel.Workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            userId,
+            "MessageUpdated",
+            $"{message.User.Username} updated a message in #{message.Channel.Name}",
+            message.Channel.WorkspaceId,
+            message.Id);
+
         return response;
     }
 
@@ -210,20 +238,16 @@ public class MessageService : IMessageService
 
         if (message == null)
         {
-            throw new NotFoundException(
-                "Message not found");
+            throw new NotFoundException("Message not found");
         }
 
-        var member = message.Channel
-            .Workspace
-            .Members
+        var member = message.Channel.Workspace.Members
             .FirstOrDefault(x =>
                 x.UserId == userId);
 
         if (member == null)
         {
-            throw new ForbiddenException(
-                "User is not a member of this workspace");
+            throw new ForbiddenException("User is not a member of this workspace");
         }
 
         var isOwner = message.UserId == userId;
@@ -234,11 +258,22 @@ public class MessageService : IMessageService
 
         if (!isOwner && !isWorkspaceAdmin)
         {
-            throw new ForbiddenException(
-                "You do not have permission to delete this message");
+            throw new ForbiddenException("You do not have permission to delete this message");
         }
 
         var channelId = message.ChannelId;
+
+        var workspaceId = message.Channel.WorkspaceId;
+        var channelName = message.Channel.Name;
+
+        var memberIds = message.Channel.Workspace.Members
+            .Select(x => x.UserId)
+            .ToList();
+
+        var actorUsername = await _dbContext.Users
+            .Where(x => x.Id == userId)
+            .Select(x => x.Username)
+            .SingleAsync();
 
         _dbContext.Messages.Remove(message);
 
@@ -251,5 +286,37 @@ public class MessageService : IMessageService
                 MessageId = messageId,
                 ChannelId = channelId
             });
+
+        await NotifyWorkspaceMembersAsync(
+            memberIds,
+            userId,
+            "MessageDeleted",
+            $"{actorUsername} deleted a message in #{channelName}",
+            workspaceId,
+            messageId);
+    }
+
+    private async Task NotifyWorkspaceMembersAsync(
+        IReadOnlyCollection<Guid> memberIds,
+        Guid actorUserId,
+        string type,
+        string message,
+        Guid workspaceId,
+        Guid entityId)
+    {
+        var recipients = memberIds
+            .Distinct()
+            .ToList();
+
+        foreach (var recipientId in recipients)
+        {
+            await _notificationService.CreateAsync(
+                recipientId,
+                actorUserId,
+                type,
+                message,
+                workspaceId,
+                entityId);
+        }
     }
 }
