@@ -1,10 +1,7 @@
-import {
-    useEffect,
-} from 'react'
+import { useEffect } from 'react'
 
-import {
-    useAuth,
-} from '../features/auth/useAuth'
+import { useAuth } from '../features/auth/useAuth'
+import NotificationRealtimeListener from '../features/notifications/NotificationRealtimeListener'
 
 import {
     startChatConnection,
@@ -15,12 +12,8 @@ interface AuthenticatedAppProps {
     children: React.ReactNode
 }
 
-function AuthenticatedApp({
-    children,
-}: AuthenticatedAppProps) {
-    const {
-        isAuthenticated,
-    } = useAuth()
+function AuthenticatedApp({ children }: AuthenticatedAppProps) {
+    const { isAuthenticated } = useAuth()
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -31,7 +24,16 @@ function AuthenticatedApp({
         void stopChatConnection()
     }, [isAuthenticated])
 
-    return children
+    if (!isAuthenticated) {
+        return <>{children}</>
+    }
+
+    return (
+        <>
+            <NotificationRealtimeListener />
+            {children}
+        </>
+    )
 }
 
 export default AuthenticatedApp
