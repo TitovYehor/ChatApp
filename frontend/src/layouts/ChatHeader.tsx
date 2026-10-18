@@ -1,4 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
+
+import NotificationCenter from '../features/notifications/NotificationCenter'
+
 import './ChatHeader.css'
 
 interface ChatHeaderProps {
@@ -11,6 +14,7 @@ function ChatHeader({
     onLogout,
 }: ChatHeaderProps) {
     const location = useLocation()
+
     const isProfilePage = location.pathname === '/profile'
     const isFriendsPage = location.pathname === '/friends'
 
@@ -21,16 +25,13 @@ function ChatHeader({
                 className="chat-header__brand"
                 aria-label="Chat App home"
             >
-                <div className="chat-header__logo">
-                    C
-                </div>
-
-                <span className="chat-header__title">
-                    Chat App
-                </span>
+                <div className="chat-header__logo">C</div>
+                <span className="chat-header__title">Chat App</span>
             </Link>
 
-            <div className="chat-header__user">                
+            <div className="chat-header__user">
+                <NotificationCenter />
+
                 <Link
                     to="/friends"
                     className={`chat-header__profile-link${
@@ -59,9 +60,7 @@ function ChatHeader({
                     {username.charAt(0).toUpperCase()}
                 </div>
 
-                <span className="chat-header__username">
-                    {username}
-                </span>
+                <span className="chat-header__username">{username}</span>
 
                 <button
                     type="button"
