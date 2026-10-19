@@ -32,3 +32,14 @@ export function add(
         },
     )
 }
+
+export function remove(
+    userId: string,
+): Promise<void> {
+    return apiRequest<void>(
+        `/friends/${userId}`,
+        {
+            method: 'DELETE',
+        },
+    )
+}
