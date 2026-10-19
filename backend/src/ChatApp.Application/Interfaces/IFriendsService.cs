@@ -14,4 +14,8 @@ public interface IFriendsService
     Task AddFriendAsync(
         Guid currentUserId,
         Guid friendUserId);
+
+    Task RemoveFriendAsync(
+        Guid currentUserId,
+        Guid friendUserId);
 }

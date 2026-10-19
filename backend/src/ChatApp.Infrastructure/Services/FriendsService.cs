@@ -138,6 +138,34 @@ public class FriendsService : IFriendsService
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task RemoveFriendAsync(
+        Guid currentUserId,
+        Guid friendUserId)
+    {
+        if (currentUserId == friendUserId)
+        {
+            throw new ConflictException("You cannot remove yourself from your friends list");
+        }
+
+        var (firstUserId, secondUserId) = OrderIds(
+            currentUserId,
+            friendUserId);
+
+        var friendship = await _dbContext.Friendships
+            .FirstOrDefaultAsync(x =>
+                x.UserId == firstUserId &&
+                x.FriendUserId == secondUserId);
+
+        if (friendship == null)
+        {
+            throw new NotFoundException("Friendship was not found");
+        }
+
+        _dbContext.Friendships.Remove(friendship);
+
+        await _dbContext.SaveChangesAsync();
+    }
+
     private static (Guid First, Guid Second) OrderIds(
         Guid first,
         Guid second)
