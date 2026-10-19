@@ -47,11 +47,25 @@ public class FriendsController : ControllerBase
     }
 
     [HttpPost("{userId:guid}")]
-    public async Task<IActionResult> AddFriend(Guid userId)
+    public async Task<IActionResult> AddFriend(
+        Guid userId)
     {
         var currentUserId = _currentUserService.GetUserId();
 
         await _friendsService.AddFriendAsync(
+            currentUserId,
+            userId);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{userId:guid}")]
+    public async Task<IActionResult> RemoveFriend(
+        Guid userId)
+    {
+        var currentUserId = _currentUserService.GetUserId();
+
+        await _friendsService.RemoveFriendAsync(
             currentUserId,
             userId);
 
