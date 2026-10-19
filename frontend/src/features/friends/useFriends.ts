@@ -12,6 +12,7 @@ export function useFriends() {
     const [isLoadingFriends, setIsLoadingFriends] = useState(true)
     const [isSearching, setIsSearching] = useState(false)
     const [addingUserId, setAddingUserId] = useState<string | null>(null)
+    const [removingUserId, setRemovingUserId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [notice, setNotice] = useState<string | null>(null)
 
@@ -151,6 +152,38 @@ export function useFriends() {
         }
     }, [loadFriends])
 
+    const removeFriend = useCallback(async (friend: FriendResponse) => {
+        setRemovingUserId(friend.userId)
+        setError(null)
+        setNotice(null)
+
+        try {
+            await friendsApi.remove(friend.userId)
+
+            setFriends(current =>
+                current.filter(item => item.userId !== friend.userId),
+            )
+
+            setResults(current =>
+                current.map(result =>
+                    result.userId === friend.userId
+                        ? { ...result, isFriend: false }
+                        : result,
+                ),
+            )
+
+            setNotice(`${friend.username} was removed from your friends`)
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Could not remove this friend',
+            )
+        } finally {
+            setRemovingUserId(null)
+        }
+    }, [])
+
     return {
         friends,
         query,
@@ -159,9 +192,11 @@ export function useFriends() {
         isLoadingFriends,
         isSearching,
         addingUserId,
+        removingUserId,
         error,
         notice,
         addFriend,
+        removeFriend,
         refreshFriends: loadFriends,
     }
 }
