@@ -145,6 +145,70 @@
     text-decoration: underline;
 }
 
+.user-profile-card__friend-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 24px;
+}
+
+.user-profile-card__friend-button {
+    width: 100%;
+    max-width: 240px;
+    padding: 11px 16px;
+    border: 1px solid #5865f2;
+    border-radius: 8px;
+    background: #5865f2;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.user-profile-card__friend-button:hover:not(:disabled) {
+    background: #4752c4;
+}
+
+.user-profile-card__friend-button--remove {
+    border-color: #593538;
+    background: transparent;
+    color: #f28b82;
+}
+
+.user-profile-card__friend-button--remove:hover:not(:disabled) {
+    background: #302024;
+    border-color: #a34e55;
+}
+
+.user-profile-card__friend-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.user-profile-card__friend-button:focus-visible {
+    outline: 2px solid #5865f2;
+    outline-offset: 3px;
+}
+
+.user-profile-card__friend-error {
+    margin: 0;
+    color: #f28b82;
+    font-size: 13px;
+    text-align: center;
+}
+
+.user-profile-card__friend-notice {
+    margin: 0;
+    color: #9298a6;
+    font-size: 13px;
+    text-align: center;
+}
+
+
 @media (max-width: 760px) {
     .user-profile-page__content {
         padding: 28px 18px 40px;

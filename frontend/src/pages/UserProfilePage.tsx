@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import ChatHeader from '../layouts/ChatHeader'
 import { useAuth } from '../features/auth/useAuth'
 import { usePublicUserProfile } from '../features/users/usePublicUserProfile'
+import { useProfileFriendship } from '../features/users/useProfileFriendship'
 
 import './css/UserProfilePage.css'
 
@@ -17,6 +18,19 @@ function UserProfilePage() {
     } = usePublicUserProfile(userId)
 
     const isOwnProfile = Boolean(userId && user?.id === userId)
+
+    const {
+        isFriend,
+        isLoadingFriendship,
+        isUpdatingFriendship,
+        error: friendshipError,
+        notice: friendshipNotice,
+        toggleFriendship,
+    } = useProfileFriendship(
+        userId,
+        profile?.username,
+        isOwnProfile,
+    )
 
     return (
         <div className="user-profile-page">
@@ -74,6 +88,47 @@ function UserProfilePage() {
                                 },
                             )}
                         </p>
+
+                        {!isOwnProfile && (
+                            <div className="user-profile-card__friend-actions">
+                                <button
+                                    type="button"
+                                    className={
+                                        isFriend
+                                            ? 'user-profile-card__friend-button user-profile-card__friend-button--remove'
+                                            : 'user-profile-card__friend-button'
+                                    }
+                                    disabled={
+                                        isLoadingFriendship ||
+                                        isUpdatingFriendship ||
+                                        !userId
+                                    }
+                                    onClick={() => {
+                                        void toggleFriendship()
+                                    }}
+                                >
+                                    {isLoadingFriendship
+                                        ? 'Checking...'
+                                        : isUpdatingFriendship
+                                            ? 'Please wait...'
+                                            : isFriend
+                                                ? 'Remove friend'
+                                                : 'Add friend'}
+                                </button>
+
+                                {friendshipError && (
+                                    <p className="user-profile-card__friend-error" role="alert">
+                                        {friendshipError}
+                                    </p>
+                                )}
+
+                                {friendshipNotice && (
+                                    <p className="user-profile-card__friend-notice" role="status">
+                                        {friendshipNotice}
+                                    </p>
+                                )}
+                            </div>
+                        )}
 
                         {isOwnProfile && (
                             <Link
