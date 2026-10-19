@@ -17,9 +17,11 @@ function FriendsPage() {
         isLoadingFriends,
         isSearching,
         addingUserId,
+        removingUserId,
         error,
         notice,
         addFriend,
+        removeFriend,
     } = useFriends()
 
     function renderSearchResult(friend: FriendSearchResponse) {
@@ -52,7 +54,7 @@ function FriendsPage() {
                     <button
                         type="button"
                         className="friends-page__add-button"
-                        disabled={addingUserId !== null}
+                        disabled={addingUserId !== null || removingUserId !== null}
                         onClick={() => void addFriend(friend)}
                     >
                         {addingUserId === friend.userId
@@ -203,13 +205,27 @@ function FriendsPage() {
                                             </span>
                                         </div>
 
-                                        <span
-                                            className="friends-page__friend-indicator"
-                                            title="Friend"
-                                            aria-label="Friend"
+                                        <button
+                                            type="button"
+                                            className="friends-page__remove-button"
+                                            disabled={
+                                                removingUserId !== null ||
+                                                addingUserId !== null
+                                            }
+                                            onClick={() => {
+                                                if (
+                                                    window.confirm(
+                                                        `Remove ${friend.username} from your friends?`,
+                                                    )
+                                                ) {
+                                                    void removeFriend(friend)
+                                                }
+                                            }}
                                         >
-                                            ✓
-                                        </span>
+                                            {removingUserId === friend.userId
+                                                ? 'Removing...'
+                                                : 'Remove friend'}
+                                        </button>
                                     </div>
                                 ))}
                             </div>

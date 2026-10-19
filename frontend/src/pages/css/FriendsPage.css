@@ -332,6 +332,39 @@
     border-radius: 2px;
 }
 
+.friends-page__remove-button {
+    flex: 0 0 auto;
+    padding: 8px 11px;
+    border: 1px solid #593538;
+    border-radius: 7px;
+    background: transparent;
+    color: #f28b82;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.friends-page__remove-button:hover:not(:disabled) {
+    border-color: #a34e55;
+    background: #302024;
+}
+
+.friends-page__remove-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.friends-page__remove-button:focus-visible {
+    outline: 2px solid #5865f2;
+    outline-offset: 3px;
+}
+
+
 @media (max-width: 760px) {
     .friends-page__content {
         padding: 28px 18px 40px;
