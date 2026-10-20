@@ -3,6 +3,10 @@ import { useCallback, useEffect, useState } from 'react'
 import * as friendsApi from '../../api/friendsApi'
 import type { FriendResponse } from '../../types/friendTypes'
 
+import { getChatConnection } from '../../services/signalR/chatConnection'
+import { SignalREvents } from '../../types/signalREvents'
+
+
 interface UseProfileFriendshipResult {
     isFriend: boolean
     isLoadingFriendship: boolean
@@ -22,6 +26,44 @@ export function useProfileFriendship(
     const [isUpdatingFriendship, setIsUpdatingFriendship] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [notice, setNotice] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (isOwnProfile || !profileUserId) {
+            return
+        }
+
+        const connection = getChatConnection()
+
+        const handleFriendshipChanged = async () => {
+            try {
+                const friends = await friendsApi.getAll()
+
+                setIsFriend(
+                    friends.some(
+                        friend => friend.userId === profileUserId,
+                    ),
+                )
+            } catch (err) {
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : 'Could not update friendship status',
+                )
+            }
+        }
+
+        connection.on(
+            SignalREvents.FriendshipChanged,
+            handleFriendshipChanged,
+        )
+
+        return () => {
+            connection.off(
+                SignalREvents.FriendshipChanged,
+                handleFriendshipChanged,
+            )
+        }
+    }, [profileUserId, isOwnProfile])
 
     useEffect(() => {
         let cancelled = false
@@ -49,7 +91,7 @@ export function useProfileFriendship(
                     setError(
                         err instanceof Error
                             ? err.message
-                            : 'Could not load friendship status.',
+                            : 'Could not load friendship status',
                     )
                 }
             } finally {
