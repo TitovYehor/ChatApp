@@ -5,6 +5,9 @@ import type {
     FriendSearchResponse,
 } from '../../types/friendTypes'
 
+import { getChatConnection } from '../../services/signalR/chatConnection'
+import { SignalREvents } from '../../types/signalREvents'
+
 export function useFriends() {
     const [friends, setFriends] = useState<FriendResponse[]>([])
     const [query, setQuery] = useState('')
@@ -47,6 +50,49 @@ export function useFriends() {
             setResults([])
             setIsSearching(false)
             searchVersion.current += 1
+        }
+    }, [])
+
+    useEffect(() => {
+        const connection = getChatConnection()
+
+        const handleFriendshipChanged = async () => {
+            try {
+                const data = await friendsApi.getAll()
+
+                setFriends(data)
+
+                const friendIds = new Set(
+                    data.map(friend => friend.userId),
+                )
+
+                setResults(current =>
+                    current.map(result => ({
+                        ...result,
+                        isFriend: friendIds.has(result.userId),
+                    })),
+                )
+
+                setError(null)
+            } catch (err) {
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : 'Could not refresh your friends',
+                )
+            }
+        }
+
+        connection.on(
+            SignalREvents.FriendshipChanged,
+            handleFriendshipChanged,
+        )
+
+        return () => {
+            connection.off(
+                SignalREvents.FriendshipChanged,
+                handleFriendshipChanged,
+            )
         }
     }, [])
 
