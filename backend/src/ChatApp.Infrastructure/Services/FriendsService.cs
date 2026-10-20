@@ -11,13 +11,17 @@ public class FriendsService : IFriendsService
 {
     private readonly AppDbContext _dbContext;
 
+    private readonly IFriendshipNotifier _friendshipNotifier;
+
     private readonly INotificationService _notificationService;
 
     public FriendsService(
         AppDbContext dbContext,
+        IFriendshipNotifier friendshipNotifier,
         INotificationService notificationService)
     {
         _dbContext = dbContext;
+        _friendshipNotifier = friendshipNotifier;
         _notificationService = notificationService;
     }
 
@@ -156,6 +160,9 @@ public class FriendsService : IFriendsService
 
         await _dbContext.SaveChangesAsync();
 
+        await _friendshipNotifier.FriendshipChangedAsync(
+            new[] { currentUserId, friendUserId });
+
         await _notificationService.CreateAsync(
             currentUserId,
             friendUserId,
@@ -210,6 +217,9 @@ public class FriendsService : IFriendsService
         _dbContext.Friendships.Remove(friendship);
 
         await _dbContext.SaveChangesAsync();
+
+        await _friendshipNotifier.FriendshipChangedAsync(
+            new[] { currentUserId, friendUserId });
 
         await _notificationService.CreateAsync(
             currentUserId,
