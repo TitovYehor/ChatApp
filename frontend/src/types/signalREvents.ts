@@ -19,5 +19,7 @@ export const SignalREvents = {
     ChannelUpdated: 'ChannelUpdated',
     ChannelDeleted: 'ChannelDeleted',
 
+    FriendshipChanged: 'FriendshipChanged',
+
     NotificationCreated: 'NotificationCreated',
 } as const
