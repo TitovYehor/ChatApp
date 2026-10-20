@@ -53,6 +53,10 @@ public static class SignalREvents
         nameof(ChannelDeleted);
 
 
+    public const string FriendshipChanged =
+        nameof(FriendshipChanged);
+
+
     public const string NotificationCreated =
         nameof(NotificationCreated);
 }
