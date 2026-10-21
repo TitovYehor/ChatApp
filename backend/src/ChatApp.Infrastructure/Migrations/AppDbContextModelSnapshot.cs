@@ -152,6 +152,66 @@ namespace ChatApp.Infrastructure.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("ChatApp.Domain.Entities.PrivateConversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("User1Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("User2Id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.HasIndex("User1Id", "User2Id")
+                        .IsUnique();
+
+                    b.ToTable("PrivateConversations", t =>
+                        {
+                            t.HasCheckConstraint("CK_PrivateConversations_UserOrder", "\"User1Id\" < \"User2Id\"");
+                        });
+                });
+
+            modelBuilder.Entity("ChatApp.Domain.Entities.PrivateMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ConversationId", "CreatedAt");
+
+                    b.ToTable("PrivateMessages");
+                });
+
             modelBuilder.Entity("ChatApp.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -326,6 +386,44 @@ namespace ChatApp.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ChatApp.Domain.Entities.PrivateConversation", b =>
+                {
+                    b.HasOne("ChatApp.Domain.Entities.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Domain.Entities.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
+            modelBuilder.Entity("ChatApp.Domain.Entities.PrivateMessage", b =>
+                {
+                    b.HasOne("ChatApp.Domain.Entities.PrivateConversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ChatApp.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("ChatApp.Domain.Entities.User", "User")
@@ -357,6 +455,11 @@ namespace ChatApp.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Entities.Channel", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("ChatApp.Domain.Entities.PrivateConversation", b =>
                 {
                     b.Navigation("Messages");
                 });
