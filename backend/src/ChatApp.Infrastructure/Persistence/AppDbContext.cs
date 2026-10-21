@@ -34,6 +34,12 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications
         => Set<Notification>();
 
+    public DbSet<PrivateConversation> PrivateConversations
+    => Set<PrivateConversation>();
+
+    public DbSet<PrivateMessage> PrivateMessages
+        => Set<PrivateMessage>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {
