@@ -1,5 +1,6 @@
 ﻿using ChatApp.Contracts.Messages.Responses;
 using ChatApp.Contracts.Realtime.Responses;
+using ChatApp.Contracts.PrivateConversations.Responses;
 
 namespace ChatApp.Application.Interfaces;
 
@@ -16,6 +17,10 @@ public interface IChatNotifier
     Task MessageDeletedAsync(
         Guid channelId,
         MessageDeletedResponseDto response);
+
+    Task PrivateMessageCreatedAsync(
+        Guid conversationId,
+        PrivateMessageResponseDto message);
 
     Task UserPresenceChangedAsync(
         IEnumerable<Guid> userIds,

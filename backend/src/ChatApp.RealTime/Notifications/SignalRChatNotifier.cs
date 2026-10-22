@@ -3,6 +3,7 @@ using ChatApp.Application.Interfaces;
 using ChatApp.Application.Realtime;
 using ChatApp.Contracts.Realtime.Responses;
 using ChatApp.Contracts.Realtime.SignalRNamings;
+using ChatApp.Contracts.PrivateConversations.Responses;
 using ChatApp.RealTime.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
@@ -52,6 +53,18 @@ public sealed class SignalRChatNotifier : IChatNotifier
             .SendAsync(
                 SignalREvents.MessageDeleted,
                 response);
+    }
+
+    public async Task PrivateMessageCreatedAsync(
+        Guid conversationId,
+        PrivateMessageResponseDto message)
+    {
+        await _hubContext.Clients
+            .Group(
+                SignalRGroups.PrivateConversationGroup(conversationId))
+            .SendAsync(
+                SignalREvents.PrivateMessageCreated,
+                message);
     }
 
     public async Task UserPresenceChangedAsync(
