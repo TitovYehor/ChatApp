@@ -14,9 +14,14 @@ public sealed class PrivateConversationService
 {
     private readonly AppDbContext _dbContext;
 
-    public PrivateConversationService(AppDbContext dbContext)
+    private readonly IChatNotifier _chatNotifier;
+
+    public PrivateConversationService(
+        AppDbContext dbContext,
+        IChatNotifier chatNotifier)
     {
         _dbContext = dbContext;
+        _chatNotifier = chatNotifier;
     }
 
     public async Task<PrivateConversationResponseDto> GetOrCreateAsync(
@@ -186,12 +191,19 @@ public sealed class PrivateConversationService
             throw new ForbiddenException("You must be friends to send messages");
         }
 
+        var content = request.Content.Trim();
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new ConflictException("Message content cannot be empty");
+        }
+
         var message = new PrivateMessage
         {
             Id = Guid.NewGuid(),
             ConversationId = conversationId,
             UserId = currentUserId,
-            Content = request.Content.Trim(),
+            Content = content,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -204,7 +216,7 @@ public sealed class PrivateConversationService
             .Select(x => x.Username)
             .SingleAsync();
 
-        return new PrivateMessageResponseDto
+        var response = new PrivateMessageResponseDto
         {
             Id = message.Id,
             ConversationId = message.ConversationId,
@@ -214,6 +226,23 @@ public sealed class PrivateConversationService
             CreatedAt = message.CreatedAt,
             UpdatedAt = message.UpdatedAt
         };
+
+        await _chatNotifier.PrivateMessageCreatedAsync(
+            conversationId,
+            response);
+
+        return response;
+    }
+
+    public async Task<bool> IsParticipantAsync(
+        Guid userId,
+        Guid conversationId)
+    {
+        return await _dbContext.PrivateConversations
+            .AsNoTracking()
+            .AnyAsync(x =>
+                x.Id == conversationId &&
+                (x.User1Id == userId || x.User2Id == userId));
     }
 
     private async Task EnsureParticipantAsync(

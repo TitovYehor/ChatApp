@@ -22,4 +22,8 @@ public interface IPrivateConversationService
         Guid currentUserId,
         Guid conversationId,
         CreateMessageRequestDto request);
+
+    Task<bool> IsParticipantAsync(
+        Guid userId,
+        Guid conversationId);
 }
