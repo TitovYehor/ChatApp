@@ -57,6 +57,10 @@ public static class SignalREvents
         nameof(FriendshipChanged);
 
 
+    public const string PrivateMessageCreated =
+        nameof(PrivateMessageCreated);
+
+
     public const string NotificationCreated =
         nameof(NotificationCreated);
 }
