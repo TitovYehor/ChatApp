@@ -12,4 +12,9 @@ public static class SignalRGroups
     {
         return $"user-{userId}";
     }
+
+    public static string PrivateConversationGroup(Guid conversationId)
+    {
+        return $"private-conversation-{conversationId}";
+    }
 }
