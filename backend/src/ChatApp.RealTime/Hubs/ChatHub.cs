@@ -14,15 +14,19 @@ public sealed class ChatHub : Hub
 
     private readonly IPresenceService _presenceService;
 
+    private readonly IPrivateConversationService _privateConversationService;
+
     private readonly ILogger<ChatHub> _logger;
 
     public ChatHub(
         IChannelAccessService channelAccessService,
         IPresenceService presenceService,
+        IPrivateConversationService privateConversationService,
         ILogger<ChatHub> logger)
     {
         _channelAccessService = channelAccessService;
         _presenceService = presenceService;
+        _privateConversationService = privateConversationService;
         _logger = logger;
     }
 
@@ -106,6 +110,36 @@ public sealed class ChatHub : Hub
             "Connection {ConnectionId} left channel {ChannelId}",
             Context.ConnectionId,
             request.ChannelId);
+    }
+
+    public async Task JoinPrivateConversation(
+        Guid conversationId)
+    {
+        var userId = GetCurrentUserId();
+
+        var isParticipant = await _privateConversationService
+            .IsParticipantAsync(userId, conversationId);
+
+        if (!isParticipant)
+        {
+            throw new HubException("Access denied");
+        }
+
+        await Groups.AddToGroupAsync(
+            Context.ConnectionId,
+            SignalRGroups.PrivateConversationGroup(conversationId));
+
+        _logger.LogInformation(
+            "User {UserId} joined private conversation {ConversationId}",
+            userId,
+            conversationId);
+    }
+
+    public async Task LeavePrivateConversation(Guid conversationId)
+    {
+        await Groups.RemoveFromGroupAsync(
+            Context.ConnectionId,
+            SignalRGroups.PrivateConversationGroup(conversationId));
     }
 
     public async Task TypingStarted(
