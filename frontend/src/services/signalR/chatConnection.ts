@@ -188,3 +188,35 @@ export async function leaveChannel(
         },
     )
 }
+
+export async function joinPrivateConversation(
+    conversationId: string,
+): Promise<void> {
+    const chatConnection = getChatConnection()
+
+    if (chatConnection.state !== HubConnectionState.Connected
+    ) {
+        throw new Error('Chat connection is not connected')
+    }
+
+    await chatConnection.invoke(
+        SignalRMethods.JoinPrivateConversation,
+        conversationId,
+    )
+}
+
+export async function leavePrivateConversation(
+    conversationId: string,
+): Promise<void> {
+    const chatConnection = getChatConnection()
+
+    if (chatConnection.state !== HubConnectionState.Connected
+    ) {
+        return
+    }
+
+    await chatConnection.invoke(
+        SignalRMethods.LeavePrivateConversation,
+        conversationId,
+    )
+}
