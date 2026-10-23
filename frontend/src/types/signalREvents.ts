@@ -21,5 +21,7 @@ export const SignalREvents = {
 
     FriendshipChanged: 'FriendshipChanged',
 
+    PrivateMessageCreated: 'PrivateMessageCreated',
+
     NotificationCreated: 'NotificationCreated',
 } as const
