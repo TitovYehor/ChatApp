@@ -15,3 +15,10 @@ export interface UserTypingResponse {
     channelId: string
     isTyping: boolean
 }
+
+export interface PrivateUserTypingResponse {
+    conversationId: string
+    userId: string
+    username: string
+    isTyping: boolean
+}
