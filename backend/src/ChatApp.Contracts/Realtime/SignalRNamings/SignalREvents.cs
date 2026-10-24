@@ -20,6 +20,9 @@ public static class SignalREvents
     public const string UserTyping =
         nameof(UserTyping);
 
+    public const string PrivateUserTyping =
+        nameof(PrivateUserTyping);
+
 
     public const string WorkspaceDeleted =
         nameof(WorkspaceDeleted);
