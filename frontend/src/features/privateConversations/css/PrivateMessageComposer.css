@@ -1,0 +1,55 @@
+.private-message-composer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: #15171e;
+    border-top: 1px solid #292d36;
+}
+
+.private-message-composer textarea {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 48px;
+    max-height: 180px;
+    padding: 12px;
+    border: 1px solid #292d36;
+    border-radius: 8px;
+    background: #101218;
+    color: #e7eaf0;
+    font: inherit;
+}
+
+.private-message-composer textarea:focus {
+    outline: none;
+    border-color: #5865f2;
+}
+
+.private-message-composer__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.private-message-composer__error {
+    margin: 0;
+    color: #f87171;
+    font-size: 0.875rem;
+}
+
+.private-message-composer button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #5865f2;
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.private-message-composer button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
