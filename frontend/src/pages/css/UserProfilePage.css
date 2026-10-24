@@ -208,6 +208,11 @@
     text-align: center;
 }
 
+.user-profile-card__error {
+    margin: 8px 0 0;
+    color: #f87171;
+    font-size: 0.875rem;
+}
 
 @media (max-width: 760px) {
     .user-profile-page__content {

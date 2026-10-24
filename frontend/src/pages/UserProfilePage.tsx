@@ -1,5 +1,6 @@
-import { Link, useParams } from 'react-router-dom'
-
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useGetOrCreatePrivateConversation } from '../features/privateConversations/usePrivateConversations'
 import ChatHeader from '../layouts/ChatHeader'
 import { useAuth } from '../features/auth/useAuth'
 import { usePublicUserProfile } from '../features/users/usePublicUserProfile'
@@ -10,12 +11,18 @@ import './css/UserProfilePage.css'
 function UserProfilePage() {
     const { userId } = useParams<{ userId: string }>()
     const { user, logout } = useAuth()
+    const navigate = useNavigate()
 
     const {
         profile,
         isLoading,
         error,
     } = usePublicUserProfile(userId)
+
+    const [startConversationError, setStartConversationError] =
+        useState<string | null>(null)
+
+    const conversationMutation = useGetOrCreatePrivateConversation()
 
     const isOwnProfile = Boolean(userId && user?.id === userId)
 
@@ -31,6 +38,23 @@ function UserProfilePage() {
         profile?.username,
         isOwnProfile,
     )
+
+    async function handleStartConversation() {
+        if (!userId || !isFriend) {
+            return
+        }
+
+        setStartConversationError(null)
+
+        try {
+            const conversation = await conversationMutation.mutateAsync(userId)
+            navigate(`/conversations/${conversation.id}`)
+        } catch {
+            setStartConversationError(
+                'Could not open this conversation. Please try again'
+            )
+        }
+    }
 
     return (
         <div className="user-profile-page">
@@ -125,6 +149,29 @@ function UserProfilePage() {
                                 {friendshipNotice && (
                                     <p className="user-profile-card__friend-notice" role="status">
                                         {friendshipNotice}
+                                    </p>
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="user-profile-card__friend-button"
+                                    disabled={
+                                        !isFriend ||
+                                        isLoadingFriendship ||
+                                        conversationMutation.isPending
+                                    }
+                                    onClick={() => {
+                                        void handleStartConversation()
+                                    }}
+                                >
+                                    {conversationMutation.isPending
+                                        ? 'Opening conversation...'
+                                        : 'Message'}
+                                </button>
+
+                                {startConversationError && (
+                                    <p className="user-profile-card__error" role="alert">
+                                        {startConversationError}
                                     </p>
                                 )}
                             </div>
