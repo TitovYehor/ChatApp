@@ -101,4 +101,15 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 SignalREvents.UserTyping,
                 response);
     }
+
+    public Task PrivateUserTypingAsync(
+        Guid conversationId,
+        PrivateUserTypingResponseDto response)
+    {
+        return _hubContext.Clients
+            .Group(SignalRGroups.PrivateConversationGroup(conversationId))
+            .SendAsync(
+                SignalREvents.PrivateUserTyping,
+                response);
+    }
 }

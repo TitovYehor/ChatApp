@@ -33,4 +33,8 @@ public interface IChatNotifier
     Task UserTypingAsync(
         Guid channelId,
         UserTypingResponseDto response);
+
+    Task PrivateUserTypingAsync(
+        Guid conversationId,
+        PrivateUserTypingResponseDto response);
 }
