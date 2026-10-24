@@ -1,6 +1,7 @@
 ﻿using ChatApp.Application.Interfaces;
 using ChatApp.Application.Realtime;
 using ChatApp.Contracts.Realtime.Requests;
+using ChatApp.Contracts.Realtime.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -16,17 +17,25 @@ public sealed class ChatHub : Hub
 
     private readonly IPrivateConversationService _privateConversationService;
 
+    private readonly IWorkspaceMemberLookupService _workspaceMemberLookupService;
+
+    private readonly IChatNotifier _chatNotifier;
+
     private readonly ILogger<ChatHub> _logger;
 
     public ChatHub(
         IChannelAccessService channelAccessService,
         IPresenceService presenceService,
         IPrivateConversationService privateConversationService,
+        IWorkspaceMemberLookupService workspaceMemberLookupService,
+        IChatNotifier chatNotifier,
         ILogger<ChatHub> logger)
     {
         _channelAccessService = channelAccessService;
         _presenceService = presenceService;
         _privateConversationService = privateConversationService;
+        _workspaceMemberLookupService = workspaceMemberLookupService;
+        _chatNotifier = chatNotifier;
         _logger = logger;
     }
 
@@ -170,6 +179,46 @@ public sealed class ChatHub : Hub
         await _presenceService.TypingStoppedAsync(
             userId,
             request.ChannelId);
+    }
+
+    public async Task PrivateTypingStarted(
+        Guid conversationId)
+    {
+        await BroadcastPrivateTypingAsync(conversationId, true);
+    }
+
+    public async Task PrivateTypingStopped(
+        Guid conversationId)
+    {
+        await BroadcastPrivateTypingAsync(conversationId, false);
+    }
+
+    private async Task BroadcastPrivateTypingAsync(
+        Guid conversationId,
+        bool isTyping)
+    {
+        var userId = GetCurrentUserId();
+
+        var isParticipant = await _privateConversationService
+            .IsParticipantAsync(userId, conversationId);
+
+        if (!isParticipant)
+        {
+            throw new HubException("Access denied");
+        }
+
+        var lookup = await _workspaceMemberLookupService
+            .GetPresenceLookupAsync(userId);
+
+        await _chatNotifier.PrivateUserTypingAsync(
+            conversationId,
+            new PrivateUserTypingResponseDto
+            {
+                ConversationId = conversationId,
+                UserId = userId,
+                Username = lookup.Username,
+                IsTyping = isTyping
+            });
     }
 
     private Guid GetCurrentUserId()
