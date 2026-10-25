@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
+import type { FormEvent } from 'react'
+
+import { logError } from '../../utils/logger'
+
 import './css/PrivateMessageComposer.css'
 
 interface PrivateMessageComposerProps {
@@ -25,6 +29,12 @@ export default function PrivateMessageComposer({
     const typingActive = useRef(false)
     const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+    const onTypingStopRef = useRef(onTypingStop)
+
+    useEffect(() => {
+        onTypingStopRef.current = onTypingStop
+    }, [onTypingStop])
+
     async function stopTyping() {
         if (typingTimeout.current) {
             clearTimeout(typingTimeout.current)
@@ -39,8 +49,9 @@ export default function PrivateMessageComposer({
 
         try {
             await onTypingStop()
-        } catch {
-            setTypingError('Could not update your typing status.')
+        } catch (error) {
+            logError('Failed to stop private typing indicator', error)
+            setTypingError('Could not update your typing status')
         }
     }
 
@@ -54,9 +65,10 @@ export default function PrivateMessageComposer({
         try {
             await onTypingStart()
             setTypingError(null)
-        } catch {
+        } catch (error) {
             typingActive.current = false
-            setTypingError('Could not update your typing status.')
+            logError('Failed to start private typing indicator', error)
+            setTypingError('Could not update your typing status')
         }
     }
 
@@ -79,7 +91,7 @@ export default function PrivateMessageComposer({
         }, TYPING_STOP_DELAY)
     }
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         const trimmedContent = content.trim()
@@ -97,14 +109,21 @@ export default function PrivateMessageComposer({
         return () => {
             if (typingTimeout.current) {
                 clearTimeout(typingTimeout.current)
+                typingTimeout.current = null
             }
 
             if (typingActive.current) {
                 typingActive.current = false
-                void onTypingStop().catch(() => { })
+
+                void onTypingStopRef.current().catch((error: unknown) => {
+                    logError(
+                        'Failed to stop private typing indicator during cleanup',
+                        error,
+                    )
+                })
             }
         }
-    }, [onTypingStop])
+    }, [])
 
     return (
         <form className="private-message-composer" onSubmit={handleSubmit}>
