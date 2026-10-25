@@ -17,25 +17,17 @@ public sealed class ChatHub : Hub
 
     private readonly IPrivateConversationService _privateConversationService;
 
-    private readonly IWorkspaceMemberLookupService _workspaceMemberLookupService;
-
-    private readonly IChatNotifier _chatNotifier;
-
     private readonly ILogger<ChatHub> _logger;
 
     public ChatHub(
         IChannelAccessService channelAccessService,
         IPresenceService presenceService,
         IPrivateConversationService privateConversationService,
-        IWorkspaceMemberLookupService workspaceMemberLookupService,
-        IChatNotifier chatNotifier,
         ILogger<ChatHub> logger)
     {
         _channelAccessService = channelAccessService;
         _presenceService = presenceService;
         _privateConversationService = privateConversationService;
-        _workspaceMemberLookupService = workspaceMemberLookupService;
-        _chatNotifier = chatNotifier;
         _logger = logger;
     }
 
@@ -181,21 +173,7 @@ public sealed class ChatHub : Hub
             request.ChannelId);
     }
 
-    public async Task PrivateTypingStarted(
-        Guid conversationId)
-    {
-        await BroadcastPrivateTypingAsync(conversationId, true);
-    }
-
-    public async Task PrivateTypingStopped(
-        Guid conversationId)
-    {
-        await BroadcastPrivateTypingAsync(conversationId, false);
-    }
-
-    private async Task BroadcastPrivateTypingAsync(
-        Guid conversationId,
-        bool isTyping)
+    public async Task PrivateTypingStarted(Guid conversationId)
     {
         var userId = GetCurrentUserId();
 
@@ -207,18 +185,26 @@ public sealed class ChatHub : Hub
             throw new HubException("Access denied");
         }
 
-        var lookup = await _workspaceMemberLookupService
-            .GetPresenceLookupAsync(userId);
+        await _presenceService.PrivateTypingStartedAsync(
+            userId,
+            conversationId);
+    }
 
-        await _chatNotifier.PrivateUserTypingAsync(
-            conversationId,
-            new PrivateUserTypingResponseDto
-            {
-                ConversationId = conversationId,
-                UserId = userId,
-                Username = lookup.Username,
-                IsTyping = isTyping
-            });
+    public async Task PrivateTypingStopped(Guid conversationId)
+    {
+        var userId = GetCurrentUserId();
+
+        var isParticipant = await _privateConversationService
+            .IsParticipantAsync(userId, conversationId);
+
+        if (!isParticipant)
+        {
+            throw new HubException("Access denied");
+        }
+
+        await _presenceService.PrivateTypingStoppedAsync(
+            userId,
+            conversationId);
     }
 
     private Guid GetCurrentUserId()
