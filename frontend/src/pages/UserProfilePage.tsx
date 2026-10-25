@@ -5,6 +5,7 @@ import ChatHeader from '../layouts/ChatHeader'
 import { useAuth } from '../features/auth/useAuth'
 import { usePublicUserProfile } from '../features/users/usePublicUserProfile'
 import { useProfileFriendship } from '../features/users/useProfileFriendship'
+import { logError } from '../utils/logger'
 
 import './css/UserProfilePage.css'
 
@@ -49,9 +50,11 @@ function UserProfilePage() {
         try {
             const conversation = await conversationMutation.mutateAsync(userId)
             navigate(`/conversations/${conversation.id}`)
-        } catch {
+        } catch (error) {
+            logError('Failed to open private conversation', error)
+
             setStartConversationError(
-                'Could not open this conversation. Please try again'
+                'Could not open this conversation. Please try again',
             )
         }
     }
