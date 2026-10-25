@@ -6,6 +6,7 @@ export const SignalREvents = {
     UserPresenceChanged: 'UserPresenceChanged',
     OnlineUsersSnapshot: 'OnlineUsersSnapshot',
     UserTyping: 'UserTyping',
+    PrivateUserTyping: 'PrivateUserTyping',
 
     WorkspaceDeleted: 'WorkspaceDeleted',
     WorkspaceUpdated: 'WorkspaceUpdated',
