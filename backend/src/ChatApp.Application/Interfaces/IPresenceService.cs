@@ -17,4 +17,12 @@ public interface IPresenceService
     Task TypingStoppedAsync(
         Guid userId,
         Guid channelId);
+
+    Task PrivateTypingStartedAsync(
+        Guid userId,
+        Guid conversationId);
+
+    Task PrivateTypingStoppedAsync(
+        Guid userId,
+        Guid conversationId);
 }

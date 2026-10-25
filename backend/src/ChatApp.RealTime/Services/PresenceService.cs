@@ -1,4 +1,5 @@
 ﻿using ChatApp.Application.Interfaces;
+using ChatApp.Contracts.PrivateConversations.Responses;
 using ChatApp.Contracts.Realtime.Responses;
 
 namespace ChatApp.RealTime.Services;
@@ -133,6 +134,42 @@ public class PresenceService : IPresenceService
                 UserId = userId,
                 Username = lookup.Username,
                 ChannelId = channelId,
+                IsTyping = false
+            });
+    }
+
+    public async Task PrivateTypingStartedAsync(
+        Guid userId,
+        Guid conversationId)
+    {
+        var lookup = await _lookupService
+            .GetPresenceLookupAsync(userId);
+
+        await _chatNotifier.PrivateUserTypingAsync(
+            conversationId,
+            new PrivateUserTypingResponseDto
+            {
+                ConversationId = conversationId,
+                UserId = userId,
+                Username = lookup.Username,
+                IsTyping = true
+            });
+    }
+
+    public async Task PrivateTypingStoppedAsync(
+        Guid userId,
+        Guid conversationId)
+    {
+        var lookup = await _lookupService
+            .GetPresenceLookupAsync(userId);
+
+        await _chatNotifier.PrivateUserTypingAsync(
+            conversationId,
+            new PrivateUserTypingResponseDto
+            {
+                ConversationId = conversationId,
+                UserId = userId,
+                Username = lookup.Username,
                 IsTyping = false
             });
     }
