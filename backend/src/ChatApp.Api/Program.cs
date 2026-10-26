@@ -91,6 +91,10 @@ builder.Services.AddAuthentication(
             }
         };
     });
+
+var frontendOrigin = builder.Configuration["FrontendOrigin"]
+    ?? "http://localhost:5173";
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -98,7 +102,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:5173")
+                .WithOrigins(frontendOrigin)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
