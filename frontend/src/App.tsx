@@ -14,6 +14,7 @@ import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
 import UserProfilePage from './pages/UserProfilePage'
 import FriendsPage from './pages/FriendsPage'
+import PrivateConversationPage from './pages/PrivateConversationPage'
 
 function App() {
     return (
@@ -50,6 +51,11 @@ function App() {
                     <Route
                         path="/users/:userId"
                         element={<UserProfilePage />}
+                    />
+
+                    <Route
+                        path="/conversations/:conversationId"
+                        element={<PrivateConversationPage />}
                     />
                 </Route>
 
