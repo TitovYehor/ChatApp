@@ -101,8 +101,13 @@ export default function PrivateMessageComposer({
         }
 
         await stopTyping()
-        await onSend(trimmedContent)
-        setContent('')
+
+        try {
+            await onSend(trimmedContent)
+            setContent('')
+        } catch (error) {
+            logError('Private message submission failed', error)
+        }
     }
 
     useEffect(() => {
