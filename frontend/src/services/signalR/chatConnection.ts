@@ -18,6 +18,9 @@ let startPromise: Promise<void> | null = null
 
 let stopRequested = false
 
+const reconnectHandlers = new Set<() => void>()
+let reconnectHandlerRegistered = false
+
 const INITIAL_RETRY_DELAY = 2000
 const MAX_RETRY_DELAY = 10000
 
@@ -219,4 +222,26 @@ export async function leavePrivateConversation(
         SignalRMethods.LeavePrivateConversation,
         conversationId,
     )
+}
+
+export function subscribeToChatReconnect(
+    handler: () => void,
+): () => void {
+    const chatConnection = getChatConnection()
+
+    reconnectHandlers.add(handler)
+
+    if (!reconnectHandlerRegistered) {
+        chatConnection.onreconnected(() => {
+            for (const reconnectHandler of reconnectHandlers) {
+                reconnectHandler()
+            }
+        })
+
+        reconnectHandlerRegistered = true
+    }
+
+    return () => {
+        reconnectHandlers.delete(handler)
+    }
 }
