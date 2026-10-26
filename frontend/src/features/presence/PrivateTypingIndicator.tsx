@@ -2,7 +2,7 @@ import type {
     PrivateUserTypingResponse,
 } from '../../types/presenceTypes'
 
-import "../css/TypingIndicator.css"
+import "./css/TypingIndicator.css"
 
 interface PrivateTypingIndicatorProps {
     typingUsers: PrivateUserTypingResponse[]
