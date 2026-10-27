@@ -67,6 +67,30 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 message);
     }
 
+    public async Task PrivateMessageUpdatedAsync(
+        Guid conversationId,
+        PrivateMessageResponseDto message)
+    {
+        await _hubContext.Clients
+            .Group(
+                SignalRGroups.PrivateConversationGroup(conversationId))
+            .SendAsync(
+                SignalREvents.PrivateMessageUpdated,
+                message);
+    }
+
+    public async Task PrivateMessageDeletedAsync(
+        Guid conversationId,
+        PrivateMessageDeletedResponseDto response)
+    {
+        await _hubContext.Clients
+            .Group(
+                SignalRGroups.PrivateConversationGroup(conversationId))
+            .SendAsync(
+                SignalREvents.PrivateMessageDeleted,
+                response);
+    }
+
     public async Task UserPresenceChangedAsync(
         IEnumerable<Guid> userIds,
         UserPresenceChangedResponseDto response)

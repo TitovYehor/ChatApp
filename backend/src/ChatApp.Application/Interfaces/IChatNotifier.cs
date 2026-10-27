@@ -22,6 +22,14 @@ public interface IChatNotifier
         Guid conversationId,
         PrivateMessageResponseDto message);
 
+    Task PrivateMessageUpdatedAsync(
+        Guid conversationId,
+        PrivateMessageResponseDto message);
+
+    Task PrivateMessageDeletedAsync(
+        Guid conversationId,
+        PrivateMessageDeletedResponseDto response);
+
     Task UserPresenceChangedAsync(
         IEnumerable<Guid> userIds,
         UserPresenceChangedResponseDto response);
