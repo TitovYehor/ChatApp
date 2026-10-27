@@ -6,11 +6,11 @@ using ChatApp.Contracts.PrivateConversations.Responses;
 using ChatApp.Domain.Entities;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ChatApp.Infrastructure.Services;
 
-public sealed class PrivateConversationService
-    : IPrivateConversationService
+public sealed class PrivateConversationService : IPrivateConversationService
 {
     private readonly AppDbContext _dbContext;
 
@@ -234,6 +234,72 @@ public sealed class PrivateConversationService
         return response;
     }
 
+    public async Task<PrivateMessageResponseDto> UpdateMessageAsync(
+        Guid currentUserId,
+        Guid conversationId,
+        Guid messageId,
+        UpdateMessageRequestDto request)
+    {
+        var message = await _dbContext.PrivateMessages
+            .FirstOrDefaultAsync(x =>
+                x.Id == messageId &&
+                x.ConversationId == conversationId);
+
+        if (message is null)
+        {
+            throw new NotFoundException("Private message was not found");
+        }
+
+        if (message.UserId != currentUserId)
+        {
+            throw new ForbiddenException("You can only edit your own messages");
+        }
+
+        var content = request.Content.Trim();
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new ConflictException("Message content cannot be empty");
+        }
+
+        if (message.Content == content)
+        {
+            return await ProjectPrivateMessageAsync(message);
+        }
+
+        message.Content = content;
+        message.UpdatedAt = DateTime.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        return await ProjectPrivateMessageAsync(message);
+    }
+
+    public async Task DeleteMessageAsync(
+        Guid currentUserId,
+        Guid conversationId,
+        Guid messageId)
+    {
+        var message = await _dbContext.PrivateMessages
+            .FirstOrDefaultAsync(x =>
+                x.Id == messageId &&
+                x.ConversationId == conversationId);
+
+        if (message is null)
+        {
+            throw new NotFoundException("Private message was not found");
+        }
+
+        if (message.UserId != currentUserId)
+        {
+            throw new ForbiddenException("You can only delete your own messages");
+        }
+
+        _dbContext.PrivateMessages.Remove(message);
+
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task<bool> IsParticipantAsync(
         Guid userId,
         Guid conversationId)
@@ -297,6 +363,26 @@ public sealed class PrivateConversationService
                 CreatedAt = x.CreatedAt
             })
             .FirstOrDefaultAsync();
+    }
+
+    private async Task<PrivateMessageResponseDto> ProjectPrivateMessageAsync(
+        PrivateMessage message)
+    {
+        var username = await _dbContext.Users
+            .Where(x => x.Id == message.UserId)
+            .Select(x => x.Username)
+            .SingleAsync();
+
+        return new PrivateMessageResponseDto
+        {
+            Id = message.Id,
+            ConversationId = message.ConversationId,
+            UserId = message.UserId,
+            Username = username,
+            Content = message.Content,
+            CreatedAt = message.CreatedAt,
+            UpdatedAt = message.UpdatedAt
+        };
     }
 
     private static (Guid User1Id, Guid User2Id) OrderIds(

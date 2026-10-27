@@ -23,6 +23,17 @@ public interface IPrivateConversationService
         Guid conversationId,
         CreateMessageRequestDto request);
 
+    Task<PrivateMessageResponseDto> UpdateMessageAsync(
+        Guid currentUserId,
+        Guid conversationId,
+        Guid messageId,
+        UpdateMessageRequestDto request);
+
+    Task DeleteMessageAsync(
+        Guid currentUserId,
+        Guid conversationId,
+        Guid messageId);
+
     Task<bool> IsParticipantAsync(
         Guid userId,
         Guid conversationId);
