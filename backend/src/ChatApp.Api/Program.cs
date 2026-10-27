@@ -109,8 +109,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddOpenApi();
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -124,15 +122,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseRouting();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "V1");
-    });
-}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
