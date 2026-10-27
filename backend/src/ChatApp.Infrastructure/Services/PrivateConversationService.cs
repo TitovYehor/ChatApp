@@ -6,7 +6,6 @@ using ChatApp.Contracts.PrivateConversations.Responses;
 using ChatApp.Domain.Entities;
 using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace ChatApp.Infrastructure.Services;
 

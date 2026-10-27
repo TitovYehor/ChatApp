@@ -24,8 +24,8 @@ public class PrivateConversationsController : ControllerBase
     }
 
     [HttpPost("{otherUserId:guid}")]
-    public async Task<ActionResult<PrivateConversationResponseDto>>
-        GetOrCreate(Guid otherUserId)
+    public async Task<ActionResult<PrivateConversationResponseDto>> GetOrCreate(
+        Guid otherUserId)
     {
         var currentUserId = _currentUserService.GetUserId();
 
@@ -37,9 +37,7 @@ public class PrivateConversationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<
-        ActionResult<IReadOnlyCollection<PrivateConversationResponseDto>>>
-        GetAll()
+    public async Task<ActionResult<IReadOnlyCollection<PrivateConversationResponseDto>>> GetAll()
     {
         var currentUserId = _currentUserService.GetUserId();
 
@@ -50,11 +48,9 @@ public class PrivateConversationsController : ControllerBase
     }
 
     [HttpGet("{conversationId:guid}/messages")]
-    public async Task<
-        ActionResult<PagedResult<PrivateMessageResponseDto>>>
-        GetMessages(
-            Guid conversationId,
-            [FromQuery] MessageQueryDto query)
+    public async Task<ActionResult<PagedResult<PrivateMessageResponseDto>>> GetMessages(
+        Guid conversationId,
+        [FromQuery] MessageQueryDto query)
     {
         var currentUserId = _currentUserService.GetUserId();
 
@@ -67,10 +63,9 @@ public class PrivateConversationsController : ControllerBase
     }
 
     [HttpPost("{conversationId:guid}/messages")]
-    public async Task<ActionResult<PrivateMessageResponseDto>>
-        SendMessage(
-            Guid conversationId,
-            CreateMessageRequestDto request)
+    public async Task<ActionResult<PrivateMessageResponseDto>> SendMessage(
+        Guid conversationId,
+        CreateMessageRequestDto request)
     {
         var currentUserId = _currentUserService.GetUserId();
 
@@ -80,5 +75,37 @@ public class PrivateConversationsController : ControllerBase
             request);
 
         return Ok(message);
+    }
+
+    [HttpPut("{conversationId:guid}/messages/{messageId:guid}")]
+    public async Task<ActionResult<PrivateMessageResponseDto>> UpdateMessage(
+        Guid conversationId,
+        Guid messageId,
+        UpdateMessageRequestDto request)
+    {
+        var currentUserId = _currentUserService.GetUserId();
+
+        var message = await _conversationService.UpdateMessageAsync(
+            currentUserId,
+            conversationId,
+            messageId,
+            request);
+
+        return Ok(message);
+    }
+
+    [HttpDelete("{conversationId:guid}/messages/{messageId:guid}")]
+    public async Task<IActionResult> DeleteMessage(
+        Guid conversationId,
+        Guid messageId)
+    {
+        var currentUserId = _currentUserService.GetUserId();
+
+        await _conversationService.DeleteMessageAsync(
+            currentUserId,
+            conversationId,
+            messageId);
+
+        return NoContent();
     }
 }
