@@ -63,6 +63,12 @@ public static class SignalREvents
     public const string PrivateMessageCreated =
         nameof(PrivateMessageCreated);
 
+    public const string PrivateMessageUpdated =
+        nameof(PrivateMessageUpdated);
+
+    public const string PrivateMessageDeleted =
+        nameof(PrivateMessageDeleted);
+
 
     public const string NotificationCreated =
         nameof(NotificationCreated);
