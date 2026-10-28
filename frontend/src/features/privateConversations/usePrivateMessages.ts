@@ -78,3 +78,72 @@ export function useSendPrivateMessage(
         },
     })
 }
+
+export function useUpdatePrivateMessage(
+    conversationId: string | undefined,
+) {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({
+            messageId,
+            content,
+        }: {
+            messageId: string
+            content: string
+        }) => {
+            if (!conversationId) {
+                throw new Error('No conversation is selected')
+            }
+
+            return privateConversationApi.updateMessage(
+                conversationId,
+                messageId,
+                { content },
+            )
+        },
+        onSuccess: async () => {
+            if (!conversationId) {
+                return
+            }
+
+            await queryClient.invalidateQueries({
+                queryKey: [
+                    'private-messages',
+                    conversationId,
+                ],
+            })
+        },
+    })
+}
+
+export function useDeletePrivateMessage(
+    conversationId: string | undefined,
+) {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (messageId: string) => {
+            if (!conversationId) {
+                throw new Error('No conversation is selected')
+            }
+
+            return privateConversationApi.deleteMessage(
+                conversationId,
+                messageId,
+            )
+        },
+        onSuccess: async () => {
+            if (!conversationId) {
+                return
+            }
+
+            await queryClient.invalidateQueries({
+                queryKey: [
+                    'private-messages',
+                    conversationId,
+                ],
+            })
+        },
+    })
+}
