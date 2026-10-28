@@ -54,3 +54,29 @@ export function sendMessage(
         },
     )
 }
+
+export function updateMessage(
+    conversationId: string,
+    messageId: string,
+    request: { content: string },
+): Promise<PrivateMessageResponse> {
+    return apiRequest<PrivateMessageResponse>(
+        `/conversations/${encodeURIComponent(conversationId)}/messages/${encodeURIComponent(messageId)}`,
+        {
+            method: 'PUT',
+            body: JSON.stringify(request),
+        },
+    )
+}
+
+export function deleteMessage(
+    conversationId: string,
+    messageId: string,
+): Promise<void> {
+    return apiRequest<void>(
+        `/conversations/${encodeURIComponent(conversationId)}/messages/${encodeURIComponent(messageId)}`,
+        {
+            method: 'DELETE',
+        },
+    )
+}
