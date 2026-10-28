@@ -271,7 +271,13 @@ public sealed class PrivateConversationService : IPrivateConversationService
 
         await _dbContext.SaveChangesAsync();
 
-        return await ProjectPrivateMessageAsync(message);
+        var response = await ProjectPrivateMessageAsync(message);
+
+        await _chatNotifier.PrivateMessageUpdatedAsync(
+            conversationId,
+            response);
+
+        return response;
     }
 
     public async Task DeleteMessageAsync(
@@ -294,9 +300,19 @@ public sealed class PrivateConversationService : IPrivateConversationService
             throw new ForbiddenException("You can only delete your own messages");
         }
 
+        var response = new PrivateMessageDeletedResponseDto
+        {
+            MessageId = message.Id,
+            ConversationId = message.ConversationId
+        };
+
         _dbContext.PrivateMessages.Remove(message);
 
         await _dbContext.SaveChangesAsync();
+
+        await _chatNotifier.PrivateMessageDeletedAsync(
+            conversationId,
+            response);
     }
 
     public async Task<bool> IsParticipantAsync(
