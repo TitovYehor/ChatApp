@@ -15,12 +15,16 @@ public sealed class PrivateConversationService : IPrivateConversationService
 
     private readonly IChatNotifier _chatNotifier;
 
+    private readonly INotificationService _notificationService;
+
     public PrivateConversationService(
         AppDbContext dbContext,
-        IChatNotifier chatNotifier)
+        IChatNotifier chatNotifier,
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
         _chatNotifier = chatNotifier;
+        _notificationService = notificationService;
     }
 
     public async Task<PrivateConversationResponseDto> GetOrCreateAsync(
@@ -92,8 +96,8 @@ public sealed class PrivateConversationService : IPrivateConversationService
             ?? throw new NotFoundException("Conversation was not found");
     }
 
-    public async Task<IReadOnlyCollection<PrivateConversationResponseDto>>
-        GetAllAsync(Guid currentUserId)
+    public async Task<IReadOnlyCollection<PrivateConversationResponseDto>> GetAllAsync(
+        Guid currentUserId)
     {
         return await _dbContext.PrivateConversations
             .AsNoTracking()
@@ -229,6 +233,13 @@ public sealed class PrivateConversationService : IPrivateConversationService
         await _chatNotifier.PrivateMessageCreatedAsync(
             conversationId,
             response);
+
+        await _notificationService.CreateAsync(
+            otherUserId,
+            currentUserId,
+            "PrivateMessageCreated",
+            $"{username} sent you a private message",
+            entityId: message.Id);
 
         return response;
     }
