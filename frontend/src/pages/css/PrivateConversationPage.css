@@ -171,6 +171,62 @@
     white-space: pre-wrap;
 }
 
+.private-message__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.private-message__actions button {
+    padding: 5px 9px;
+    border: 1px solid #454fc5;
+    border-radius: 5px;
+    background: #20232b;
+    color: #e7eaf0;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.private-message__actions button:hover:not(:disabled) {
+    background: #343a4b;
+}
+
+.private-message__actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.private-message__edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: min(280px, 65vw);
+}
+
+.private-message__edit-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #454fc5;
+    border-radius: 6px;
+    background: #101218;
+    color: #e7eaf0;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.private-message__edited {
+    display: inline-block;
+    margin-top: 5px;
+    color: #b9beca;
+    font-size: 11px;
+    font-style: italic;
+}
+
 @media (max-width: 600px) {
     .private-conversation {
         padding: 12px;

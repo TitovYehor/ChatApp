@@ -8,6 +8,8 @@ import {
 import {
     usePrivateMessages,
     useSendPrivateMessage,
+    useUpdatePrivateMessage,
+    useDeletePrivateMessage,
 } from '../features/privateConversations/usePrivateMessages'
 import PrivateMessageComposer from '../features/privateConversations/PrivateMessageComposer'
 import PrivateTypingIndicator from '../features/presence/PrivateTypingIndicator'
@@ -21,7 +23,10 @@ import {
 } from '../services/signalR/chatConnection'
 
 import { SignalREvents } from '../types/signalREvents'
-import type { PrivateMessageResponse } from '../types/privateConversationTypes'
+import type {
+    PrivateMessageResponse,
+    PrivateMessageDeletedResponse
+} from '../types/privateConversationTypes'
 import { usePrivateTypingIndicator } from '../features/presence/usePrivateTypingIndicator'
 import { logError } from '../utils/logger'
 
@@ -51,10 +56,20 @@ function PrivateConversationPage() {
 
     const sendMessageMutation = useSendPrivateMessage(conversationId)
 
+    const updateMessageMutation = useUpdatePrivateMessage(conversationId)
+
+    const deleteMessageMutation = useDeletePrivateMessage(conversationId)
+
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+
+    const [editContent, setEditContent] = useState('')
+    const [messageActionError, setMessageActionError] = useState<string | null>(null)
+
     const [liveState, setLiveState] = useState<PrivateMessagesState>({
         conversationId: null,
         messages: [],
     })
+    const [deletedMessageIds, setDeletedMessageIds] = useState<Set<string>>(() => new Set())
     const [sendError, setSendError] = useState<string | null>(null)
     const [connectionError, setConnectionError] = useState<string | null>(null)
 
@@ -68,10 +83,6 @@ function PrivateConversationPage() {
         (item) => item.id === conversationId,
     )
 
-    const liveMessages = liveState.conversationId === conversationId
-        ? liveState.messages
-        : []
-
     const messages = useMemo(() => {
         const uniqueMessages = new Map<string, PrivateMessageResponse>()
 
@@ -79,16 +90,29 @@ function PrivateConversationPage() {
             uniqueMessages.set(message.id, message)
         }
 
+        const liveMessages =
+            liveState.conversationId === conversationId
+                ? liveState.messages
+                : []
+
         for (const message of liveMessages) {
             uniqueMessages.set(message.id, message)
         }
 
-        return Array.from(uniqueMessages.values()).sort(
-            (a, b) =>
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime(),
-        )
-    }, [result?.items, liveMessages])
+        return Array.from(uniqueMessages.values())
+            .filter((message) => !deletedMessageIds.has(message.id))
+            .sort(
+                (a, b) =>
+                    new Date(a.createdAt).getTime() -
+                    new Date(b.createdAt).getTime(),
+            )
+    }, [
+        result?.items,
+        liveState.conversationId,
+        liveState.messages,
+        conversationId,
+        deletedMessageIds,
+    ])
 
     useEffect(() => {
         if (!conversationId) {
@@ -120,6 +144,71 @@ function PrivateConversationPage() {
                 return {
                     conversationId: activeConversationId,
                     messages: [...existingMessages, message],
+                }
+            })
+
+            void refetch()
+        }
+
+        const handlePrivateMessageUpdated = (
+            message: PrivateMessageResponse,
+        ) => {
+            if (message.conversationId !== activeConversationId) {
+                return
+            }
+
+            setDeletedMessageIds((current) => {
+                const next = new Set(current)
+                next.delete(message.id)
+                return next
+            })
+
+            setLiveState((current) => {
+                const existingMessages =
+                    current.conversationId === activeConversationId
+                        ? current.messages
+                        : []
+
+                const messageExists = existingMessages.some(
+                    (item) => item.id === message.id,
+                )
+
+                return {
+                    conversationId: activeConversationId,
+                    messages: messageExists
+                        ? existingMessages.map((item) =>
+                            item.id === message.id ? message : item,
+                        )
+                        : [...existingMessages, message],
+                }
+            })
+
+            void refetch()
+        }
+
+        const handlePrivateMessageDeleted = (
+            response: PrivateMessageDeletedResponse,
+        ) => {
+            if (response.conversationId !== activeConversationId) {
+                return
+            }
+
+            setDeletedMessageIds((current) => {
+                const next = new Set(current)
+                next.add(response.messageId)
+                return next
+            })
+
+            setLiveState((current) => {
+                if (current.conversationId !== activeConversationId) {
+                    return current
+                }
+
+                return {
+                    ...current,
+                    messages: current.messages.filter(
+                        (message) => message.id !== response.messageId,
+                    ),
                 }
             })
 
@@ -160,6 +249,17 @@ function PrivateConversationPage() {
             SignalREvents.PrivateMessageCreated,
             handlePrivateMessageCreated,
         )
+
+        connection.on(
+            SignalREvents.PrivateMessageUpdated,
+            handlePrivateMessageUpdated,
+        )
+
+        connection.on(
+            SignalREvents.PrivateMessageDeleted,
+            handlePrivateMessageDeleted,
+        )
+
         const unsubscribeReconnect = subscribeToChatReconnect(handleReconnected)
 
         void startChatConnection()
@@ -180,6 +280,17 @@ function PrivateConversationPage() {
                 SignalREvents.PrivateMessageCreated,
                 handlePrivateMessageCreated,
             )
+
+            connection.off(
+                SignalREvents.PrivateMessageUpdated,
+                handlePrivateMessageUpdated,
+            )
+
+            connection.off(
+                SignalREvents.PrivateMessageDeleted,
+                handlePrivateMessageDeleted,
+            )
+
             unsubscribeReconnect()
 
             if (joined) {
@@ -219,6 +330,111 @@ function PrivateConversationPage() {
             throw error
         }
     }, [sendMessageMutation])
+
+    const handleStartEdit = (message: PrivateMessageResponse) => {
+        setMessageActionError(null)
+        setEditingMessageId(message.id)
+        setEditContent(message.content)
+    }
+
+    const handleCancelEdit = () => {
+        setEditingMessageId(null)
+        setEditContent('')
+        setMessageActionError(null)
+    }
+
+    const handleSaveEdit = async (message: PrivateMessageResponse) => {
+        const content = editContent.trim()
+
+        if (!content) {
+            setMessageActionError('Message content cannot be empty')
+            return
+        }
+
+        if (content === message.content) {
+            handleCancelEdit()
+            return
+        }
+
+        setMessageActionError(null)
+
+        try {
+            const updatedMessage = await updateMessageMutation.mutateAsync({
+                messageId: message.id,
+                content,
+            })
+
+            setLiveState((current) => {
+                const existingMessages =
+                    current.conversationId === conversationId
+                        ? current.messages
+                        : []
+
+                const exists = existingMessages.some(
+                    (item) => item.id === updatedMessage.id,
+                )
+
+                return {
+                    conversationId: conversationId!,
+                    messages: exists
+                        ? existingMessages.map((item) =>
+                            item.id === updatedMessage.id
+                                ? updatedMessage
+                                : item,
+                        )
+                        : [...existingMessages, updatedMessage],
+                }
+            })
+
+            setEditingMessageId(null)
+            setEditContent('')
+        } catch (error) {
+            logError('Failed to edit private message', error)
+            setMessageActionError('Could not edit the message. Please try again')
+        }
+    }
+
+    const handleDeleteMessage = async (message: PrivateMessageResponse) => {
+        const confirmed = window.confirm(
+            'Are you sure you want to delete this message? This cannot be undone',
+        )
+
+        if (!confirmed) {
+            return
+        }
+
+        setMessageActionError(null)
+
+        try {
+            await deleteMessageMutation.mutateAsync(message.id)
+
+            setDeletedMessageIds((current) => {
+                const next = new Set(current)
+                next.add(message.id)
+                return next
+            })
+
+            setLiveState((current) => {
+                if (current.conversationId !== conversationId) {
+                    return current
+                }
+
+                return {
+                    ...current,
+                    messages: current.messages.filter(
+                        (item) => item.id !== message.id,
+                    ),
+                }
+            })
+
+            if (editingMessageId === message.id) {
+                handleCancelEdit()
+            }
+        } catch (error) {
+            logError('Failed to delete private message', error)
+            setMessageActionError('Could not delete the message. Please try again')
+        }
+    }
 
     if (!conversationId) {
         return (
@@ -262,6 +478,12 @@ function PrivateConversationPage() {
                 </p>
             )}
 
+            {messageActionError && (
+                <p className="private-conversation__error" role="alert">
+                    {messageActionError}
+                </p>
+            )}
+
             <section
                 className="private-conversation__messages"
                 aria-label="Private messages"
@@ -301,9 +523,76 @@ function PrivateConversationPage() {
                                             {new Date(message.createdAt).toLocaleString()}
                                         </time>
                                     </div>
-                                    <p className="private-message__content">
-                                        {message.content}
-                                    </p>
+
+                                    {editingMessageId === message.id ? (
+                                        <form
+                                            className="private-message__edit-form"
+                                            onSubmit={(event) => {
+                                                event.preventDefault()
+                                                void handleSaveEdit(message)
+                                            }}
+                                        >
+                                            <textarea
+                                                className="private-message__edit-input"
+                                                value={editContent}
+                                                onChange={(event) => setEditContent(event.target.value)}
+                                                rows={3}
+                                                maxLength={4000}
+                                                autoFocus
+                                                aria-label="Edit message"
+                                                disabled={updateMessageMutation.isPending}
+                                            />
+
+                                            <div className="private-message__actions">
+                                                <button
+                                                    type="submit"
+                                                    disabled={updateMessageMutation.isPending}
+                                                >
+                                                    {updateMessageMutation.isPending ? 'Saving…' : 'Save'}
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCancelEdit}
+                                                    disabled={updateMessageMutation.isPending}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <p className="private-message__content">
+                                                {message.content}
+                                            </p>
+
+                                            {message.updatedAt && (
+                                                <span className="private-message__edited">
+                                                    Edited
+                                                </span>
+                                            )}
+
+                                            {isOwnMessage && (
+                                                <div className="private-message__actions">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleStartEdit(message)}
+                                                        disabled={deleteMessageMutation.isPending}
+                                                    >
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => void handleDeleteMessage(message)}
+                                                        disabled={deleteMessageMutation.isPending}
+                                                    >
+                                                        {deleteMessageMutation.isPending ? 'Deleting…' : 'Delete'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
                                 </article>
                             )
                         })}
