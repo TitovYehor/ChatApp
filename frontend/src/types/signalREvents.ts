@@ -23,6 +23,8 @@ export const SignalREvents = {
     FriendshipChanged: 'FriendshipChanged',
 
     PrivateMessageCreated: 'PrivateMessageCreated',
+    PrivateMessageUpdated: 'PrivateMessageUpdated',
+    PrivateMessageDeleted: 'PrivateMessageDeleted',
 
     NotificationCreated: 'NotificationCreated',
 } as const
