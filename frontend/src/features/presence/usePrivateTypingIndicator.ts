@@ -49,6 +49,7 @@ export function usePrivateTypingIndicator(
         }
 
         const activeConversationId = conversationId
+        const activeTimers = timers.current
 
         const handlePrivateUserTyping = (
             response: PrivateUserTypingResponse,
@@ -60,11 +61,11 @@ export function usePrivateTypingIndicator(
                 return
             }
 
-            const existingTimer = timers.current.get(response.userId)
+            const existingTimer = activeTimers.get(response.userId)
 
             if (existingTimer) {
                 clearTimeout(existingTimer)
-                timers.current.delete(response.userId)
+                activeTimers.delete(response.userId)
             }
 
             if (!response.isTyping) {
@@ -118,10 +119,10 @@ export function usePrivateTypingIndicator(
                             : current.users,
                 }))
 
-                timers.current.delete(response.userId)
+                activeTimers.delete(response.userId)
             }, TYPING_EXPIRATION_MS)
 
-            timers.current.set(response.userId, timer)
+            activeTimers.set(response.userId, timer)
         }
 
         connection.on(
@@ -135,11 +136,11 @@ export function usePrivateTypingIndicator(
                 handlePrivateUserTyping,
             )
 
-            for (const timer of timers.current.values()) {
+            for (const timer of activeTimers.values()) {
                 clearTimeout(timer)
             }
 
-            timers.current.clear()
+            activeTimers.clear()
         }
     }, [connection, conversationId, currentUserId])
 
