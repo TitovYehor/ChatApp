@@ -18,3 +18,8 @@ export interface PrivateMessageResponse {
 export interface CreatePrivateMessageRequest {
     content: string
 }
+
+export interface PrivateMessageDeletedResponse {
+    messageId: string
+    conversationId: string
+}
