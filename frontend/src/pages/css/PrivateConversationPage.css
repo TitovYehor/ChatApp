@@ -3,7 +3,8 @@
     flex-direction: column;
 
     width: 100%;
-    height: 100%;
+    flex: 1;
+    height: auto;
     min-width: 0;
     min-height: 0;
 
@@ -12,6 +13,16 @@
 
     background: #101218;
     color: #e7eaf0;
+}
+
+.private-conversation-page {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .private-conversation__header {

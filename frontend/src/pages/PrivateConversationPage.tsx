@@ -13,6 +13,7 @@ import {
 } from '../features/privateConversations/usePrivateMessages'
 import PrivateMessageComposer from '../features/privateConversations/PrivateMessageComposer'
 import PrivateTypingIndicator from '../features/presence/PrivateTypingIndicator'
+import ChatHeader from '../layouts/ChatHeader'
 
 import {
     getChatConnection,
@@ -40,7 +41,7 @@ interface PrivateMessagesState {
 function PrivateConversationPage() {
     const { conversationId } = useParams<{ conversationId: string }>()
     const navigate = useNavigate()
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
 
     const {
         conversations,
@@ -438,178 +439,196 @@ function PrivateConversationPage() {
 
     if (!conversationId) {
         return (
-            <main className="private-conversation">
-                <p className="private-conversation__error">
-                    Invalid conversation.
-                </p>
-                <button type="button" onClick={() => navigate('/friends')}>
-                    Back to friends
-                </button>
-            </main>
+            <div className="private-conversation-page">
+                <ChatHeader
+                    username={user?.username ?? 'User'}
+                    onLogout={() => {
+                        void logout()
+                    }}
+                />
+
+                <main className="private-conversation">
+                    <p className="private-conversation__error">
+                        Invalid conversation.
+                    </p>
+                    <button type="button" onClick={() => navigate('/friends')}>
+                        Back to friends
+                    </button>
+                </main>
+            </div>
         )
     }
 
     return (
-        <main className="private-conversation">
-            <header className="private-conversation__header">
-                <button
-                    type="button"
-                    className="private-conversation__back"
-                    onClick={() => navigate('/friends')}
-                >
-                    Back
-                </button>
+        <div className="private-conversation-page">
+            <ChatHeader
+                username={user?.username ?? 'User'}
+                onLogout={() => {
+                    void logout()
+                }}
+            />
 
-                <div className="private-conversation__avatar" aria-hidden="true">
-                    {(conversation?.otherUsername ?? '?').charAt(0).toUpperCase()}
-                </div>
+            <main className="private-conversation">
+                <header className="private-conversation__header">
+                    <button
+                        type="button"
+                        className="private-conversation__back"
+                        onClick={() => navigate('/friends')}
+                    >
+                        Back
+                    </button>
 
-                <div className="private-conversation__header-info">
-                    <h1>
-                        {conversation?.otherUsername ?? 'Private conversation'}
-                    </h1>
-                    <p>Private messages</p>
-                </div>
-            </header>
-
-            {connectionError && (
-                <p className="private-conversation__notice" role="status">
-                    {connectionError}
-                </p>
-            )}
-
-            {messageActionError && (
-                <p className="private-conversation__error" role="alert">
-                    {messageActionError}
-                </p>
-            )}
-
-            <section
-                className="private-conversation__messages"
-                aria-label="Private messages"
-            >
-                {isLoading || (isLoadingConversations && !conversation) ? (
-                    <p className="private-conversation__status">
-                        Loading conversation…
-                    </p>
-                ) : error ? (
-                    <div>
-                        <p className="private-conversation__error">{error}</p>
-                        <button type="button" onClick={() => void refetch()}>
-                            Try again
-                        </button>
+                    <div className="private-conversation__avatar" aria-hidden="true">
+                        {(conversation?.otherUsername ?? '?').charAt(0).toUpperCase()}
                     </div>
-                ) : messages.length === 0 ? (
-                    <p className="private-conversation__status">
-                        No messages yet. Start the conversation!
+
+                    <div className="private-conversation__header-info">
+                        <h1>
+                            {conversation?.otherUsername ?? 'Private conversation'}
+                        </h1>
+                        <p>Private messages</p>
+                    </div>
+                </header>
+
+                {connectionError && (
+                    <p className="private-conversation__notice" role="status">
+                        {connectionError}
                     </p>
-                ) : (
-                    <div className="private-conversation__message-list">
-                        {messages.map((message) => {
-                            const isOwnMessage = message.userId === user?.id
+                )}
 
-                            return (
-                                <article
-                                    key={message.id}
-                                    className={
-                                        isOwnMessage
-                                            ? 'private-message private-message--own'
-                                            : 'private-message'
-                                    }
-                                >
-                                    <div className="private-message__meta">
-                                        <span>{isOwnMessage ? 'You' : message.username}</span>
-                                        <time dateTime={message.createdAt}>
-                                            {new Date(message.createdAt).toLocaleString()}
-                                        </time>
-                                    </div>
+                {messageActionError && (
+                    <p className="private-conversation__error" role="alert">
+                        {messageActionError}
+                    </p>
+                )}
 
-                                    {editingMessageId === message.id ? (
-                                        <form
-                                            className="private-message__edit-form"
-                                            onSubmit={(event) => {
-                                                event.preventDefault()
-                                                void handleSaveEdit(message)
-                                            }}
-                                        >
-                                            <textarea
-                                                className="private-message__edit-input"
-                                                value={editContent}
-                                                onChange={(event) => setEditContent(event.target.value)}
-                                                rows={3}
-                                                maxLength={4000}
-                                                autoFocus
-                                                aria-label="Edit message"
-                                                disabled={updateMessageMutation.isPending}
-                                            />
+                <section
+                    className="private-conversation__messages"
+                    aria-label="Private messages"
+                >
+                    {isLoading || (isLoadingConversations && !conversation) ? (
+                        <p className="private-conversation__status">
+                            Loading conversation…
+                        </p>
+                    ) : error ? (
+                        <div>
+                            <p className="private-conversation__error">{error}</p>
+                            <button type="button" onClick={() => void refetch()}>
+                                Try again
+                            </button>
+                        </div>
+                    ) : messages.length === 0 ? (
+                        <p className="private-conversation__status">
+                            No messages yet. Start the conversation!
+                        </p>
+                    ) : (
+                        <div className="private-conversation__message-list">
+                            {messages.map((message) => {
+                                const isOwnMessage = message.userId === user?.id
 
-                                            <div className="private-message__actions">
-                                                <button
-                                                    type="submit"
+                                return (
+                                    <article
+                                        key={message.id}
+                                        className={
+                                            isOwnMessage
+                                                ? 'private-message private-message--own'
+                                                : 'private-message'
+                                        }
+                                    >
+                                        <div className="private-message__meta">
+                                            <span>{isOwnMessage ? 'You' : message.username}</span>
+                                            <time dateTime={message.createdAt}>
+                                                {new Date(message.createdAt).toLocaleString()}
+                                            </time>
+                                        </div>
+
+                                        {editingMessageId === message.id ? (
+                                            <form
+                                                className="private-message__edit-form"
+                                                onSubmit={(event) => {
+                                                    event.preventDefault()
+                                                    void handleSaveEdit(message)
+                                                }}
+                                            >
+                                                <textarea
+                                                    className="private-message__edit-input"
+                                                    value={editContent}
+                                                    onChange={(event) => setEditContent(event.target.value)}
+                                                    rows={3}
+                                                    maxLength={4000}
+                                                    autoFocus
+                                                    aria-label="Edit message"
                                                     disabled={updateMessageMutation.isPending}
-                                                >
-                                                    {updateMessageMutation.isPending ? 'Saving…' : 'Save'}
-                                                </button>
+                                                />
 
-                                                <button
-                                                    type="button"
-                                                    onClick={handleCancelEdit}
-                                                    disabled={updateMessageMutation.isPending}
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </form>
-                                    ) : (
-                                        <>
-                                            <p className="private-message__content">
-                                                {message.content}
-                                            </p>
-
-                                            {message.updatedAt && (
-                                                <span className="private-message__edited">
-                                                    Edited
-                                                </span>
-                                            )}
-
-                                            {isOwnMessage && (
                                                 <div className="private-message__actions">
                                                     <button
-                                                        type="button"
-                                                        onClick={() => handleStartEdit(message)}
-                                                        disabled={deleteMessageMutation.isPending}
+                                                        type="submit"
+                                                        disabled={updateMessageMutation.isPending}
                                                     >
-                                                        Edit
+                                                        {updateMessageMutation.isPending ? 'Saving…' : 'Save'}
                                                     </button>
 
                                                     <button
                                                         type="button"
-                                                        onClick={() => void handleDeleteMessage(message)}
-                                                        disabled={deleteMessageMutation.isPending}
+                                                        onClick={handleCancelEdit}
+                                                        disabled={updateMessageMutation.isPending}
                                                     >
-                                                        {deleteMessageMutation.isPending ? 'Deleting…' : 'Delete'}
+                                                        Cancel
                                                     </button>
                                                 </div>
-                                            )}
-                                        </>
-                                    )}
-                                </article>
-                            )
-                        })}
-                    </div>
-                )}
-            </section>
+                                            </form>
+                                        ) : (
+                                            <>
+                                                <p className="private-message__content">
+                                                    {message.content}
+                                                </p>
 
-            <PrivateTypingIndicator typingUsers={typingUsers} />
+                                                {message.updatedAt && (
+                                                    <span className="private-message__edited">
+                                                        Edited
+                                                    </span>
+                                                )}
 
-            <PrivateMessageComposer
-                isSending={sendMessageMutation.isPending}
-                sendError={sendError}
-                onSend={handleSend}
-                onTypingStart={startTyping}
-                onTypingStop={stopTyping}
-            />
-        </main>
+                                                {isOwnMessage && (
+                                                    <div className="private-message__actions">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleStartEdit(message)}
+                                                            disabled={deleteMessageMutation.isPending}
+                                                        >
+                                                            Edit
+                                                        </button>
+
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => void handleDeleteMessage(message)}
+                                                            disabled={deleteMessageMutation.isPending}
+                                                        >
+                                                            {deleteMessageMutation.isPending ? 'Deleting…' : 'Delete'}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </article>
+                                )
+                            })}
+                        </div>
+                    )}
+                </section>
+
+                <PrivateTypingIndicator typingUsers={typingUsers} />
+
+                <PrivateMessageComposer
+                    isSending={sendMessageMutation.isPending}
+                    sendError={sendError}
+                    onSend={handleSend}
+                    onTypingStart={startTyping}
+                    onTypingStop={stopTyping}
+                />
+            </main>
+        </div>
     )
 }
 
