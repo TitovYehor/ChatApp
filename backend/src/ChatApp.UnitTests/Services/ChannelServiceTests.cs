@@ -16,6 +16,8 @@ public class ChannelServiceTests
 
     private readonly Mock<IWorkspaceAuthorizationService> _workspaceAuthorizationMock;
 
+    private readonly Mock<INotificationService> _notificationServiceMock = new();
+
     public ChannelServiceTests()
     {
         _channelNotifierMock = new Mock<IChannelNotifier>();
@@ -36,6 +38,12 @@ public class ChannelServiceTests
             workspaceId,
             userId,
             WorkspaceRole.Admin);
+
+        dbContext.Users.Add(
+            TestDataFactory.CreateUser(
+                userId,
+                "channel-creator",
+                "channel-creator@test.com"));
 
         dbContext.Workspaces.Add(workspace);
 
@@ -491,6 +499,12 @@ public class ChannelServiceTests
 
         workspace.Channels.Add(channel);
 
+        dbContext.Users.Add(
+            TestDataFactory.CreateUser(
+                userId,
+                "channel-editor",
+                "channel-editor@test.com"));
+
         dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
@@ -592,6 +606,12 @@ public class ChannelServiceTests
 
         workspace.Channels.Add(channel);
 
+        dbContext.Users.Add(
+            TestDataFactory.CreateUser(
+                userId,
+                "channel-deleter",
+                "channel-deleter@test.com"));
+
         dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
@@ -669,6 +689,7 @@ public class ChannelServiceTests
         return new ChannelService(
             dbContext,
             _channelNotifierMock.Object,
-            _workspaceAuthorizationMock.Object);
+            _workspaceAuthorizationMock.Object,
+            _notificationServiceMock.Object);
     }
 }
