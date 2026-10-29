@@ -16,6 +16,8 @@ public class WorkspaceServiceTests
 {
     private readonly Mock<IWorkspaceNotifier> _workspaceNotifierMock;
 
+    private readonly Mock<INotificationService> _notificationServiceMock = new();
+
     public WorkspaceServiceTests()
     {
         _workspaceNotifierMock = new Mock<IWorkspaceNotifier>();
@@ -425,6 +427,12 @@ public class WorkspaceServiceTests
             ownerId,
             WorkspaceRole.Owner);
 
+        dbContext.Users.Add(
+            TestDataFactory.CreateUser(
+                ownerId,
+                "owner",
+                "owner@test.com"));
+
         dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
@@ -616,6 +624,12 @@ public class WorkspaceServiceTests
                 WorkspaceRole.Member)
             );
 
+        dbContext.Users.Add(
+            TestDataFactory.CreateUser(
+                ownerId,
+                "owner",
+                "owner@test.com"));
+
         dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
@@ -681,6 +695,12 @@ public class WorkspaceServiceTests
                 memberId,
                 WorkspaceRole.Member)
             );
+
+        dbContext.Users.Add(
+            TestDataFactory.CreateUser(
+                ownerId,
+                "owner",
+                "owner@test.com"));
 
         dbContext.Workspaces.Add(workspace);
 
@@ -1355,6 +1375,12 @@ public class WorkspaceServiceTests
                 WorkspaceRole.Member)
             );
 
+        dbContext.Users.Add(
+            TestDataFactory.CreateUser(
+                memberId,
+                "member",
+                "member@test.com"));
+
         dbContext.Workspaces.Add(workspace);
 
         await dbContext.SaveChangesAsync();
@@ -1928,6 +1954,7 @@ public class WorkspaceServiceTests
     {
         return new WorkspaceService(
             dbContext,
-            _workspaceNotifierMock.Object);
+            _workspaceNotifierMock.Object,
+            _notificationServiceMock.Object);
     }
 }
