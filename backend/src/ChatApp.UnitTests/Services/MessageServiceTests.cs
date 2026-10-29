@@ -14,6 +14,8 @@ public class MessageServiceTests
 {
     private readonly Mock<IChatNotifier> _chatNotifierMock;
 
+    private readonly Mock<INotificationService> _notificationServiceMock = new();
+
     public MessageServiceTests()
     {
         _chatNotifierMock = new Mock<IChatNotifier>();
@@ -838,6 +840,9 @@ public class MessageServiceTests
 
     private MessageService CreateMessageService(AppDbContext dbContext)
     {
-        return new MessageService(dbContext, _chatNotifierMock.Object);
+        return new MessageService(
+            dbContext, 
+            _chatNotifierMock.Object,
+            _notificationServiceMock.Object);
     }
 }
