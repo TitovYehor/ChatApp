@@ -1,23 +1,5 @@
 # ChatApp
 
-> **Note about performance:** Due to the low-tier hosting plan, Render servers spin down after inactivity. The first request after inactivity may be delayed by up to 50 seconds while the server spins up. So, **_~1 minute may be needed for the app in the link to start working._**
-
-**Live Demo:** [chatapp-frontend-x48j.onrender.com](https://chatapp-frontend-x48j.onrender.com)
-
-ChatApp is a full-stack real-time messaging application designed around team collaboration and private conversations. Users can create workspaces, communicate through channels, manage friendships, and exchange direct messages.
-
-The project was built as a personal portfolio project to practice full-stack development, backend architecture, authentication and authorization, database design, and real-time communication.
-
-> **Project status:** Core functionality is implemented and the application is publicly hosted. Further improvements are ongoing.
-
-### **Demo Account**
-To make it easier to test the platform, you can log in using this demo account:
-```text
-Login: demo@example.com
-Password: DemoPassword333!
-```
-This account is already a member of some workspaces and has the **Member** role, which allows you to test application functionality without previous registration and data set up.
-
 ## Features
 
 ### Authentication and user profiles
@@ -172,22 +154,6 @@ Run the backend unit tests:
 ```bash
 dotnet test backend/ChatApp.sln
 ```
-
-## Deployment
-
-The public application is hosted on [Render](https://render.com). The frontend is deployed as a Static Site, while the ASP.NET Core API and PostgreSQL database are hosted separately.
-
-- **Live App:** [chatapp-frontend-x48j.onrender.com](https://chatapp-frontend-x48j.onrender.com)
-- **Hosting:** Render (frontend, backend API, and PostgreSQL database)
-
-## Roadmap
-
-Potential improvements include:
-
-- Editing and deleting private messages.
-- Further UI and UX polish.
-- Additional automated tests.
-- More detailed technical documentation.
 
 ## Project Goals
 
