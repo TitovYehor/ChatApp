@@ -1,3 +1,4 @@
+using ChatApp.Application.Authentication;
 using ChatApp.Application.Exceptions;
 using ChatApp.Application.Interfaces;
 using ChatApp.Contracts.Users.Requests;
@@ -44,6 +45,11 @@ public class UserService : IUserService
         if (user is null)
         {
             throw new NotFoundException("User not found");
+        }
+
+        if (DemoAccountPolicy.IsDemoAccount(user.Email))
+        {
+            throw new ForbiddenException(DemoAccountPolicy.RestrictionMessage);
         }
 
         var username = request.Username.Trim();
