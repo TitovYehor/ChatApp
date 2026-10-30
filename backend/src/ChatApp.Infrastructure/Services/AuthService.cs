@@ -143,6 +143,11 @@ public class AuthService : IAuthService
             throw new NotFoundException("User not found");
         }
 
+        if (DemoAccountPolicy.IsDemoAccount(user.Email))
+        {
+            throw new ForbiddenException(DemoAccountPolicy.RestrictionMessage);
+        }
+
         var currentPasswordValid = BCrypt.Net.BCrypt.Verify(
             request.CurrentPassword,
             user.PasswordHash);
