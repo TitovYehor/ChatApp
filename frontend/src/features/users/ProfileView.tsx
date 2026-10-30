@@ -6,6 +6,7 @@ import './css/ProfileView.css'
 
 interface ProfileViewProps {
     profile: UserProfileResponse
+    isDemoAccount: boolean
     isUpdating: boolean
     updateError: string | null
     onUpdateUsername: (
@@ -15,6 +16,7 @@ interface ProfileViewProps {
 
 function ProfileView({
     profile,
+    isDemoAccount,
     isUpdating,
     updateError,
     onUpdateUsername,
@@ -23,6 +25,10 @@ function ProfileView({
         event: React.FormEvent<HTMLFormElement>,
     ) {
         event.preventDefault()
+
+        if (isDemoAccount) {
+            return
+        }
 
         const formData =
             new FormData(
@@ -91,7 +97,7 @@ function ProfileView({
                         defaultValue={profile.username}
                         maxLength={50}
                         autoComplete="username"
-                        disabled={isUpdating}
+                        disabled={isUpdating || isDemoAccount}
                         required
                     />
                 </div>
@@ -105,7 +111,7 @@ function ProfileView({
                 <button
                     type="submit"
                     className="profile-form__submit"
-                    disabled={isUpdating}
+                    disabled={isUpdating || isDemoAccount}
                 >
                     {isUpdating ? 'Saving changes...' : 'Save changes'}
                 </button>
