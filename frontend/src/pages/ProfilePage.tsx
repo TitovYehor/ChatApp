@@ -16,6 +16,7 @@ function ProfilePage() {
         profile,
         isLoading,
         error,
+        isDemoAccount,
         updateProfile,
         isUpdatingProfile,
         updateProfileError,
@@ -60,6 +61,22 @@ function ProfilePage() {
                     </p>
                 </div>
 
+                {isDemoAccount && (
+                    <div className="profile-page__notice" role="status">
+                        <span className="profile-page__notice-icon" aria-hidden="true">
+                            i
+                        </span>
+
+                        <div className="profile-page__notice-content">
+                            <strong>Demo account</strong>
+                            <p>
+                                Username and password changes are disabled for this
+                                shared account. Please register to try this features
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 {isLoading ? (
                     <div className="profile-page__status">
                         Loading your profile...
@@ -72,12 +89,14 @@ function ProfilePage() {
                     <div className="profile-page__sections">
                         <ProfileView
                             profile={profile}
+                            isDemoAccount={isDemoAccount}
                             isUpdating={isUpdatingProfile}
                             updateError={updateProfileError}
                             onUpdateUsername={handleUpdateUsername}
                         />
 
                         <ChangePasswordForm
+                            isDemoAccount={isDemoAccount}
                             isChangingPassword={isChangingPassword}
                             changePasswordError={changePasswordError}
                             onChangePassword={handleChangePassword}
