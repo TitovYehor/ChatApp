@@ -16,9 +16,13 @@ export async function apiRequest<T>(
         options,
     )
 
-    if (response.status === 401 &&
+    const shouldRefreshToken =
+        response.status === 401 &&
+        endpoint !== '/auth/login' &&
+        endpoint !== '/auth/register' &&
         endpoint !== '/auth/refresh'
-    ) {
+
+    if (shouldRefreshToken) {
         await refreshAccessToken()
 
         const retryResponse = await sendRequest(
