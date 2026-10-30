@@ -5,6 +5,7 @@ import {
 import './css/ChangePasswordForm.css'
 
 interface ChangePasswordFormProps {
+    isDemoAccount: boolean
     isChangingPassword: boolean
     changePasswordError: string | null
     onChangePassword: (
@@ -14,6 +15,7 @@ interface ChangePasswordFormProps {
 }
 
 function ChangePasswordForm({
+    isDemoAccount,
     isChangingPassword,
     changePasswordError,
     onChangePassword,
@@ -48,6 +50,10 @@ function ChangePasswordForm({
         setValidationError(
             null,
         )
+
+        if (isDemoAccount) {
+            return
+        }
 
         if (
             !currentPassword ||
@@ -123,7 +129,7 @@ function ChangePasswordForm({
                         onChange={(event) =>
                             setCurrentPassword(event.target.value)
                         }
-                        disabled={isChangingPassword}
+                        disabled={isChangingPassword || isDemoAccount}
                         required
                     />
                 </div>
@@ -141,7 +147,7 @@ function ChangePasswordForm({
                         onChange={(event) =>
                             setNewPassword(event.target.value)
                         }
-                        disabled={isChangingPassword}
+                        disabled={isChangingPassword || isDemoAccount}
                         required
                     />
 
@@ -163,7 +169,7 @@ function ChangePasswordForm({
                         onChange={(event) =>
                             setConfirmPassword(event.target.value)
                         }
-                        disabled={isChangingPassword}
+                        disabled={isChangingPassword || isDemoAccount}
                         required
                     />
                 </div>
@@ -183,7 +189,7 @@ function ChangePasswordForm({
                 <button
                     type="submit"
                     className="password-form__submit"
-                    disabled={isChangingPassword}
+                    disabled={isChangingPassword || isDemoAccount}
                 >
                     {isChangingPassword
                         ? 'Updating password...'
