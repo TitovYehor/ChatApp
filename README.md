@@ -60,6 +60,125 @@ The backend is organized into separate projects to keep responsibilities distinc
 
 The frontend is maintained separately in the `frontend` directory.
 
+## Database Schema
+
+The application uses PostgreSQL with Entity Framework Core. The database is organized around users, workspaces, channels, and messaging, with additional tables for friendships, private conversations, notifications, and authentication.
+
+```mermaid
+erDiagram
+    USER {
+        uuid Id PK
+        string Username
+        string Email
+        string PasswordHash
+        datetime CreatedAt
+    }
+
+    WORKSPACE {
+        uuid Id PK
+        string Name
+        string Description
+        datetime CreatedAt
+    }
+
+    WORKSPACE_MEMBER {
+        uuid WorkspaceId PK, FK
+        uuid UserId PK, FK
+        int Role
+        datetime JoinedAt
+    }
+
+    CHANNEL {
+        uuid Id PK
+        uuid WorkspaceId FK
+        string Name
+        int Type
+        datetime CreatedAt
+    }
+
+    MESSAGE {
+        uuid Id PK
+        uuid ChannelId FK
+        uuid UserId FK
+        string Content
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    FRIENDSHIP {
+        uuid Id PK
+        uuid UserId FK
+        uuid FriendUserId FK
+        datetime CreatedAt
+    }
+
+    PRIVATE_CONVERSATION {
+        uuid Id PK
+        uuid User1Id FK
+        uuid User2Id FK
+        datetime CreatedAt
+    }
+
+    PRIVATE_MESSAGE {
+        uuid Id PK
+        uuid ConversationId FK
+        uuid UserId FK
+        string Content
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    NOTIFICATION {
+        uuid Id PK
+        uuid RecipientUserId FK
+        uuid ActorUserId FK "nullable"
+        string Type
+        string Message
+        datetime CreatedAt
+        boolean IsRead
+        uuid WorkspaceId "nullable"
+        uuid EntityId "nullable"
+    }
+
+    REFRESH_TOKEN {
+        uuid Id PK
+        uuid UserId FK
+        string TokenHash
+        datetime CreatedAt
+        datetime ExpiresAt
+        datetime RevokedAt "nullable"
+    }
+
+    USER ||--o{ WORKSPACE_MEMBER : joins
+    WORKSPACE ||--o{ WORKSPACE_MEMBER : has
+
+    WORKSPACE ||--o{ CHANNEL : contains
+    CHANNEL ||--o{ MESSAGE : contains
+    USER ||--o{ MESSAGE : sends
+
+    USER ||--o{ FRIENDSHIP : initiates
+    USER ||--o{ FRIENDSHIP : receives
+
+    USER ||--o{ PRIVATE_CONVERSATION : participates_as_user1
+    USER ||--o{ PRIVATE_CONVERSATION : participates_as_user2
+    PRIVATE_CONVERSATION ||--o{ PRIVATE_MESSAGE : contains
+    USER ||--o{ PRIVATE_MESSAGE : sends
+
+    USER ||--o{ NOTIFICATION : receives
+    USER o|--o{ NOTIFICATION : triggers
+
+    USER ||--o{ REFRESH_TOKEN : owns
+```
+
+**Key relationships:**
+
+- A user can belong to multiple workspaces, and a workspace can have multiple members. Membership roles are stored in `WorkspaceMember`.
+- Each workspace contains channels, and each channel contains messages.
+- Friendships and private conversations connect two users independently of workspace membership.
+- Private messages belong to a conversation and are associated with their sender.
+- Notifications belong to a recipient and can optionally reference an actor and related application context.
+- Refresh tokens belong to users and are stored as hashes.
+
 ## Repository Structure
 
 ```text
