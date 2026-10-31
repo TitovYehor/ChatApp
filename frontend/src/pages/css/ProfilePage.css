@@ -85,6 +85,60 @@
     border-color: #593538;
 }
 
+.profile-page__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto 24px;
+    padding: 16px 18px;
+
+    border: 1px solid #292d36;
+    border-left: 3px solid #5865f2;
+    border-radius: 10px;
+
+    background: #15171e;
+}
+
+.profile-page__notice-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+
+    border: 1px solid #34394a;
+    border-radius: 50%;
+
+    color: #9298f6;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.profile-page__notice-content {
+    min-width: 0;
+}
+
+.profile-page__notice-content strong {
+    display: block;
+
+    color: #e7eaf0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.profile-page__notice-content p {
+    margin: 5px 0 0;
+
+    color: #9298a6;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
 @media (max-width: 760px) {
     .profile-page__content {
         padding: 28px 18px 40px;

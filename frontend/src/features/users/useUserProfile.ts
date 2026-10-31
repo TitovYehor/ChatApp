@@ -1,4 +1,3 @@
-
 import {
     useMutation,
     useQuery,
@@ -24,7 +23,13 @@ import type {
 
 import type {
     ChangePasswordRequest,
+    UpdateUserProfileRequest
 } from '../../types/userTypes'
+
+
+const DEMO_ACCOUNT_EMAIL = 'demo@example.com'
+
+const DEMO_ACCOUNT_RESTRICTION_MESSAGE = 'The demo account cannot change its username or password.'
 
 export function useUserProfile() {
     const queryClient = useQueryClient()
@@ -34,6 +39,8 @@ export function useUserProfile() {
         updateUser,
         updateAuthentication,
     } = useAuth()
+
+    const isDemoAccount = user?.email?.toLowerCase() === DEMO_ACCOUNT_EMAIL
 
     const userId = user?.id ?? null
 
@@ -48,7 +55,13 @@ export function useUserProfile() {
     })
 
     const updateProfileMutation = useMutation({
-        mutationFn: updateProfile,
+        mutationFn: (request: UpdateUserProfileRequest) => {
+            if (isDemoAccount) {
+                throw new Error(DEMO_ACCOUNT_RESTRICTION_MESSAGE)
+            }
+
+            return updateProfile(request)
+        },
 
         onSuccess: (profile) => {
             queryClient.setQueryData(
@@ -67,8 +80,13 @@ export function useUserProfile() {
     })
 
     const changePasswordMutation = useMutation({
-        mutationFn: (request: ChangePasswordRequest) =>
-            changePassword(request),
+        mutationFn: (request: ChangePasswordRequest) => {
+            if (isDemoAccount) {
+                throw new Error(DEMO_ACCOUNT_RESTRICTION_MESSAGE)
+            }
+
+            return changePassword(request)
+        },
 
         onSuccess: (response) => {
             updateAuthentication(
@@ -89,12 +107,16 @@ export function useUserProfile() {
 
         reload: query.refetch,
 
+        isDemoAccount,
+
         updateProfile: updateProfileMutation.mutateAsync,
 
         isUpdatingProfile: updateProfileMutation.isPending,
 
         updateProfileError: updateProfileMutation.error
-            ? 'Failed to update profile'
+            ? updateProfileMutation.error instanceof Error
+                ? updateProfileMutation.error.message
+                : 'Failed to update profile'
             : null,
 
         changePassword: changePasswordMutation.mutateAsync,
@@ -102,7 +124,9 @@ export function useUserProfile() {
         isChangingPassword: changePasswordMutation.isPending,
 
         changePasswordError: changePasswordMutation.error
-            ? 'Failed to change password'
+            ? changePasswordMutation.error instanceof Error
+                ? changePasswordMutation.error.message
+                : 'Failed to change password'
             : null,
     }
 }
