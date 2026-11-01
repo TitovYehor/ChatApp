@@ -143,7 +143,8 @@ public class MessageService : IMessageService
         var totalCount = await messagesQuery.CountAsync();
 
         var messages = await messagesQuery
-            .OrderBy(m => m.CreatedAt)
+            .OrderByDescending(m => m.CreatedAt)
+            .ThenByDescending(m => m.Id)
             .Skip((query.PageNumber - 1) * query.PageSize)
             .Take(query.PageSize)
             .Select(m => new MessageResponseDto
