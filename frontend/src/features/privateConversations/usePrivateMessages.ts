@@ -13,7 +13,7 @@ import {
 export function usePrivateMessages(
     conversationId: string | undefined,
     pageNumber = 1,
-    pageSize = 50,
+    pageSize = 10,
 ) {
     const query = useQuery({
         queryKey: conversationId

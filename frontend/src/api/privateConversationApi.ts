@@ -30,7 +30,7 @@ export function getOrCreate(
 export function getMessages(
     conversationId: string,
     pageNumber = 1,
-    pageSize = 50,
+    pageSize = 10,
 ): Promise<PagedResult<PrivateMessageResponse>> {
     const params = new URLSearchParams({
         pageNumber: pageNumber.toString(),
