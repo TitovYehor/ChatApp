@@ -33,12 +33,19 @@ function PrivateConversationPage() {
         isLoading: isLoadingConversations,
     } = usePrivateConversations()
 
+    const [pageNumber, setPageNumber] = useState(1)
+    const pageSize = 5
+
     const {
         result,
         isLoading,
         error,
         refetch,
-    } = usePrivateMessages(conversationId)
+    } = usePrivateMessages(conversationId, pageNumber, pageSize)
+
+    const totalPages = Math.ceil(
+        (result?.totalCount ?? 0) / pageSize,
+    )
 
     const sendMessageMutation = useSendPrivateMessage(conversationId)
     const updateMessageMutation = useUpdatePrivateMessage(conversationId)
@@ -87,8 +94,9 @@ function PrivateConversationPage() {
             .filter((message) => !deletedMessageIds.has(message.id))
             .sort(
                 (a, b) =>
-                    new Date(a.createdAt).getTime() -
-                    new Date(b.createdAt).getTime(),
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime() ||
+                    b.id.localeCompare(a.id),
             )
     }, [result?.items, liveMessages, deletedMessageIds])
 
@@ -201,6 +209,30 @@ function PrivateConversationPage() {
                     onSave={handleSaveEdit}
                     onDelete={handleDeleteMessage}
                 />
+
+                {totalPages > 1 && (
+                    <div className="private-conversation__pagination">
+                        <button
+                            type="button"
+                            disabled={pageNumber <= 1 || isLoading}
+                            onClick={() => setPageNumber((current) => current - 1)}
+                        >
+                            Previous
+                        </button>
+
+                        <span>
+                            Page {result?.pageNumber ?? pageNumber} of {totalPages}
+                        </span>
+
+                        <button
+                            type="button"
+                            disabled={pageNumber >= totalPages || isLoading}
+                            onClick={() => setPageNumber((current) => current + 1)}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
 
                 <PrivateTypingIndicator typingUsers={typingUsers} />
 

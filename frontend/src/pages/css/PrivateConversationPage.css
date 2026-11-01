@@ -111,7 +111,6 @@
     flex-direction: column;
     gap: 16px;
 
-    margin-top: auto;
     padding: 8px 0 16px;
 }
 
@@ -236,6 +235,44 @@
     color: #b9beca;
     font-size: 11px;
     font-style: italic;
+}
+
+.private-conversation__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    flex: 0 0 auto;
+
+    padding: 12px 0 4px;
+}
+
+.private-conversation__pagination button {
+    padding: 7px 12px;
+
+    border: 1px solid #3a3f4b;
+    border-radius: 6px;
+
+    background: #1b1e26;
+    color: #e7eaf0;
+
+    font: inherit;
+    font-size: 13px;
+}
+
+.private-conversation__pagination button:hover:not(:disabled) {
+    background: #252934;
+}
+
+.private-conversation__pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.private-conversation__pagination span {
+    color: #9298a6;
+    font-size: 13px;
 }
 
 @media (max-width: 600px) {
