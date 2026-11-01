@@ -1,4 +1,8 @@
-import type { ReactNode } from 'react'
+import {
+    useLayoutEffect,
+    useRef,
+    type ReactNode,
+} from 'react'
 
 import PrivateMessageItem from './PrivateMessageItem'
 
@@ -27,6 +31,17 @@ export default function PrivateMessageList({
     onSave,
     onDelete,
 }: PrivateMessageListProps) {
+    const messagesRef = useRef<HTMLElement>(null)
+
+    const newestMessageId = messages[0]?.id
+
+    useLayoutEffect(() => {
+        messagesRef.current?.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        })
+    }, [newestMessageId])
+
     let content: ReactNode
 
     if (isLoading) {
@@ -70,6 +85,7 @@ export default function PrivateMessageList({
 
     return (
         <section
+            ref={messagesRef}
             className="private-conversation__messages"
             aria-label="Private messages"
         >
