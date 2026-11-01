@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef } from 'react'
+
 import MessageItem from './MessageItem'
 
 import './css/MessageList.css'
@@ -43,8 +45,22 @@ function MessageList({
     onUpdate,
     onDelete,
 }: MessageListProps) {
+    const listRef = useRef<HTMLUListElement>(null)
+
+    const newestMessageId = messages[0]?.id
+
+    useLayoutEffect(() => {
+        listRef.current?.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        })
+    }, [newestMessageId])
+
     return (
-        <ul className="message-list">
+        <ul
+            ref={listRef}
+            className="message-list"
+        >
             {messages.map(
                 (message) => (
                     <MessageItem
