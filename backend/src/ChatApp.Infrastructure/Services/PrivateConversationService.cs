@@ -157,8 +157,6 @@ public sealed class PrivateConversationService : IPrivateConversationService
             })
             .ToListAsync();
 
-        items.Reverse();
-
         return new PagedResult<PrivateMessageResponseDto>
         {
             Items = items,
