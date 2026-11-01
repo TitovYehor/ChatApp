@@ -1,5 +1,14 @@
 # ChatApp
 
+## Demo Video
+
+Watch a short demonstration of ChatApp's main features,
+including workspaces, channels, real-time messaging,
+typing indicators, and private conversations.
+
+https://github.com/user-attachments/assets/9d11646f-9bb2-49a5-b4be-26ec8c7a3571
+
+
 ## Features
 
 ### Authentication and user profiles
