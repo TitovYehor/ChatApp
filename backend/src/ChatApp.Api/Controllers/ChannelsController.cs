@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for creating, retrieving, updating, and deleting workspace channels
+/// </summary>
 [ApiController]
 [Authorize]
 [Route("api")]
@@ -22,6 +25,9 @@ public class ChannelsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Creates a channel in a workspace
+    /// </summary>
     [HttpPost("workspaces/{workspaceId:guid}/channels")]
     public async Task<ActionResult<ChannelResponseDto>> Create(
         Guid workspaceId,
@@ -40,6 +46,9 @@ public class ChannelsController : ControllerBase
             channel);
     }
 
+    /// <summary>
+    /// Retrieves a channel by ID
+    /// </summary>
     [HttpGet("channels/{channelId:guid}")]
     public async Task<ActionResult<ChannelResponseDto>> GetById(
         Guid channelId)
@@ -53,6 +62,9 @@ public class ChannelsController : ControllerBase
         return Ok(channel);
     }
 
+    /// <summary>
+    /// Searches for channels within a workspace
+    /// </summary>
     [HttpGet("workspaces/{workspaceId:guid}/channels/search")]
     public async Task<ActionResult<IReadOnlyCollection<ChannelResponseDto>>> Search(
         Guid workspaceId,
@@ -68,6 +80,9 @@ public class ChannelsController : ControllerBase
         return Ok(channels);
     }
 
+    /// <summary>
+    /// Retrieves all channels belonging to a workspace
+    /// </summary>
     [HttpGet("workspaces/{workspaceId:guid}/channels")]
     public async Task<ActionResult<IReadOnlyCollection<ChannelResponseDto>>> GetByWorkspaceId(
         Guid workspaceId)
@@ -81,6 +96,9 @@ public class ChannelsController : ControllerBase
         return Ok(channels);
     }
 
+    /// <summary>
+    /// Updates channel information
+    /// </summary>
     [HttpPut("channels/{channelId:guid}")]
     public async Task<ActionResult<ChannelResponseDto>> Update(
         Guid channelId,
@@ -96,6 +114,9 @@ public class ChannelsController : ControllerBase
         return Ok(channel);
     }
 
+    /// <summary>
+    /// Deletes a channel
+    /// </summary>
     [HttpDelete("channels/{channelId:guid}")]
     public async Task<IActionResult> Delete(
         Guid channelId)
