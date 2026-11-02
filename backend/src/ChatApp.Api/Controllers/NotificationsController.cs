@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for retrieving notifications and managing their read status
+/// </summary>
 [ApiController]
 [Authorize]
 [Route("api/notifications")]
@@ -21,6 +24,9 @@ public class NotificationsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Retrieves the latest notifications for the authenticated user
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<NotificationResponseDto>>> GetLatest(
         [FromQuery] int limit = 50)
@@ -39,6 +45,9 @@ public class NotificationsController : ControllerBase
         return Ok(notifications);
     }
 
+    /// <summary>
+    /// Marks a notification as read
+    /// </summary>
     [HttpPut("{id:guid}/read")]
     public async Task<IActionResult> MarkAsRead(
         Guid id)
@@ -57,6 +66,9 @@ public class NotificationsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Marks all notifications belonging to the authenticated user as read
+    /// </summary>
     [HttpPut("read-all")]
     public async Task<IActionResult> MarkAllAsRead()
     {

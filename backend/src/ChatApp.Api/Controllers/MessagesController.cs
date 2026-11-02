@@ -1,12 +1,15 @@
-﻿using ChatApp.Contracts.Common;
+﻿using ChatApp.Application.Interfaces;
+using ChatApp.Contracts.Common;
 using ChatApp.Contracts.Messages.Requests;
 using ChatApp.Contracts.Messages.Responses;
-using ChatApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for managing messages in workspace channels
+/// </summary>
 [ApiController]
 [Route("api")]
 [Authorize]
@@ -23,6 +26,9 @@ public class MessagesController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Creates a message in a channel
+    /// </summary>
     [HttpPost("channels/{channelId:guid}/messages")]
     public async Task<ActionResult<MessageResponseDto>> Create(
         Guid channelId,
@@ -41,6 +47,9 @@ public class MessagesController : ControllerBase
             message);
     }
 
+    /// <summary>
+    /// Retrieves a message by ID
+    /// </summary>
     [HttpGet("messages/{messageId:guid}")]
     public async Task<ActionResult<MessageResponseDto>> GetById(
         Guid messageId)
@@ -54,6 +63,9 @@ public class MessagesController : ControllerBase
         return Ok(message);
     }
 
+    /// <summary>
+    /// Retrieves a paginated list of messages from a channel
+    /// </summary>
     [HttpGet("channels/{channelId:guid}/messages")]
     public async Task<ActionResult<PagedResult<MessageResponseDto>>> GetByChannelId(
         Guid channelId,
@@ -69,6 +81,9 @@ public class MessagesController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Updates an existing message
+    /// </summary>
     [HttpPut("messages/{messageId:guid}")]
     public async Task<ActionResult<MessageResponseDto>> Update(
         Guid messageId,
@@ -84,6 +99,9 @@ public class MessagesController : ControllerBase
         return Ok(message);
     }
 
+    /// <summary>
+    /// Deletes a message
+    /// </summary>
     [HttpDelete("messages/{messageId:guid}")]
     public async Task<IActionResult> Delete(
         Guid messageId)
