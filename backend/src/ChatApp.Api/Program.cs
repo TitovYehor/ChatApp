@@ -15,6 +15,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure database access
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddHttpContextAccessor();
 
+// Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
@@ -35,15 +37,16 @@ builder.Services.AddScoped<IChannelAccessService, ChannelAccessService>();
 builder.Services.AddScoped<IWorkspaceAuthorizationService, WorkspaceAuthorizationService>();
 builder.Services.AddScoped<IWorkspaceMemberLookupService, WorkspaceMemberLookupService>();
 
+// Register SignalR services
 builder.Services.AddRealTime();
 
+// Configure controllers and request validation
 builder.Services.AddControllers();
-
-builder.Services.AddAuthorization();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestDtoValidator>();
 
+// Configure JWT authentication and authorization
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(
@@ -65,22 +68,20 @@ builder.Services.AddAuthentication(
                 ValidIssuer = jwtSettings!.Issuer,
                 ValidAudience = jwtSettings.Audience,
 
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            jwtSettings.SecretKey))
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(
+                        jwtSettings.SecretKey))
             };
 
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                var accessToken =
-                    context.Request.Query["access_token"];
+                var accessToken = context.Request.Query["access_token"];
 
-                var path =
-                    context.HttpContext.Request.Path;
+                var path = context.HttpContext.Request.Path;
 
+                // SignalR connections pass the access token through the query string
                 if (!string.IsNullOrWhiteSpace(accessToken)
                     && path.StartsWithSegments("/hubs/chat"))
                 {
@@ -92,6 +93,7 @@ builder.Services.AddAuthentication(
         };
     });
 
+// Configure CORS for the frontend application
 var frontendOrigin = builder.Configuration["FrontendOrigin"]
     ?? "http://localhost:5173";
 
@@ -111,6 +113,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Initialize the database before handling requests
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
@@ -121,6 +124,7 @@ using (var scope = app.Services.CreateScope())
         builder.Configuration);
 }
 
+// Configure the HTTP request pipeline
 app.UseRouting();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -130,6 +134,7 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map API controllers and the SignalR hub
 app.MapControllers();
 
 app.MapHub<ChatHub>("/hubs/chat");
