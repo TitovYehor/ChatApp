@@ -31,11 +31,16 @@ export function getMessages(
     conversationId: string,
     pageNumber = 1,
     pageSize = 10,
+    search?: string,
 ): Promise<PagedResult<PrivateMessageResponse>> {
     const params = new URLSearchParams({
         pageNumber: pageNumber.toString(),
         pageSize: pageSize.toString(),
     })
+
+    if (search?.trim()) {
+        params.set('search', search.trim())
+    }
 
     return apiRequest<PagedResult<PrivateMessageResponse>>(
         `/conversations/${encodeURIComponent(conversationId)}/messages?${params.toString()}`,
