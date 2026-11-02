@@ -9,6 +9,10 @@ using Microsoft.Extensions.Options;
 
 namespace ChatApp.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for user registration, authentication,
+/// token refresh, logout, and password management
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -27,6 +31,9 @@ public class AuthController : ControllerBase
         _jwtSettings = jwtOptions.Value;
     }
 
+    /// <summary>
+    /// Registers a new user and issues authentication tokens
+    /// </summary>
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponseDto>> Register(
         RegisterRequestDto request)
@@ -34,10 +41,13 @@ public class AuthController : ControllerBase
         var result = await _authService.RegisterAsync(request);
 
         SetRefreshTokenCookie(result.RefreshToken);
-        
+
         return Ok(result.Response);
     }
 
+    /// <summary>
+    /// Authenticates a user and issues authentication tokens
+    /// </summary>
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(
         LoginRequestDto request)
@@ -49,6 +59,9 @@ public class AuthController : ControllerBase
         return Ok(result.Response);
     }
 
+    /// <summary>
+    /// Issues a new access token using the refresh token stored in the request cookie
+    /// </summary>
     [HttpPost("refresh")]
     public async Task<ActionResult<AuthResponseDto>> Refresh()
     {
@@ -67,6 +80,9 @@ public class AuthController : ControllerBase
         return Ok(result.Response);
     }
 
+    /// <summary>
+    /// Revokes the refresh token and removes the authentication cookie
+    /// </summary>
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
@@ -83,6 +99,9 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Changes the authenticated user's password and issues updated authentication tokens
+    /// </summary>
     [Authorize]
     [HttpPost("change-password")]
     public async Task<ActionResult<AuthResponseDto>> ChangePassword(
@@ -99,6 +118,9 @@ public class AuthController : ControllerBase
         return Ok(result.Response);
     }
 
+    /// <summary>
+    /// Returns basic information about the currently authenticated user
+    /// </summary>
     [Authorize]
     [HttpGet("me")]
     public IActionResult Me()
