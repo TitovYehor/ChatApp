@@ -4,6 +4,10 @@ using System.Text.Json;
 
 namespace ChatApp.Api.Middleware;
 
+/// <summary>
+/// Handles unhandled exceptions during HTTP request processing
+/// and converts them into standardized API error responses
+/// </summary>
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
@@ -18,6 +22,10 @@ public class ExceptionHandlingMiddleware
         _logger = logger;
     }
 
+    /// <summary>
+    /// Invokes the next middleware and handles any exceptions
+    /// thrown during request processing
+    /// </summary>
     public async Task InvokeAsync(
         HttpContext context)
     {
@@ -39,6 +47,9 @@ public class ExceptionHandlingMiddleware
         }
     }
 
+    /// <summary>
+    /// Writes a standardized JSON error response with the appropriate HTTP status code
+    /// </summary>
     private static async Task HandleExceptionAsync(
         HttpContext context,
         Exception exception)
@@ -62,6 +73,9 @@ public class ExceptionHandlingMiddleware
             JsonSerializer.Serialize(response));
     }
 
+    /// <summary>
+    /// Maps application exceptions to their corresponding HTTP status codes
+    /// </summary>
     private static int GetStatusCode(
         Exception exception)
     {
@@ -89,6 +103,10 @@ public class ExceptionHandlingMiddleware
         };
     }
 
+    /// <summary>
+    /// Returns the appropriate error message for an exception.
+    /// Unexpected exceptions are represented by a generic message
+    /// </summary>
     private static string GetMessage(
         Exception exception)
     {
