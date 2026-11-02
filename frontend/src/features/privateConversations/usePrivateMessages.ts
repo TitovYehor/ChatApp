@@ -14,20 +14,31 @@ export function usePrivateMessages(
     conversationId: string | undefined,
     pageNumber = 1,
     pageSize = 10,
+    search = '',
 ) {
+    const normalizedSearch = search.trim()
+
     const query = useQuery({
         queryKey: conversationId
             ? privateConversationKeys.messages(
                 conversationId,
                 pageNumber,
                 pageSize,
+                normalizedSearch,
             )
-            : ['private-messages', null, pageNumber, pageSize],
+            : [
+                'private-messages',
+                null,
+                pageNumber,
+                pageSize,
+                normalizedSearch,
+            ],
         queryFn: () =>
             privateConversationApi.getMessages(
                 conversationId!,
                 pageNumber,
                 pageSize,
+                normalizedSearch || undefined,
             ),
         enabled: Boolean(conversationId),
     })

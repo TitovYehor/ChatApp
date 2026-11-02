@@ -8,11 +8,13 @@ export const privateConversationKeys = {
         conversationId: string,
         pageNumber: number,
         pageSize: number,
+        search: string,
     ) => [
         'private-messages',
         conversationId,
         pageNumber,
         pageSize,
+        search,
     ] as const,
 }
 
