@@ -77,6 +77,7 @@
 
 .private-conversation__header-info {
     min-width: 0;
+    flex: 1;
 }
 
 .private-conversation__header-info h1 {
@@ -94,6 +95,53 @@
     margin: 4px 0 0;
     color: #9298a6;
     font-size: 13px;
+}
+
+.private-conversation__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    flex: 0 1 300px;
+    min-width: 150px;
+}
+
+.private-conversation__search input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 9px 12px;
+
+    border: 1px solid #292d36;
+    border-radius: 6px;
+
+    background: #101218;
+    color: #e7eaf0;
+
+    font: inherit;
+    font-size: 14px;
+}
+
+.private-conversation__search input:focus {
+    outline: none;
+    border-color: #5865f2;
+}
+
+.private-conversation__search button {
+    padding: 8px 12px;
+
+    border: 1px solid #292d36;
+    border-radius: 6px;
+
+    background: #20232b;
+    color: #e7eaf0;
+
+    font: inherit;
+    cursor: pointer;
+}
+
+.private-conversation__search button:hover {
+    background: #292d36;
 }
 
 .private-conversation__messages {
@@ -281,9 +329,16 @@
     }
 
     .private-conversation__header {
-        gap: 8px;
-        margin: -12px -12px 12px;
-        padding: 12px;
+        flex-wrap: wrap;
+    }
+
+    .private-conversation__header-info {
+        flex: 1;
+    }
+
+    .private-conversation__search {
+        flex: 1 0 100%;
+        min-width: 0;
     }
 
     .private-conversation__back {

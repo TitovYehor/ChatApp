@@ -36,12 +36,19 @@ function PrivateConversationPage() {
     const [pageNumber, setPageNumber] = useState(1)
     const pageSize = 5
 
+    const [searchQuery, setSearchQuery] = useState('')
+
     const {
         result,
         isLoading,
         error,
         refetch,
-    } = usePrivateMessages(conversationId, pageNumber, pageSize)
+    } = usePrivateMessages(
+        conversationId,
+        pageNumber,
+        pageSize,
+        searchQuery,
+    )
 
     const totalPages = Math.ceil(
         (result?.totalCount ?? 0) / pageSize,
@@ -52,6 +59,11 @@ function PrivateConversationPage() {
     const deleteMessageMutation = useDeletePrivateMessage(conversationId)
 
     const [sendError, setSendError] = useState<string | null>(null)
+
+    const handleSearchChange = useCallback((value: string) => {
+        setSearchQuery(value)
+        setPageNumber(1)
+    }, [])
 
     const handleMessagesChanged = useCallback(() => {
         void refetch()
@@ -86,8 +98,10 @@ function PrivateConversationPage() {
             uniqueMessages.set(message.id, message)
         }
 
-        for (const message of liveMessages) {
-            uniqueMessages.set(message.id, message)
+        if (pageNumber === 1 && !searchQuery.trim()) {
+            for (const message of liveMessages) {
+                uniqueMessages.set(message.id, message)
+            }
         }
 
         return Array.from(uniqueMessages.values())
@@ -98,13 +112,21 @@ function PrivateConversationPage() {
                     new Date(a.createdAt).getTime() ||
                     b.id.localeCompare(a.id),
             )
-    }, [result?.items, liveMessages, deletedMessageIds])
+    }, [
+        result?.items,
+        liveMessages,
+        deletedMessageIds,
+        pageNumber,
+        searchQuery,
+    ])
 
     const handleSend = useCallback(async (content: string) => {
         setSendError(null)
 
         try {
             const message = await sendMessageMutation.mutateAsync(content)
+
+            setPageNumber(1)
             addLiveMessage(message)
         } catch (error) {
             logError('Failed to send private message', error)
@@ -186,6 +208,26 @@ function PrivateConversationPage() {
                             {conversation?.otherUsername ?? 'Private conversation'}
                         </h1>
                         <p>Private messages</p>
+                    </div>
+
+                    <div className="private-conversation__search">
+                        <input
+                            type="search"
+                            value={searchQuery}
+                            onChange={(event) => handleSearchChange(event.target.value)}
+                            placeholder="Search messages..."
+                            aria-label="Search private messages"
+                        />
+
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={() => handleSearchChange('')}
+                                aria-label="Clear message search"
+                            >
+                                Clear
+                            </button>
+                        )}
                     </div>
                 </header>
 
