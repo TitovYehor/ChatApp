@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for managing private conversations and their messages
+/// </summary>
 [ApiController]
 [Route("api/conversations")]
 [Authorize]
@@ -23,6 +26,9 @@ public class PrivateConversationsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Retrieves an existing conversation with another user or creates one
+    /// </summary>
     [HttpPost("{otherUserId:guid}")]
     public async Task<ActionResult<PrivateConversationResponseDto>> GetOrCreate(
         Guid otherUserId)
@@ -36,6 +42,9 @@ public class PrivateConversationsController : ControllerBase
         return Ok(conversation);
     }
 
+    /// <summary>
+    /// Retrieves all private conversations of the authenticated user
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<PrivateConversationResponseDto>>> GetAll()
     {
@@ -47,6 +56,9 @@ public class PrivateConversationsController : ControllerBase
         return Ok(conversations);
     }
 
+    /// <summary>
+    /// Retrieves a paginated list of messages in a private conversation
+    /// </summary>
     [HttpGet("{conversationId:guid}/messages")]
     public async Task<ActionResult<PagedResult<PrivateMessageResponseDto>>> GetMessages(
         Guid conversationId,
@@ -62,6 +74,9 @@ public class PrivateConversationsController : ControllerBase
         return Ok(messages);
     }
 
+    /// <summary>
+    /// Sends a message in a private conversation
+    /// </summary>
     [HttpPost("{conversationId:guid}/messages")]
     public async Task<ActionResult<PrivateMessageResponseDto>> SendMessage(
         Guid conversationId,
@@ -77,6 +92,9 @@ public class PrivateConversationsController : ControllerBase
         return Ok(message);
     }
 
+    /// <summary>
+    /// Updates a message in a private conversation
+    /// </summary>
     [HttpPut("{conversationId:guid}/messages/{messageId:guid}")]
     public async Task<ActionResult<PrivateMessageResponseDto>> UpdateMessage(
         Guid conversationId,
@@ -94,6 +112,9 @@ public class PrivateConversationsController : ControllerBase
         return Ok(message);
     }
 
+    /// <summary>
+    /// Deletes a message from a private conversation
+    /// </summary>
     [HttpDelete("{conversationId:guid}/messages/{messageId:guid}")]
     public async Task<IActionResult> DeleteMessage(
         Guid conversationId,

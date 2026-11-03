@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for searching users and managing friendships
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
@@ -21,9 +24,11 @@ public class FriendsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Retrieves the authenticated user's friends
+    /// </summary>
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyCollection<FriendResponseDto>>>
-        GetFriends()
+    public async Task<ActionResult<IReadOnlyCollection<FriendResponseDto>>> GetFriends()
     {
         var currentUserId = _currentUserService.GetUserId();
 
@@ -33,9 +38,12 @@ public class FriendsController : ControllerBase
         return Ok(friends);
     }
 
+    /// <summary>
+    /// Searches for users who can be added as friends
+    /// </summary>
     [HttpGet("search")]
-    public async Task<ActionResult<IReadOnlyCollection<FriendSearchResponseDto>>>
-        SearchUsers([FromQuery] string query = "")
+    public async Task<ActionResult<IReadOnlyCollection<FriendSearchResponseDto>>> SearchUsers(
+        [FromQuery] string query = "")
     {
         var currentUserId = _currentUserService.GetUserId();
 
@@ -46,6 +54,9 @@ public class FriendsController : ControllerBase
         return Ok(users);
     }
 
+    /// <summary>
+    /// Adds a user to the authenticated user's friends
+    /// </summary>
     [HttpPost("{userId:guid}")]
     public async Task<IActionResult> AddFriend(
         Guid userId)
@@ -59,6 +70,9 @@ public class FriendsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Removes a user from the authenticated user's friends
+    /// </summary>
     [HttpDelete("{userId:guid}")]
     public async Task<IActionResult> RemoveFriend(
         Guid userId)
