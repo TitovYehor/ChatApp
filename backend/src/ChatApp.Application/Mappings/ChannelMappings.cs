@@ -3,8 +3,14 @@ using ChatApp.Domain.Entities;
 
 namespace ChatApp.Application.Mappings;
 
+/// <summary>
+/// Defines mappings between channel domain entities and response DTOs
+/// </summary>
 public static class ChannelMappings
 {
+    /// <summary>
+    /// Maps a channel entity to its response DTO
+    /// </summary>
     public static ChannelResponseDto ToDto(
         this Channel channel)
     {

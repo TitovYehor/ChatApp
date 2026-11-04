@@ -3,8 +3,14 @@ using ChatApp.Domain.Entities;
 
 namespace ChatApp.Application.Mappings;
 
+/// <summary>
+/// Defines mappings between message domain entities and response DTOs
+/// </summary>
 public static class MessageMappings
 {
+    /// <summary>
+    /// Maps a message entity to its response DTO, including the author's username
+    /// </summary>
     public static MessageResponseDto ToDto(
         this Message message)
     {
