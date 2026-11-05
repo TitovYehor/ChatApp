@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Messages.Requests;
 
+/// <summary>
+/// Contains the content of a new channel message
+/// </summary>
 public class CreateMessageRequestDto
 {
     [Required]

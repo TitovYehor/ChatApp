@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Messages.Requests;
 
+/// <summary>
+/// Defines pagination and optional search criteria for retrieving messages
+/// </summary>
 public class MessageQueryDto
 {
     [Range(1, int.MaxValue)]

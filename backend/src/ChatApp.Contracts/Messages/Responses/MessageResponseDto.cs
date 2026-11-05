@@ -1,5 +1,8 @@
 ﻿namespace ChatApp.Contracts.Messages.Responses;
 
+/// <summary>
+/// Represents a channel message and its author information
+/// </summary>
 public class MessageResponseDto
 {
     public Guid Id { get; set; }
@@ -14,5 +17,8 @@ public class MessageResponseDto
 
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// Gets or sets the last update time, or null if the message has not been edited
+    /// </summary>
     public DateTime? UpdatedAt { get; set; }
 }

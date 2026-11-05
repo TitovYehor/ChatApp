@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Messages.Requests;
 
+/// <summary>
+/// Contains the updated content of an existing message
+/// </summary>
 public class UpdateMessageRequestDto
 {
     [Required]
