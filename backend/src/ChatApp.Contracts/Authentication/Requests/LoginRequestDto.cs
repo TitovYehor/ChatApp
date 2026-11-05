@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Authentication.Requests;
 
+/// <summary>
+/// Contains the credentials submitted when a user signs in
+/// </summary>
 public class LoginRequestDto
 {
     [Required]

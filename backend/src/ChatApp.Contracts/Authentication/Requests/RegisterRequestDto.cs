@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Authentication.Requests;
 
+/// <summary>
+/// Contains the information required to register a new user
+/// </summary>
 public class RegisterRequestDto
 {
     [Required]
