@@ -1,5 +1,8 @@
 namespace ChatApp.Contracts.PrivateConversations.Responses;
 
+/// <summary>
+/// Represents a message exchanged in a private conversation
+/// </summary>
 public class PrivateMessageResponseDto
 {
     public Guid Id { get; set; }
@@ -14,5 +17,8 @@ public class PrivateMessageResponseDto
 
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// Gets or sets the last update time, or null if the message has not been edited
+    /// </summary>
     public DateTime? UpdatedAt { get; set; }
 }
