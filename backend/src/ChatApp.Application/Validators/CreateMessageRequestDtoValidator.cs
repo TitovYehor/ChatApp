@@ -3,6 +3,9 @@ using FluentValidation;
 
 namespace ChatApp.Application.Validators;
 
+/// <summary>
+/// Validates message creation requests
+/// </summary>
 public class CreateMessageRequestDtoValidator
     : AbstractValidator<CreateMessageRequestDto>
 {

@@ -3,6 +3,9 @@ using FluentValidation;
 
 namespace ChatApp.Application.Validators;
 
+/// <summary>
+/// Validates user login requests
+/// </summary>
 public class LoginRequestDtoValidator
     : AbstractValidator<LoginRequestDto>
 {

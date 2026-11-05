@@ -3,6 +3,9 @@ using FluentValidation;
 
 namespace ChatApp.Application.Validators;
 
+/// <summary>
+/// Validates user registration requests, including username, email, and password requirements
+/// </summary>
 public class RegisterRequestDtoValidator
     : AbstractValidator<RegisterRequestDto>
 {

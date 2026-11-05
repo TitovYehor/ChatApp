@@ -3,6 +3,9 @@ using FluentValidation;
 
 namespace ChatApp.Application.Validators;
 
+/// <summary>
+/// Validates message pagination query parameters
+/// </summary>
 public class MessageQueryDtoValidator
     : AbstractValidator<MessageQueryDto>
 {
