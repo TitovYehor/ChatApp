@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Channels.Requests;
 
+/// <summary>
+/// Contains the values used to update an existing channel
+/// </summary>
 public class UpdateChannelRequestDto
 {
     [Required]

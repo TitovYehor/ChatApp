@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Channels.Requests;
 
+/// <summary>
+/// Contains the information required to create a channel
+/// </summary>
 public class CreateChannelRequestDto
 {
     [Required]
