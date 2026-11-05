@@ -3,6 +3,9 @@ using FluentValidation;
 
 namespace ChatApp.Application.Validators;
 
+/// <summary>
+/// Validates channel update requests
+/// </summary>
 public class UpdateChannelRequestDtoValidator
     : AbstractValidator<UpdateChannelRequestDto>
 {

@@ -3,6 +3,9 @@ using FluentValidation;
 
 namespace ChatApp.Application.Validators;
 
+/// <summary>
+/// Validates workspace creation requests
+/// </summary>
 public class CreateWorkspaceRequestDtoValidator
     : AbstractValidator<CreateWorkspaceRequestDto>
 {
