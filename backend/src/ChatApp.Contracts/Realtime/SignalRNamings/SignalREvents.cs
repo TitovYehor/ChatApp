@@ -1,5 +1,8 @@
 ﻿namespace ChatApp.Contracts.Realtime.SignalRNamings;
 
+/// <summary>
+/// Defines the event names used by the server to send realtime notifications to clients
+/// </summary>
 public static class SignalREvents
 {
     public const string MessageCreated =
@@ -27,7 +30,7 @@ public static class SignalREvents
     public const string WorkspaceDeleted =
         nameof(WorkspaceDeleted);
 
-    public const string WorkspaceUpdated = 
+    public const string WorkspaceUpdated =
         nameof(WorkspaceUpdated);
 
     public const string WorkspaceMemberAdded =
