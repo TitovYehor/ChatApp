@@ -1,5 +1,8 @@
 namespace ChatApp.Domain.Entities;
 
+/// <summary>
+/// Represents a friendship relationship between two users
+/// </summary>
 public class Friendship
 {
     public Guid Id { get; set; }

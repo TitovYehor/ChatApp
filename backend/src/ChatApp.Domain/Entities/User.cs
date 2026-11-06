@@ -1,5 +1,8 @@
 ﻿namespace ChatApp.Domain.Entities;
 
+/// <summary>
+/// Represents a registered user of the application
+/// </summary>
 public class User
 {
     public Guid Id { get; set; }
@@ -8,10 +11,16 @@ public class User
 
     public string Email { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the user's hashed password
+    /// </summary>
     public string PasswordHash { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    /// <summary>
+    /// Gets or sets the user's workspace memberships
+    /// </summary>
     public ICollection<WorkspaceMember> WorkspaceMemberships { get; set; }
         = new List<WorkspaceMember>();
 
