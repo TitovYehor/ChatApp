@@ -2,6 +2,9 @@
 
 namespace ChatApp.Contracts.Workspaces.Responses;
 
+/// <summary>
+/// Represents a member of a workspace, including their role and join date
+/// </summary>
 public class WorkspaceMemberResponseDto
 {
     public Guid UserId { get; set; }

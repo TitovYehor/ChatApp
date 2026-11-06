@@ -1,5 +1,8 @@
 namespace ChatApp.Contracts.Workspaces.Responses;
 
+/// <summary>
+/// Identifies a member removed from a workspace
+/// </summary>
 public class WorkspaceMemberRemovedResponseDto
 {
     public Guid WorkspaceId { get; set; }

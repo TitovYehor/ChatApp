@@ -2,6 +2,9 @@ using ChatApp.Contracts.Workspaces.Enums;
 
 namespace ChatApp.Contracts.Workspaces.Responses;
 
+/// <summary>
+/// Contains workspace and user information when a member is added to a workspace
+/// </summary>
 public class WorkspaceMemberAddedResponseDto
 {
     public Guid WorkspaceId { get; set; }

@@ -1,5 +1,8 @@
 namespace ChatApp.Contracts.Workspaces.Responses;
 
+/// <summary>
+/// Describes a workspace ownership transfer, including the previous and new owners
+/// </summary>
 public class WorkspaceOwnershipTransferredResponseDto
 {
     public Guid WorkspaceId { get; set; }

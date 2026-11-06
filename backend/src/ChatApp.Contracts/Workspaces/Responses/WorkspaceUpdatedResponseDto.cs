@@ -1,5 +1,8 @@
 ﻿namespace ChatApp.Contracts.Workspaces.Responses;
 
+/// <summary>
+/// Contains the updated workspace information sent to clients
+/// </summary>
 public class WorkspaceUpdatedResponseDto
 {
     public Guid WorkspaceId { get; set; }
