@@ -1,5 +1,8 @@
 namespace ChatApp.Contracts.Users.Responses;
 
+/// <summary>
+/// Represents the user profile information available to other users
+/// </summary>
 public class PublicUserProfileResponseDto
 {
     public Guid Id { get; set; }
