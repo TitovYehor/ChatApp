@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Manages friendships and user search, including friendship-related notifications
+/// </summary>
 public class FriendsService : IFriendsService
 {
     private readonly AppDbContext _dbContext;
@@ -25,6 +28,7 @@ public class FriendsService : IFriendsService
         _notificationService = notificationService;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<FriendResponseDto>> GetFriendsAsync(
         Guid currentUserId)
     {
@@ -56,6 +60,7 @@ public class FriendsService : IFriendsService
         return friendships;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<FriendSearchResponseDto>> SearchUsersAsync(
         Guid currentUserId,
         string query)
@@ -105,6 +110,7 @@ public class FriendsService : IFriendsService
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task AddFriendAsync(
         Guid currentUserId,
         Guid friendUserId)
@@ -176,6 +182,7 @@ public class FriendsService : IFriendsService
             $"{actorUsername} added you as a friend");
     }
 
+    /// <inheritdoc />
     public async Task RemoveFriendAsync(
         Guid currentUserId,
         Guid friendUserId)

@@ -11,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Manages channel messages, including retrieval, creation, updates, and deletion
+/// </summary>
 public class MessageService : IMessageService
 {
     private readonly AppDbContext _dbContext;
@@ -29,6 +32,7 @@ public class MessageService : IMessageService
         _notificationService = notificationService;
     }
 
+    /// <inheritdoc />
     public async Task<MessageResponseDto> CreateAsync(
         Guid channelId, 
         Guid userId, 
@@ -92,6 +96,7 @@ public class MessageService : IMessageService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task<MessageResponseDto> GetByIdAsync(
         Guid messageId,
         Guid userId)
@@ -112,6 +117,7 @@ public class MessageService : IMessageService
         return message.ToDto();
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<MessageResponseDto>> GetByChannelIdAsync(
         Guid channelId,
         Guid userId,
@@ -168,6 +174,7 @@ public class MessageService : IMessageService
         };
     }
 
+    /// <inheritdoc />
     public async Task<MessageResponseDto> UpdateAsync(
         Guid messageId,
         Guid userId,
@@ -226,6 +233,7 @@ public class MessageService : IMessageService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(
         Guid messageId,
         Guid userId)

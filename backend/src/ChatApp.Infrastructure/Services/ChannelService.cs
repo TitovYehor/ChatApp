@@ -11,6 +11,9 @@ using Npgsql;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Manages channel creation, retrieval, searching, updates, and deletion
+/// </summary>
 public class ChannelService : IChannelService
 {
     private readonly AppDbContext _dbContext;
@@ -33,6 +36,7 @@ public class ChannelService : IChannelService
         this._notificationService = notificationService;
     }
 
+    /// <inheritdoc />
     public async Task<ChannelResponseDto> CreateAsync(
         Guid workspaceId,
         Guid userId,
@@ -97,6 +101,7 @@ public class ChannelService : IChannelService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task<ChannelResponseDto> GetByIdAsync(
         Guid channelId,
         Guid userId)
@@ -117,6 +122,7 @@ public class ChannelService : IChannelService
         return channel.ToDto();
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<ChannelResponseDto>> SearchAsync(
         Guid workspaceId,
         Guid userId,
@@ -147,6 +153,7 @@ public class ChannelService : IChannelService
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<ChannelResponseDto>> GetByWorkspaceIdAsync(
         Guid workspaceId,
         Guid userId)
@@ -167,6 +174,7 @@ public class ChannelService : IChannelService
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task<ChannelResponseDto> UpdateAsync(
         Guid channelId,
         Guid userId,
@@ -233,6 +241,7 @@ public class ChannelService : IChannelService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(
         Guid channelId,
         Guid userId)

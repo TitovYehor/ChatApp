@@ -11,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Manages workspaces, membership, roles, and ownership operations
+/// </summary>
 public class WorkspaceService : IWorkspaceService
 {
     private readonly AppDbContext _dbContext;
@@ -29,6 +32,7 @@ public class WorkspaceService : IWorkspaceService
         _notificationService = notificationService;
     }
 
+    /// <inheritdoc />
     public async Task<WorkspaceResponseDto> CreateAsync(
         Guid userId,
         CreateWorkspaceRequestDto request)
@@ -55,6 +59,7 @@ public class WorkspaceService : IWorkspaceService
         return workspace.ToDto(WorkspaceRole.Owner);
     }
 
+    /// <inheritdoc />
     public async Task<WorkspaceResponseDto> GetByIdAsync(
         Guid workspaceId,
         Guid userId)
@@ -79,6 +84,7 @@ public class WorkspaceService : IWorkspaceService
         return workspace.ToDto(membership.Role);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<WorkspaceResponseDto>> SearchAsync(
         Guid userId,
         WorkspaceSearchRequestDto request)
@@ -103,6 +109,7 @@ public class WorkspaceService : IWorkspaceService
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<WorkspaceResponseDto>> GetAllAsync(
         Guid userId)
     {
@@ -117,6 +124,7 @@ public class WorkspaceService : IWorkspaceService
             .ToList();
     }
 
+    /// <inheritdoc />
     public async Task<WorkspaceResponseDto> UpdateAsync(
         Guid workspaceId,
         Guid userId,
@@ -180,6 +188,7 @@ public class WorkspaceService : IWorkspaceService
         return workspace.ToDto(member.Role);
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(
         Guid workspaceId,
         Guid currentUserId)
@@ -234,6 +243,7 @@ public class WorkspaceService : IWorkspaceService
             workspaceId);
     }
 
+    /// <inheritdoc />
     public async Task AddMemberAsync(
         Guid workspaceId,
         Guid currentUserId,
@@ -324,6 +334,7 @@ public class WorkspaceService : IWorkspaceService
             user.Id);
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> GetMembersAsync(
         Guid workspaceId,
         Guid userId)
@@ -357,6 +368,7 @@ public class WorkspaceService : IWorkspaceService
         return members;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<WorkspaceMemberResponseDto>> SearchMembersAsync(
         Guid workspaceId,
         Guid userId,
@@ -399,6 +411,7 @@ public class WorkspaceService : IWorkspaceService
         return members;
     }
 
+    /// <inheritdoc />
     public async Task JoinAsync(
         Guid workspaceId,
         Guid userId)
@@ -435,6 +448,7 @@ public class WorkspaceService : IWorkspaceService
         await _dbContext.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task LeaveAsync(
         Guid workspaceId,
         Guid currentUserId)
@@ -493,6 +507,7 @@ public class WorkspaceService : IWorkspaceService
             currentUserId);
     }
 
+    /// <inheritdoc />
     public async Task RemoveMemberAsync(
         Guid workspaceId,
         Guid currentUserId,
@@ -578,6 +593,7 @@ public class WorkspaceService : IWorkspaceService
             user.Id);
     }
 
+    /// <inheritdoc />
     public async Task ChangeMemberRoleAsync(
         Guid workspaceId,
         Guid currentUserId,
@@ -663,6 +679,7 @@ public class WorkspaceService : IWorkspaceService
             member.UserId);
     }
 
+    /// <inheritdoc />
     public async Task TransferOwnershipAsync(
         Guid workspaceId,
         Guid currentUserId,
