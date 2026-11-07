@@ -5,8 +5,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace ChatApp.Infrastructure.Persistence;
 
+/// <summary>
+/// Initializes the database by applying migrations and creating development seed data
+/// </summary>
 public static class DbInitializer
 {
+    /// <summary>
+    /// Applies pending migrations and ensures that the configured development seed data exists
+    /// </summary>
     public static async Task InitializeAsync(
         AppDbContext dbContext,
         IConfiguration configuration)

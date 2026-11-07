@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Persistence;
 
+/// <summary>
+/// Represents the Entity Framework Core database context for the application
+/// </summary>
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)
