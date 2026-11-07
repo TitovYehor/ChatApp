@@ -4,7 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ChatApp.Infrastructure.Persistence.Configurations;
 
-public class FriendshipConfiguration : IEntityTypeConfiguration<Friendship>
+/// <summary>
+/// Defines the database mapping and constraints for friendships
+/// </summary>
+public class FriendshipConfiguration
+    : IEntityTypeConfiguration<Friendship>
 {
     public void Configure(EntityTypeBuilder<Friendship> builder)
     {

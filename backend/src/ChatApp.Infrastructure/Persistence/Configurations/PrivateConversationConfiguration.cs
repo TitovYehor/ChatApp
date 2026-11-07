@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ChatApp.Infrastructure.Persistence.Configurations;
 
+/// <summary>
+/// Defines the database mapping and constraints for private conversations
+/// </summary>
 public class PrivateConversationConfiguration
     : IEntityTypeConfiguration<PrivateConversation>
 {
