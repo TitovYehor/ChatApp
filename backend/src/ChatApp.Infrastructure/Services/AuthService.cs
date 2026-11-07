@@ -18,6 +18,9 @@ using System.Text;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Implements user registration, authentication, password changes, and token lifecycle management
+/// </summary>
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _dbContext;
@@ -31,6 +34,7 @@ public class AuthService : IAuthService
         _jwtSettings = jwtOptions.Value;
     }
 
+    /// <inheritdoc />
     public async Task<AuthResult> RegisterAsync(
         RegisterRequestDto request)
     {
@@ -63,6 +67,7 @@ public class AuthService : IAuthService
         return CreateAuthResult(user, accessToken, refreshToken);
     }
 
+    /// <inheritdoc />
     public async Task<AuthResult> LoginAsync(
         LoginRequestDto request)
     {
@@ -85,6 +90,7 @@ public class AuthService : IAuthService
         return CreateAuthResult(user, accessToken, refreshToken);
     }
 
+    /// <inheritdoc />
     public async Task<AuthResult> RefreshAsync(
         string refreshToken)
     {
@@ -113,6 +119,7 @@ public class AuthService : IAuthService
             newRefreshToken);
     }
 
+    /// <inheritdoc />
     public async Task LogoutAsync(string refreshToken)
     {
         var tokenHash = RefreshTokenHasher.Hash(refreshToken);
@@ -131,6 +138,7 @@ public class AuthService : IAuthService
         await _dbContext.SaveChangesAsync();
     }
 
+    /// <inheritdoc />
     public async Task<AuthResult> ChangePasswordAsync(
         Guid userId,
         ChangePasswordRequestDto request)

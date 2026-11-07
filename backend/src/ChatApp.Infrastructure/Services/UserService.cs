@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Manages user profiles and user-related operations
+/// </summary>
 public class UserService : IUserService
 {
     private readonly AppDbContext _dbContext;
@@ -19,6 +22,7 @@ public class UserService : IUserService
         _dbContext = dbContext;
     }
 
+    /// <inheritdoc />
     public async Task<UserProfileResponseDto> GetProfileAsync(
         Guid userId)
     {
@@ -34,6 +38,7 @@ public class UserService : IUserService
         return ToProfileDto(user);
     }
 
+    /// <inheritdoc />
     public async Task<UserProfileResponseDto> UpdateProfileAsync(
         Guid userId,
         UpdateUserProfileRequestDto request)
@@ -71,6 +76,7 @@ public class UserService : IUserService
         return ToProfileDto(user);
     }
 
+    /// <inheritdoc />
     public async Task<PublicUserProfileResponseDto> GetPublicProfileAsync(
         Guid userId)
     {

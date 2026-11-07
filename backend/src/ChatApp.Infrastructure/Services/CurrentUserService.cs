@@ -5,6 +5,9 @@ using System.Security.Claims;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Retrieves the authenticated user's identifier from the current HTTP context
+/// </summary>
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -14,6 +17,7 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
+    /// <inheritdoc />
     public Guid GetUserId()
     {
         var userIdClaim = _httpContextAccessor

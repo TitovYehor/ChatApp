@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
-public sealed class ChannelAccessService
-    : IChannelAccessService
+/// <summary>
+/// Checks whether users have access to channels through workspace membership
+/// </summary>
+public sealed class ChannelAccessService : IChannelAccessService
 {
     private readonly AppDbContext _dbContext;
 
@@ -15,6 +17,7 @@ public sealed class ChannelAccessService
         _dbContext = dbContext;
     }
 
+    /// <inheritdoc />
     public async Task<bool> CanAccessChannelAsync(
         Guid userId,
         Guid channelId)
