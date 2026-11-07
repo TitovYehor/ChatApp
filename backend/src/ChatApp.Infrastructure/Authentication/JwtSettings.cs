@@ -1,5 +1,8 @@
 ﻿namespace ChatApp.Infrastructure.Authentication;
 
+/// <summary>
+/// Contains configuration settings used for JWT and refresh-token generation
+/// </summary>
 public class JwtSettings
 {
     public string SecretKey { get; set; } = string.Empty;
