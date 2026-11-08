@@ -6,8 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatApp.RealTime.Extensions;
 
+/// <summary>
+/// Provides dependency injection registration for realtime functionality
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Registers SignalR services and the realtime implementation services
+    /// </summary>
     public static IServiceCollection AddRealTime(
         this IServiceCollection services)
     {

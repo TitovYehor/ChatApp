@@ -8,6 +8,9 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatApp.RealTime.Hubs;
 
+/// <summary>
+/// Handles authenticated SignalR connections and realtime chat interactions
+/// </summary>
 [Authorize]
 public sealed class ChatHub : Hub
 {
@@ -31,6 +34,9 @@ public sealed class ChatHub : Hub
         _logger = logger;
     }
 
+    /// <summary>
+    /// Adds the connection to the user's group and updates their online presence
+    /// </summary>
     public override async Task OnConnectedAsync()
     {
         var userId = GetCurrentUserId();
@@ -51,6 +57,9 @@ public sealed class ChatHub : Hub
         await base.OnConnectedAsync();
     }
 
+    /// <summary>
+    /// Removes the connection from the user's group and updates their online presence
+    /// </summary>
     public override async Task OnDisconnectedAsync(
         Exception? exception)
     {
@@ -73,6 +82,9 @@ public sealed class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
+    /// <summary>
+    /// Adds the current connection to a channel group after verifying channel access
+    /// </summary>
     public async Task JoinChannel(
         JoinChannelRequest request)
     {
@@ -99,6 +111,9 @@ public sealed class ChatHub : Hub
             request.ChannelId);
     }
 
+    /// <summary>
+    /// Removes the current connection from a channel group
+    /// </summary>
     public async Task LeaveChannel(
         LeaveChannelRequest request)
     {
@@ -113,6 +128,9 @@ public sealed class ChatHub : Hub
             request.ChannelId);
     }
 
+    /// <summary>
+    /// Adds the current connection to a private conversation group after verifying participation
+    /// </summary>
     public async Task JoinPrivateConversation(
         Guid conversationId)
     {
@@ -136,6 +154,9 @@ public sealed class ChatHub : Hub
             conversationId);
     }
 
+    /// <summary>
+    /// Removes the current connection from a private conversation group
+    /// </summary>
     public async Task LeavePrivateConversation(Guid conversationId)
     {
         await Groups.RemoveFromGroupAsync(
@@ -143,6 +164,9 @@ public sealed class ChatHub : Hub
             SignalRGroups.PrivateConversationGroup(conversationId));
     }
 
+    /// <summary>
+    /// Notifies channel participants that the current user has started typing
+    /// </summary>
     public async Task TypingStarted(
         TypingStartedRequest request)
     {
@@ -163,6 +187,9 @@ public sealed class ChatHub : Hub
             request.ChannelId);
     }
 
+    /// <summary>
+    /// Notifies channel participants that the current user has stopped typing
+    /// </summary>
     public async Task TypingStopped(
         TypingStoppedRequest request)
     {
@@ -173,6 +200,9 @@ public sealed class ChatHub : Hub
             request.ChannelId);
     }
 
+    /// <summary>
+    /// Notifies private conversation participants that the current user has started typing
+    /// </summary>
     public async Task PrivateTypingStarted(Guid conversationId)
     {
         var userId = GetCurrentUserId();
@@ -190,6 +220,9 @@ public sealed class ChatHub : Hub
             conversationId);
     }
 
+    /// <summary>
+    /// Notifies private conversation participants that the current user has stopped typing
+    /// </summary>
     public async Task PrivateTypingStopped(Guid conversationId)
     {
         var userId = GetCurrentUserId();
