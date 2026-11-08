@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.UnitTests.Helpers;
 
+/// <summary>
+/// Provides factory methods for creating test entities and an in-memory database context
+/// </summary>
 public static class TestDataFactory
 {
     public static AppDbContext CreateDbContext()
