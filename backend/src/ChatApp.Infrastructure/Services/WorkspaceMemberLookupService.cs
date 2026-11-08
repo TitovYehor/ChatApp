@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Provides workspace membership lookups used by application services
+/// </summary>
 public class WorkspaceMemberLookupService : IWorkspaceMemberLookupService
 {
     private readonly AppDbContext _dbContext;
@@ -17,6 +20,7 @@ public class WorkspaceMemberLookupService : IWorkspaceMemberLookupService
         _dbContext = dbContext;
     }
 
+    /// <inheritdoc />
     public async Task<PresenceLookupResponseDto> GetPresenceLookupAsync(
         Guid userId)
     {
@@ -47,6 +51,7 @@ public class WorkspaceMemberLookupService : IWorkspaceMemberLookupService
         };
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<OnlineUserResponseDto>> GetOnlineUsersAsync(
         Guid userId,
         IReadOnlyCollection<Guid> onlineUsers)

@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Creates and manages user notifications and their read status
+/// </summary>
 public sealed class NotificationService : INotificationService
 {
     private readonly AppDbContext _dbContext;
@@ -19,6 +22,7 @@ public sealed class NotificationService : INotificationService
         _notificationNotifier = notificationNotifier;
     }
 
+    /// <inheritdoc />
     public async Task<NotificationResponseDto> CreateAsync(
         Guid recipientUserId,
         Guid? actorUserId,
@@ -52,6 +56,7 @@ public sealed class NotificationService : INotificationService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<NotificationResponseDto>> GetLatestAsync(
         Guid userId,
         int limit = 50)
@@ -78,6 +83,7 @@ public sealed class NotificationService : INotificationService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<bool> MarkAsReadAsync(
         Guid notificationId,
         Guid userId)
@@ -101,6 +107,7 @@ public sealed class NotificationService : INotificationService
         return true;
     }
 
+    /// <inheritdoc />
     public async Task<int> MarkAllAsReadAsync(Guid userId)
     {
         return await _dbContext.Notifications

@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Manages private conversations and their messages between users
+/// </summary>
 public sealed class PrivateConversationService : IPrivateConversationService
 {
     private readonly AppDbContext _dbContext;
@@ -27,6 +30,7 @@ public sealed class PrivateConversationService : IPrivateConversationService
         _notificationService = notificationService;
     }
 
+    /// <inheritdoc />
     public async Task<PrivateConversationResponseDto> GetOrCreateAsync(
         Guid currentUserId,
         Guid otherUserId)
@@ -96,6 +100,7 @@ public sealed class PrivateConversationService : IPrivateConversationService
             ?? throw new NotFoundException("Conversation was not found");
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyCollection<PrivateConversationResponseDto>> GetAllAsync(
         Guid currentUserId)
     {
@@ -119,6 +124,7 @@ public sealed class PrivateConversationService : IPrivateConversationService
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<PagedResult<PrivateMessageResponseDto>> GetMessagesAsync(
         Guid currentUserId,
         Guid conversationId,
@@ -166,6 +172,7 @@ public sealed class PrivateConversationService : IPrivateConversationService
         };
     }
 
+    /// <inheritdoc />
     public async Task<PrivateMessageResponseDto> SendMessageAsync(
         Guid currentUserId,
         Guid conversationId,
@@ -242,6 +249,7 @@ public sealed class PrivateConversationService : IPrivateConversationService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task<PrivateMessageResponseDto> UpdateMessageAsync(
         Guid currentUserId,
         Guid conversationId,
@@ -289,6 +297,7 @@ public sealed class PrivateConversationService : IPrivateConversationService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task DeleteMessageAsync(
         Guid currentUserId,
         Guid conversationId,
@@ -324,6 +333,7 @@ public sealed class PrivateConversationService : IPrivateConversationService
             response);
     }
 
+    /// <inheritdoc />
     public async Task<bool> IsParticipantAsync(
         Guid userId,
         Guid conversationId)

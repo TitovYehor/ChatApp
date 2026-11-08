@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services;
 
+/// <summary>
+/// Enforces workspace and channel permissions based on workspace membership and roles
+/// </summary>
 public class WorkspaceAuthorizationService: IWorkspaceAuthorizationService
 {
     private readonly AppDbContext _dbContext;
@@ -17,6 +20,7 @@ public class WorkspaceAuthorizationService: IWorkspaceAuthorizationService
         _dbContext = dbContext;
     }
 
+    /// <inheritdoc />
     public async Task EnsureCanAccessWorkspaceAsync(
         Guid workspaceId,
         Guid userId)
@@ -28,11 +32,11 @@ public class WorkspaceAuthorizationService: IWorkspaceAuthorizationService
 
         if (!isMember)
         {
-            throw new ForbiddenException(
-                "User is not a member of this workspace");
+            throw new ForbiddenException("User is not a member of this workspace");
         }
     }
 
+    /// <inheritdoc />
     public async Task EnsureCanCreateChannelAsync(
         Guid workspaceId,
         Guid userId)
@@ -46,18 +50,17 @@ public class WorkspaceAuthorizationService: IWorkspaceAuthorizationService
 
         if (role == null)
         {
-            throw new ForbiddenException(
-                "User is not a member of this workspace");
+            throw new ForbiddenException("User is not a member of this workspace");
         }
 
         if (role != WorkspaceRole.Owner &&
             role != WorkspaceRole.Admin)
         {
-            throw new ForbiddenException(
-                "Only workspace administrators can create channels");
+            throw new ForbiddenException("Only workspace administrators can create channels");
         }
     }
 
+    /// <inheritdoc />
     public async Task<Channel> GetManageableChannelAsync(
         Guid channelId,
         Guid userId)
@@ -77,15 +80,13 @@ public class WorkspaceAuthorizationService: IWorkspaceAuthorizationService
 
         if (member == null)
         {
-            throw new ForbiddenException(
-                "User does not have access to this channel");
+            throw new ForbiddenException("User does not have access to this channel");
         }
 
         if (member.Role != WorkspaceRole.Owner &&
             member.Role != WorkspaceRole.Admin)
         {
-            throw new ForbiddenException(
-                "Only workspace administrators can manage channels");
+            throw new ForbiddenException("Only workspace administrators can manage channels");
         }
 
         return channel;
