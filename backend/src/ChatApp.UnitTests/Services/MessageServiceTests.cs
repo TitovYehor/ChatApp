@@ -10,6 +10,9 @@ using Moq;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests channel message operations, authorization, and notifications
+/// </summary>
 public class MessageServiceTests
 {
     private readonly Mock<IChatNotifier> _chatNotifierMock;

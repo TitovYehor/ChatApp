@@ -11,6 +11,9 @@ using Moq;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests private conversation and message operations, including participant authorization
+/// </summary>
 public class PrivateConversationServiceTests
 {
     private readonly Mock<IChatNotifier> _chatNotifierMock = new();

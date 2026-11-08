@@ -6,6 +6,9 @@ using Moq;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests user presence and typing event notifications
+/// </summary>
 public class PresenceServiceTests
 {
     private readonly Mock<IWorkspaceMemberLookupService>

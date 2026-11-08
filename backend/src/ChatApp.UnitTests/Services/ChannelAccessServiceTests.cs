@@ -3,6 +3,9 @@ using ChatApp.UnitTests.Helpers;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests channel access checks based on workspace membership
+/// </summary>
 public class ChannelAccessServiceTests
 {
     [Fact]

@@ -6,6 +6,9 @@ using ChatApp.UnitTests.Helpers;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests workspace membership lookups and online user retrieval
+/// </summary>
 public class WorkspaceMemberLookupServiceTests
 {
     [Fact]

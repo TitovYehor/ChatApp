@@ -2,6 +2,9 @@
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests online user tracking across multiple SignalR connections
+/// </summary>
 public class OnlineUserTrackerTests
 {
     private readonly OnlineUserTracker _sut = new();

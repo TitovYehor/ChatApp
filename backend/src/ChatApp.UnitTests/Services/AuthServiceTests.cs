@@ -13,6 +13,9 @@ using System.Text;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests user registration and authentication behavior
+/// </summary>
 public class AuthServiceTests
 {
     [Fact]

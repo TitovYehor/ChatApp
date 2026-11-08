@@ -7,6 +7,9 @@ using Moq;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests notification creation, retrieval, and read status management
+/// </summary>
 public class NotificationServiceTests
 {
     private readonly Mock<INotificationNotifier> _notifierMock = new();

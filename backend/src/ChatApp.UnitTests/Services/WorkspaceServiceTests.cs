@@ -12,6 +12,9 @@ using Moq;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests workspace management, membership, role changes, and ownership operations
+/// </summary>
 public class WorkspaceServiceTests
 {
     private readonly Mock<IWorkspaceNotifier> _workspaceNotifierMock;

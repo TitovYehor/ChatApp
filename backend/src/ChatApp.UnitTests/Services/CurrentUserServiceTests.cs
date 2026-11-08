@@ -6,6 +6,9 @@ using System.Security.Claims;
 
 namespace ChatApp.UnitTests.Services;
 
+/// <summary>
+/// Tests retrieval of the authenticated user's identifier
+/// </summary>
 public class CurrentUserServiceTests
 {
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
