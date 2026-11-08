@@ -4,6 +4,9 @@ using ChatApp.Contracts.Realtime.Responses;
 
 namespace ChatApp.RealTime.Services;
 
+/// <summary>
+/// Coordinates online presence and typing updates using connection tracking and realtime notifications
+/// </summary>
 public class PresenceService : IPresenceService
 {
     private readonly IWorkspaceMemberLookupService _lookupService;
@@ -22,6 +25,7 @@ public class PresenceService : IPresenceService
         _chatNotifier = chatNotifier;
     }
 
+    /// <inheritdoc />
     public async Task UserConnectedAsync(
         Guid userId,
         string connectionId)
@@ -67,6 +71,7 @@ public class PresenceService : IPresenceService
             });
     }
 
+    /// <inheritdoc />
     public async Task UserDisconnectedAsync(
         Guid userId,
         string connectionId)
@@ -102,6 +107,7 @@ public class PresenceService : IPresenceService
             });
     }
 
+    /// <inheritdoc />
     public async Task TypingStartedAsync(
         Guid userId,
         Guid channelId)
@@ -120,6 +126,7 @@ public class PresenceService : IPresenceService
             });
     }
 
+    /// <inheritdoc />
     public async Task TypingStoppedAsync(
         Guid userId,
         Guid channelId)
@@ -138,6 +145,7 @@ public class PresenceService : IPresenceService
             });
     }
 
+    /// <inheritdoc />
     public async Task PrivateTypingStartedAsync(
         Guid userId,
         Guid conversationId)
@@ -156,6 +164,7 @@ public class PresenceService : IPresenceService
             });
     }
 
+    /// <inheritdoc />
     public async Task PrivateTypingStoppedAsync(
         Guid userId,
         Guid conversationId)

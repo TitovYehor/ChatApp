@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 
 namespace ChatApp.RealTime.Services;
 
+/// <summary>
+/// Tracks active SignalR connections for users and determines their online status
+/// </summary>
 public class OnlineUserTracker : IOnlineUserTracker
 {
     private readonly ConcurrentDictionary<Guid, HashSet<string>> _connections
@@ -10,6 +13,7 @@ public class OnlineUserTracker : IOnlineUserTracker
 
     private readonly object _syncRoot = new();
 
+    /// <inheritdoc />
     public bool UserConnected(
         Guid userId,
         string connectionId)
@@ -33,6 +37,7 @@ public class OnlineUserTracker : IOnlineUserTracker
         }
     }
 
+    /// <inheritdoc />
     public bool UserDisconnected(
         Guid userId,
         string connectionId)
@@ -61,12 +66,14 @@ public class OnlineUserTracker : IOnlineUserTracker
         }
     }
 
+    /// <inheritdoc />
     public bool IsOnline(
         Guid userId)
     {
         return _connections.ContainsKey(userId);
     }
 
+    /// <inheritdoc />
     public IReadOnlyCollection<Guid> GetOnlineUserIds()
     {
         lock (_syncRoot)

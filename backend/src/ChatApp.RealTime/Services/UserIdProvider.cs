@@ -3,9 +3,14 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.RealTime.Services;
 
-public sealed class UserIdProvider
-    : IUserIdProvider
+/// <summary>
+/// Resolves SignalR user identifiers from authenticated connection claims
+/// </summary>
+public sealed class UserIdProvider : IUserIdProvider
 {
+    /// <summary>
+    /// Gets the user identifier from the connection's name identifier claim
+    /// </summary>
     public string? GetUserId(
         HubConnectionContext connection)
     {
