@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.RealTime.Notifications;
 
-public sealed class SignalRFriendshipNotifier
-    : IFriendshipNotifier
+/// <summary>
+/// Notifies users when their friendship relationships change
+/// </summary>
+public sealed class SignalRFriendshipNotifier : IFriendshipNotifier
 {
     private readonly IHubContext<ChatHub> _hubContext;
 
@@ -16,6 +18,7 @@ public sealed class SignalRFriendshipNotifier
         _hubContext = hubContext;
     }
 
+    /// <inheritdoc />
     public async Task FriendshipChangedAsync(
         IReadOnlyCollection<Guid> userIds)
     {

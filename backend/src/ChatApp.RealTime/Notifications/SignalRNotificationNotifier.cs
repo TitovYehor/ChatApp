@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.RealTime.Notifications;
 
-public sealed class SignalRNotificationNotifier
-    : INotificationNotifier
+/// <summary>
+/// Delivers newly created notifications to their intended recipients in realtime
+/// </summary>
+public sealed class SignalRNotificationNotifier : INotificationNotifier
 {
     private readonly IHubContext<ChatHub> _hubContext;
 
@@ -17,6 +19,7 @@ public sealed class SignalRNotificationNotifier
         _hubContext = hubContext;
     }
 
+    /// <inheritdoc />
     public async Task NotificationCreatedAsync(
         Guid recipientUserId,
         NotificationResponseDto notification)

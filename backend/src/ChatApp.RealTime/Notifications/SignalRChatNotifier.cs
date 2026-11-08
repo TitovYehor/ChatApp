@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.RealTime.Notifications;
 
+/// <summary>
+/// Broadcasts chat messages, presence updates, and typing events to SignalR groups
+/// </summary>
 public sealed class SignalRChatNotifier : IChatNotifier
 {
     private readonly IHubContext<ChatHub> _hubContext;
@@ -19,6 +22,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
         _hubContext = hubContext;
     }
 
+    /// <inheritdoc />
     public async Task MessageCreatedAsync(
         Guid channelId,
         MessageResponseDto message)
@@ -31,6 +35,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 message);
     }
 
+    /// <inheritdoc />
     public async Task MessageUpdatedAsync(
         Guid channelId,
         MessageResponseDto message)
@@ -43,6 +48,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 message);
     }
 
+    /// <inheritdoc />
     public async Task MessageDeletedAsync(
         Guid channelId,
         MessageDeletedResponseDto response)
@@ -55,6 +61,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task PrivateMessageCreatedAsync(
         Guid conversationId,
         PrivateMessageResponseDto message)
@@ -67,6 +74,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 message);
     }
 
+    /// <inheritdoc />
     public async Task PrivateMessageUpdatedAsync(
         Guid conversationId,
         PrivateMessageResponseDto message)
@@ -79,6 +87,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 message);
     }
 
+    /// <inheritdoc />
     public async Task PrivateMessageDeletedAsync(
         Guid conversationId,
         PrivateMessageDeletedResponseDto response)
@@ -91,6 +100,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task UserPresenceChangedAsync(
         IEnumerable<Guid> userIds,
         UserPresenceChangedResponseDto response)
@@ -103,6 +113,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task OnlineUsersSnapshotAsync(
         Guid userId,
         IReadOnlyCollection<OnlineUserResponseDto> users)
@@ -115,6 +126,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 users);
     }
 
+    /// <inheritdoc />
     public Task UserTypingAsync(
         Guid channelId,
         UserTypingResponseDto response)
@@ -126,6 +138,7 @@ public sealed class SignalRChatNotifier : IChatNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public Task PrivateUserTypingAsync(
         Guid conversationId,
         PrivateUserTypingResponseDto response)

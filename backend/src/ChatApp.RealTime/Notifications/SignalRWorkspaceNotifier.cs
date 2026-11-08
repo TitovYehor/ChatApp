@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.RealTime.Notifications;
 
+/// <summary>
+/// Broadcasts workspace and workspace membership events to affected members
+/// </summary>
 public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
 {
     private readonly IHubContext<ChatHub> _hubContext;
@@ -16,6 +19,7 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
         _hubContext = hubContext;
     }
 
+    /// <inheritdoc />
     public async Task WorkspaceDeletedAsync(
         Guid workspaceId,
         IReadOnlyCollection<Guid> memberIds)
@@ -30,6 +34,7 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 });
     }
 
+    /// <inheritdoc />
     public async Task WorkspaceUpdatedAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceUpdatedResponseDto response)
@@ -41,6 +46,7 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task WorkspaceMemberAddedAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberAddedResponseDto response)
@@ -52,6 +58,7 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task WorkspaceMemberRemovedAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberRemovedResponseDto response)
@@ -63,6 +70,7 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task WorkspaceMemberRoleChangedAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceMemberRoleChangedResponseDto response)
@@ -74,6 +82,7 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task WorkspaceOwnershipTransferredAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceOwnershipTransferredResponseDto response)
@@ -85,6 +94,7 @@ public sealed class SignalRWorkspaceNotifier : IWorkspaceNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task WorkspaceLeftAsync(
         IReadOnlyCollection<Guid> memberIds,
         WorkspaceLeftResponseDto response)

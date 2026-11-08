@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.RealTime.Notifications;
 
+/// <summary>
+/// Broadcasts channel lifecycle events to the affected workspace members
+/// </summary>
 public sealed class SignalRChannelNotifier : IChannelNotifier
 {
     private readonly IHubContext<ChatHub> _hubContext;
@@ -16,6 +19,7 @@ public sealed class SignalRChannelNotifier : IChannelNotifier
         _hubContext = hubContext;
     }
 
+    /// <inheritdoc />
     public async Task ChannelCreatedAsync(
         IReadOnlyCollection<Guid> memberIds,
         ChannelResponseDto response)
@@ -27,6 +31,7 @@ public sealed class SignalRChannelNotifier : IChannelNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task ChannelUpdatedAsync(
         IReadOnlyCollection<Guid> memberIds,
         ChannelResponseDto response)
@@ -38,6 +43,7 @@ public sealed class SignalRChannelNotifier : IChannelNotifier
                 response);
     }
 
+    /// <inheritdoc />
     public async Task ChannelDeletedAsync(
         IReadOnlyCollection<Guid> memberIds,
         ChannelDeletedResponseDto response)
